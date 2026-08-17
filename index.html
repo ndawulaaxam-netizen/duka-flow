@@ -14,7 +14,6 @@
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 
-/* ============ SPLASH ============ */
 #splash{position:fixed;inset:0;background:#000;z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s}
 #splash.hide{opacity:0;pointer-events:none}
 #splash .logo{width:120px;height:120px}
@@ -22,7 +21,6 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 #splash .name span{color:var(--green)}
 #splash .tag{font-size:13px;letter-spacing:3px;color:#9CA3AF;text-transform:uppercase}
 
-/* ============ AUTH FLOW ============ */
 #authFlow{position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;display:none;-webkit-overflow-scrolling:touch}
 .auth-screen{display:none;padding:40px 20px 80px 20px;text-align:center;}
 .auth-screen.active{display:block;animation:fadeIn .4s}
@@ -36,7 +34,6 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 .value-row{display:flex;gap:10px;align-items:center;margin-bottom:12px;font-size:14px}
 .value-row .vicon{width:38px;height:38px;border-radius:10px;background:rgba(91,179,36,.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 
-/* ============ FORMS ============ */
 .form-group{margin-bottom:14px}
 .form-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .form-input,.form-select,.form-textarea{width:100%;padding:13px 14px;background:var(--bg);border:2px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;outline:none;transition:border-color .2s}
@@ -49,7 +46,6 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 .input-with-btn .form-input{flex:1}
 .scan-btn{background:var(--green);border:none;color:#fff;width:50px;border-radius:12px;font-size:20px;cursor:pointer;flex-shrink:0}
 
-/* ============ BUTTONS ============ */
 .btn{border:none;border-radius:14px;padding:15px 20px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
 .btn:active{transform:scale(.97)}
 .btn-green{background:linear-gradient(135deg,var(--green2),var(--green3));color:#fff;box-shadow:0 4px 18px rgba(91,179,36,.35)}
@@ -62,7 +58,6 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 .btn-row{display:flex;gap:10px}
 .btn-row .btn{flex:1}
 
-/* ============ HEADER ============ */
 .app-header{background:linear-gradient(135deg,#123508,#0B0F0B);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
 .header-left{display:flex;align-items:center;gap:10px}
 .header-left .logo{width:38px;height:38px}
@@ -75,21 +70,18 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .sync-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-weight:700}
 
-/* ============ CONTENT ============ */
 .app-content{flex:1;overflow-y:auto;padding:18px;padding-bottom:95px}
 .screen{display:none}
 .screen.active{display:block;animation:fadeIn .3s}
 .card{background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px;border:1px solid var(--border)}
 .card-title{font-size:15px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 
-/* ============ STATS ============ */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .stat-card{background:var(--card);border-radius:14px;padding:14px;border:1px solid var(--border);text-align:center}
 .stat-value{font-size:19px;font-weight:800;margin:5px 0}
 .stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .stat-green{color:var(--green2)} .stat-red{color:var(--red)} .stat-blue{color:var(--blue)} .stat-yellow{color:var(--yellow)}
 
-/* ============ LISTS ============ */
 .list-item{display:flex;justify-content:space-between;align-items:center;padding:13px;background:var(--bg);border-radius:12px;margin-bottom:8px;border:1px solid #1B241B}
 .item-info{flex:1}
 .item-name{font-weight:700;font-size:14px}
@@ -105,13 +97,11 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 .amount-red{font-weight:800;color:var(--red)}
 .expense-cat{display:inline-block;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:800;margin-top:4px;background:rgba(96,165,250,.15);color:var(--blue)}
 
-/* ============ SEARCH ============ */
 .search-container{position:relative;margin-bottom:14px;display:flex;gap:8px}
 .search-input{flex:1;padding:13px 14px 13px 42px;background:var(--card);border:2px solid var(--border);border-radius:14px;color:var(--text);font-size:15px;outline:none}
 .search-input:focus{border-color:var(--green)}
 .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted)}
 
-/* ============ MODAL ============ */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-end;justify-content:center}
 .modal-overlay.active{display:flex}
 .modal{background:var(--card);border-radius:24px 24px 0 0;padding:22px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;animation:slideUp .3s}
@@ -120,17 +110,14 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 .modal-title{font-size:19px;font-weight:800}
 .modal-close{background:var(--border);border:none;color:var(--muted);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px}
 
-/* ============ SCANNER ============ */
 #qr-reader{width:100%;border-radius:14px;overflow:hidden;background:#000;min-height:220px}
 
-/* ============ NAV ============ */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;padding-bottom:max(8px,env(safe-area-inset-bottom));z-index:100}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 12px;border-radius:12px;color:var(--muted)}
 .nav-item.active{color:var(--green2);background:rgba(91,179,36,.12)}
 .nav-item .nav-icon{font-size:21px}
 .nav-item .nav-label{font-size:10px;font-weight:800}
 
-/* ============ MISC ============ */
 .empty-state{text-align:center;padding:34px 20px;color:var(--muted)}
 .empty-state .empty-icon{font-size:44px;margin-bottom:10px}
 .empty-state p{font-size:13px}
@@ -157,7 +144,6 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 </head>
 <body>
 
-<!-- ============ DRAWN LOGO (fallback if image missing) ============ -->
 <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
   <symbol id="df-logo" viewBox="0 0 120 120">
     <defs><linearGradient id="dfg" x1="0" y1="0" x2="1" y2="1">
@@ -173,16 +159,14 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
   </symbol>
 </svg>
 
-<!-- ============ SPLASH ============ -->
 <div id="splash">
   <img class="logo" src="logo.png" onerror="logoErr(this)" alt="DukaFlow">
   <div class="name">Duka<span>Flow</span></div>
-  <div class="tag">Keep Your Shop Flowing • v1.3</div>
+  <div class="tag">Keep Your Shop Flowing • v2.0</div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- ============ AUTH FLOW ============ -->
 <div id="authFlow">
   <div class="auth-screen" id="screen-welcome">
     <img class="auth-logo" src="logo.png" onerror="logoErr(this)" alt="DukaFlow">
@@ -232,7 +216,6 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
   </div>
 </div>
 
-<!-- ============ MAIN APP ============ -->
 <div id="appShell" style="display:none;flex-direction:column;height:100vh">
 <header class="app-header">
   <div class="header-left">
@@ -335,9 +318,19 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
     </div>
   </div>
 
+  <div class="screen" id="screen-founder">
+    <div class="card">
+      <div class="card-title">🏭 Founder Intelligence</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Live data from ALL shops. This is the exact view factories will pay for.</p>
+      <div id="founderBody"><p style="color:var(--muted);font-size:13px">Tap the button to load live market data.</p></div>
+      <button class="btn btn-green" style="margin-top:12px" onclick="loadFounder()">📡 Load Live Market Data</button>
+      <button class="btn btn-outline" style="margin-top:10px" onclick="switchScreen('settings')">← Back</button>
+    </div>
+  </div>
+
   <div class="screen" id="screen-settings">
     <div class="card">
-      <div class="card-title">⚙️ DukaFlow v1.3</div>
+      <div class="card-title">⚙️ DukaFlow v2.0</div>
       <div class="form-group"><label class="form-label">Shop Name</label><input type="text" class="form-input" id="settingShopName" onchange="saveSettings()"></div>
       <div class="form-group"><label class="form-label">Owner Name</label><input type="text" class="form-input" id="settingOwner" onchange="saveSettings()"></div>
       <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="settingPhone" onchange="saveSettings()"></div>
@@ -345,10 +338,15 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
       <div class="form-group"><label class="form-label">Low Stock Alert Threshold</label><input type="number" class="form-input" id="settingLowStock" onchange="saveSettings()"></div>
     </div>
     <div class="card">
-      <div class="card-title">☁️ Cloud Sync (Phase 2)</div>
+      <div class="card-title">☁️ Cloud Sync (Supabase)</div>
       <div class="form-group"><label class="form-label">Supabase URL</label><input type="text" class="form-input" id="settingSupabaseUrl" placeholder="https://xxxx.supabase.co" onchange="saveSettings()"></div>
-      <div class="form-group"><label class="form-label">Supabase Anon Key</label><input type="text" class="form-input" id="settingSupabaseKey" placeholder="Comes in Phase 2" onchange="saveSettings()"></div>
-      <p class="form-hint">Your data is saved safely on this device. Cloud sync connects in Phase 2.</p>
+      <div class="form-group"><label class="form-label">Supabase Anon Key</label><input type="text" class="form-input" id="settingSupabaseKey" placeholder="Paste your anon public key" onchange="saveSettings()"></div>
+      <button class="btn btn-blue btn-green" onclick="connectAndSync()">☁️ Connect & Sync to Cloud</button>
+      <p class="form-hint" style="margin-top:10px">Data is saved on the device first, then flies to your cloud automatically.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🏭 Founder Tools</div>
+      <button class="btn btn-purple" onclick="switchScreen('founder')">🏭 Founder Dashboard</button>
     </div>
     <div class="card">
       <div class="card-title">⚠️ Account</div>
@@ -367,7 +365,6 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 </nav>
 </div>
 
-<!-- ============ MODALS ============ -->
 <div class="modal-overlay" id="saleModal"><div class="modal">
   <div class="modal-header"><div class="modal-title">🛒 Record Sale</div><button class="modal-close" onclick="closeModal('saleModal')">✕</button></div>
   <div class="form-group"><label class="form-label">Product</label>
@@ -442,10 +439,8 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 
 <script>
 // ================================================================
-//  DUKAFLOW v1.3 — REAL LOGO + VISIBLE VERSION + ERROR REPORTER
+//  DUKAFLOW v2.0 — CLOUD SYNC + FOUNDER DASHBOARD
 // ================================================================
-
-// If anything ever crashes, show it on screen instead of freezing
 window.addEventListener('error', function(e){
   var el=document.getElementById('splash');
   if(el){ el.classList.remove('hide');
@@ -453,7 +448,6 @@ window.addEventListener('error', function(e){
   }
 });
 
-// Logo loader: try logo.png → logo.jpg → drawn fallback
 function logoErr(el){
   if(el.dataset.t===undefined){ el.dataset.t='1'; el.src='logo.jpg'; }
   else {
@@ -471,7 +465,7 @@ const DB={
   setObj(k,v){localStorage.setItem('df_'+k,JSON.stringify(v))}
 };
 const genId=()=>Date.now().toString(36)+Math.random().toString(36).substr(2);
-let pendingOTP=null, scanTarget=null, scanner=null;
+let pendingOTP=null, scanTarget=null, scanner=null, sb=null, syncTimer=null;
 
 // ============ BOOT ============
 window.onload=function(){
@@ -509,6 +503,8 @@ function startApp(){
   const p=DB.getObj('profile');
   document.getElementById('shopNameDisplay').textContent=p.shopName||'My Shop';
   renderAll(); updateSyncCount();
+  const st=DB.getObj('settings');
+  if(st.supabaseUrl&&st.supabaseKey){ setTimeout(silentSync,1500); }
 }
 
 // ============ AUTH ============
@@ -590,11 +586,119 @@ function saveSettings(){
   DB.setObj('settings',{
     capital:parseFloat(document.getElementById('settingCapital').value)||0,
     lowStockThreshold:parseInt(document.getElementById('settingLowStock').value)||10,
-    supabaseUrl:document.getElementById('settingSupabaseUrl').value,
-    supabaseKey:document.getElementById('settingSupabaseKey').value
+    supabaseUrl:document.getElementById('settingSupabaseUrl').value.trim(),
+    supabaseKey:document.getElementById('settingSupabaseKey').value.trim()
   });
   document.getElementById('shopNameDisplay').textContent=p.shopName||'My Shop';
   showToast('Settings saved ✓');
+}
+
+// ============ CLOUD SYNC (SUPABASE) ============
+function loadSupabaseLib(){
+  return new Promise(function(res,rej){
+    if(window.supabase&&window.supabase.createClient) return res();
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload=function(){res();};
+    s.onerror=function(){rej();};
+    document.head.appendChild(s);
+    setTimeout(function(){ if(!(window.supabase&&window.supabase.createClient)) rej(); },12000);
+  });
+}
+async function ensureClient(){
+  const s=DB.getObj('settings');
+  if(!s.supabaseUrl||!s.supabaseKey) return null;
+  await loadSupabaseLib();
+  if(!sb) sb=window.supabase.createClient(s.supabaseUrl,s.supabaseKey);
+  return sb;
+}
+async function connectAndSync(){
+  try{
+    const client=await ensureClient();
+    if(!client){ showToast('Paste your Supabase URL and key in Settings first',true); return; }
+    showToast('Connecting to cloud...');
+    const p=DB.getObj('profile');
+    if(!p.cloudId){
+      const key=p.shopKey||(genId()+genId());
+      p.shopKey=key;
+      const ins=await client.from('shops').insert({
+        shop_key:key, shop_name:p.shopName, owner_name:p.owner, phone:p.phone, location:p.location
+      }).select().single();
+      if(ins.error) throw new Error(ins.error.message);
+      p.cloudId=ins.data.id; DB.setObj('profile',p);
+    }
+    await pushAll(client,p.cloudId);
+    updateSyncCount();
+    document.getElementById('syncStatus').textContent='Cloud ✓';
+    showToast('Connected! Data synced to cloud ☁️');
+  }catch(e){
+    showToast('Cloud error: '+e.message,true);
+  }
+}
+function syncToCloud(){ connectAndSync(); }
+async function silentSync(){
+  try{
+    const s=DB.getObj('settings');
+    if(!s.supabaseUrl||!s.supabaseKey||!navigator.onLine) return;
+    const p=DB.getObj('profile');
+    if(!p.cloudId) return;
+    const client=await ensureClient();
+    await pushAll(client,p.cloudId);
+    updateSyncCount();
+    document.getElementById('syncStatus').textContent='Cloud ✓';
+  }catch(e){}
+}
+window.addEventListener('online',silentSync);
+async function pushAll(client,shopId){
+  await pushTable(client,shopId,'products',DB.get('products'),function(r){return{
+    local_id:r.id,name:r.name,barcode:r.barcode,category:r.category,price:r.price,stock:r.stock};});
+  await pushTable(client,shopId,'sales',DB.get('sales'),function(r){return{
+    local_id:r.id,product_name:r.productName,quantity:r.quantity,price:r.price,total:r.total,
+    payment:r.payment,customer:r.customer,sale_date:r.date};});
+  await pushTable(client,shopId,'expenses',DB.get('expenses'),function(r){return{
+    local_id:r.id,category:r.category,amount:r.amount,note:r.note,expense_date:r.date};});
+  await pushTable(client,shopId,'reconciliations',DB.get('reconciliations'),function(r){return{
+    local_id:r.id,recon_date:r.date,cash:r.cash,items:r.items};});
+}
+async function pushTable(client,shopId,table,rows,mapFn){
+  if(!rows.length) return;
+  const ex=await client.from(table).select('local_id').eq('shop_id',shopId);
+  const have=(ex.data||[]).map(x=>x.local_id);
+  const fresh=rows.filter(r=>have.indexOf(r.id)===-1);
+  if(fresh.length){
+    const payload=fresh.map(r=>Object.assign({shop_id:shopId},mapFn(r)));
+    const ins=await client.from(table).insert(payload);
+    if(ins.error) throw new Error(table+': '+ins.error.message);
+  }
+  rows.forEach(r=>{r.synced=true;});
+  DB.set(table,rows);
+}
+
+// ============ FOUNDER DASHBOARD ============
+async function loadFounder(){
+  try{
+    const c=await ensureClient();
+    if(!c){ showToast('Paste keys & connect first',true); return; }
+    document.getElementById('founderBody').innerHTML='<p style="color:var(--muted);font-size:13px">Loading live market data...</p>';
+    const sh=await c.from('shops').select('id');
+    const sa=await c.from('sales').select('product_name,quantity,total,shop_id');
+    const shops=(sh.data||[]).length;
+    const sales=sa.data||[];
+    const units=sales.reduce((a,b)=>a+(Number(b.quantity)||0),0);
+    const rev=sales.reduce((a,b)=>a+Number(b.total||0),0);
+    const agg={};
+    sales.forEach(function(s){agg[s.product_name]=agg[s.product_name]||{q:0,r:0};
+      agg[s.product_name].q+=Number(s.quantity)||0; agg[s.product_name].r+=Number(s.total)||0;});
+    const top=Object.entries(agg).sort((a,b)=>b[1].q-a[1].q).slice(0,5);
+    document.getElementById('founderBody').innerHTML=
+      '<div class="report-summary" style="margin-bottom:14px">'+
+      '<div class="report-stat"><div class="report-stat-label">Shops</div><div class="report-stat-value stat-green">'+shops+'</div></div>'+
+      '<div class="report-stat"><div class="report-stat-label">Units Sold</div><div class="report-stat-value stat-blue">'+units.toLocaleString()+'</div></div>'+
+      '<div class="report-stat"><div class="report-stat-label">Revenue</div><div class="report-stat-value stat-yellow">'+rev.toLocaleString()+'</div></div>'+
+      '</div>'+
+      (top.length? top.map(function(t,i){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(i+1)+'. '+t[0]+'</div><div class="item-meta">'+t[1].q.toLocaleString()+' units • UGX '+t[1].r.toLocaleString()+'</div></div></div>';}).join('')
+      : '<p style="color:var(--muted);font-size:13px">No sales in cloud yet. Record some sales and sync!</p>');
+  }catch(e){ showToast('Founder load error: '+e.message,true); }
 }
 
 // ============ PRODUCTS ============
@@ -802,7 +906,7 @@ function renderDashboard(){
     .concat(ex.slice(0,3).map(x=>({t:'exp',txt:x.category,amt:x.amount,d:x.date})))
     .sort((a,b)=>new Date(b.d)-new Date(a.d)).slice(0,8);
   document.getElementById('recentActivity').innerHTML=act.length?act.map(a=>
-    '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒':'')+' '+a.txt+'</div>'+
+    '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒':'💸')+' '+a.txt+'</div>'+
     '<div class="item-meta">'+new Date(a.d).toLocaleString()+'</div></div>'+
     '<div class="'+(a.t==='sale'?'amount-green':'amount-red')+'">'+(a.t==='sale'?'+':'-')+'UGX '+a.amt.toLocaleString()+'</div></div>').join('')
     :'<div class="empty-state"><div class="empty-icon">📭</div><p>No activity yet. Record your first sale!</p></div>';
@@ -837,29 +941,26 @@ function renderReports(){
     :'<div class="empty-state"><p>No expenses yet</p></div>';
 }
 
-// ============ SYNC ============
-function markPending(){updateSyncCount();}
-function updateSyncCount(){
-  const n=DB.get('sales').filter(x=>!x.synced).length+DB.get('expenses').filter(x=>!x.synced).length;
-  document.getElementById('syncCount').textContent=n;
-}
-function syncToCloud(){
+// ============ SYNC COUNTER ============
+function markPending(){
+  updateSyncCount();
   const s=DB.getObj('settings');
-  if(!s.supabaseUrl||!s.supabaseKey)return showToast('Cloud sync arrives in Phase 2 — your data is safe on this device ✓');
-  document.getElementById('syncStatus').textContent='Syncing...';
-  setTimeout(function(){
-    DB.set('sales',DB.get('sales').map(x=>Object.assign({},x,{synced:true})));
-    DB.set('expenses',DB.get('expenses').map(x=>Object.assign({},x,{synced:true})));
-    updateSyncCount();
-    document.getElementById('syncStatus').textContent='Synced ✓';
-    showToast('Data synced to cloud!');
-    setTimeout(function(){document.getElementById('syncStatus').textContent='Offline Ready';},3000);
-  },1500);
+  if(s.supabaseUrl&&s.supabaseKey&&navigator.onLine){
+    clearTimeout(syncTimer);
+    syncTimer=setTimeout(silentSync,4000);
+  }
+}
+function updateSyncCount(){
+  let n=0;
+  ['sales','expenses','products','reconciliations'].forEach(function(k){
+    DB.get(k).forEach(function(r){ if(r.synced!==true) n++; });
+  });
+  document.getElementById('syncCount').textContent=n;
 }
 
 // ============ DANGER ============
 function clearAllData(){
-  if(!confirm('⚠️ DELETE ALL DATA permanently?'))return;
+  if(!confirm('⚠️ DELETE ALL DATA on this device permanently? (Cloud data stays safe)'))return;
   if(!confirm('This cannot be undone. Final confirmation?'))return;
   localStorage.clear(); location.reload();
 }
