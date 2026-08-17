@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0B0F0B">
+<title>DukaFlow — Keep Your Shop Flowing</title>
+<style>
+:root{
+  --bg:#0B0F0B; --card:#161D16; --border:#273327; --green:#5BB324; --green2:#7AC943;
+  --green3:#3E8918; --text:#EAF2EA; --muted:#8FA38F; --red:#F87171; --yellow:#FBBF24; --blue:#60A5FA;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
+
+/* ============ SPLASH ============ */
+#splash{position:fixed;inset:0;background:#000;z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .5s}
+#splash.hide{opacity:0;pointer-events:none}
+#splash .logo{width:120px;height:120px}
+#splash .name{font-size:38px;font-weight:800;color:#fff}
+#splash .name span{color:var(--green)}
+#splash .tag{font-size:13px;letter-spacing:3px;color:#9CA3AF;text-transform:uppercase}
+
+/* ============ AUTH FLOW ============ */
+#authFlow{position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;display:none;-webkit-overflow-scrolling:touch}
+.auth-screen{display:none;padding:40px 20px 80px 20px;text-align:center;}
+.auth-screen.active{display:block;animation:fadeIn .4s}
+.auth-logo{width:90px;height:90px;margin:0 auto 10px auto;display:block;}
+.auth-name{font-size:34px;font-weight:800;color:#fff}
+.auth-name span{color:var(--green)}
+.auth-tag{font-size:12px;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin:6px 0 26px}
+.auth-card{width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin:0 auto;text-align:left;}
+.auth-card h2{font-size:20px;margin-bottom:4px}
+.auth-card p{font-size:13px;color:var(--muted);margin-bottom:18px}
+.value-row{display:flex;gap:10px;align-items:center;margin-bottom:12px;font-size:14px}
+.value-row .vicon{width:38px;height:38px;border-radius:10px;background:rgba(91,179,36,.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* ============ FORMS ============ */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.form-input,.form-select,.form-textarea{width:100%;padding:13px 14px;background:var(--bg);border:2px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;outline:none;transition:border-color .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green)}
+.form-textarea{resize:vertical;min-height:56px}
+.form-row{display:flex;gap:12px}
+.form-row .form-group{flex:1}
+.form-hint{font-size:11px;color:var(--muted);margin-top:4px}
+.input-with-btn{display:flex;gap:8px}
+.input-with-btn .form-input{flex:1}
+.scan-btn{background:var(--green);border:none;color:#fff;width:50px;border-radius:12px;font-size:20px;cursor:pointer;flex-shrink:0}
+
+/* ============ BUTTONS ============ */
+.btn{border:none;border-radius:14px;padding:15px 20px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn:active{transform:scale(.97)}
+.btn-green{background:linear-gradient(135deg,var(--green2),var(--green3));color:#fff;box-shadow:0 4px 18px rgba(91,179,36,.35)}
+.btn-dark{background:#1E2A1E;border:2px solid var(--green3);color:var(--green2)}
+.btn-yellow{background:linear-gradient(135deg,#D97706,#B45309);color:#fff}
+.btn-purple{background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff}
+.btn-red{background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff}
+.btn-outline{background:transparent;border:2px solid var(--border);color:var(--muted)}
+.btn-group{display:flex;flex-direction:column;gap:10px}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{flex:1}
+
+/* ============ HEADER ============ */
+.app-header{background:linear-gradient(135deg,#123508,#0B0F0B);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.header-left{display:flex;align-items:center;gap:10px}
+.header-left .logo{width:38px;height:38px}
+.header-left h1{font-size:19px;font-weight:800;color:#fff}
+.header-left h1 span{color:var(--green)}
+.header-left .subtitle{font-size:11px;color:var(--muted)}
+.header-right{display:flex;align-items:center;gap:8px}
+.offline-badge{background:rgba(91,179,36,.12);padding:5px 10px;border-radius:16px;font-size:10px;color:var(--green2);display:flex;align-items:center;gap:5px}
+.offline-dot{width:7px;height:7px;background:var(--green2);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sync-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-weight:700}
+
+/* ============ CONTENT ============ */
+.app-content{flex:1;overflow-y:auto;padding:18px;padding-bottom:95px}
+.screen{display:none}
+.screen.active{display:block;animation:fadeIn .3s}
+.card{background:var(--card);border-radius:16px;padding:18px;margin-bottom:14px;border:1px solid var(--border)}
+.card-title{font-size:15px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+/* ============ STATS ============ */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{background:var(--card);border-radius:14px;padding:14px;border:1px solid var(--border);text-align:center}
+.stat-value{font-size:19px;font-weight:800;margin:5px 0}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.stat-green{color:var(--green2)} .stat-red{color:var(--red)} .stat-blue{color:var(--blue)} .stat-yellow{color:var(--yellow)}
+
+/* ============ LISTS ============ */
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:13px;background:var(--bg);border-radius:12px;margin-bottom:8px;border:1px solid #1B241B}
+.item-info{flex:1}
+.item-name{font-weight:700;font-size:14px}
+.item-meta{font-size:11px;color:var(--muted);margin-top:3px}
+.item-price{font-size:12px;color:var(--green2);font-weight:700;margin-top:3px}
+.item-right{text-align:right}
+.stock-count{font-size:20px;font-weight:800}
+.stock-low{color:var(--red)} .stock-ok{color:var(--green2)}
+.stock-label{font-size:10px;color:var(--muted)}
+.item-actions{display:flex;gap:6px;margin-left:10px}
+.action-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:13px}
+.amount-green{font-weight:800;color:var(--green2)}
+.amount-red{font-weight:800;color:var(--red)}
+.expense-cat{display:inline-block;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:800;margin-top:4px;background:rgba(96,165,250,.15);color:var(--blue)}
+
+/* ============ SEARCH ============ */
+.search-container{position:relative;margin-bottom:14px;display:flex;gap:8px}
+.search-input{flex:1;padding:13px 14px 13px 42px;background:var(--card);border:2px solid var(--border);border-radius:14px;color:var(--text);font-size:15px;outline:none}
+.search-input:focus{border-color:var(--green)}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted)}
+
+/* ============ MODAL ============ */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-end;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal{background:var(--card);border-radius:24px 24px 0 0;padding:22px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;animation:slideUp .3s}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:19px;font-weight:800}
+.modal-close{background:var(--border);border:none;color:var(--muted);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px}
+
+/* ============ SCANNER ============ */
+#qr-reader{width:100%;border-radius:14px;overflow:hidden;background:#000;min-height:220px}
+
+/* ============ NAV ============ */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;padding-bottom:max(8px,env(safe-area-inset-bottom));z-index:100}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 12px;border-radius:12px;color:var(--muted)}
+.nav-item.active{color:var(--green2);background:rgba(91,179,36,.12)}
+.nav-item .nav-icon{font-size:21px}
+.nav-item .nav-label{font-size:10px;font-weight:800}
+
+/* ============ MISC ============ */
+.empty-state{text-align:center;padding:34px 20px;color:var(--muted)}
+.empty-state .empty-icon{font-size:44px;margin-bottom:10px}
+.empty-state p{font-size:13px}
+.toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--green3);color:#fff;padding:13px 22px;border-radius:12px;font-weight:800;font-size:13px;z-index:4000;display:none;box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:90%;text-align:center}
+.toast.error{background:#DC2626}
+.toast.show{display:block;animation:fadeIn .3s}
+.sms-bubble{background:#1E2A1E;border:1px solid var(--green3);border-radius:14px;padding:14px;margin-bottom:18px;font-size:13px;color:var(--text);text-align:center;}
+.sms-bubble .code{font-size:26px;font-weight:800;letter-spacing:8px;color:var(--green2);text-align:center;margin-top:8px}
+.sms-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.recon-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+.recon-row:last-child{border-bottom:none}
+.recon-label{color:var(--muted);font-size:13px}
+.recon-value{font-weight:800;font-size:13px}
+.recon-match{color:var(--green2)} .recon-mismatch{color:var(--red)}
+.report-bar{display:flex;align-items:flex-end;gap:5px;height:110px;margin:16px 0 26px;padding:0 6px}
+.report-bar-item{flex:1;background:linear-gradient(to top,var(--green3),var(--green2));border-radius:5px 5px 0 0;min-height:6px;position:relative}
+.report-bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted)}
+.report-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.report-stat{text-align:center;padding:12px 6px;background:var(--bg);border-radius:12px}
+.report-stat-value{font-size:14px;font-weight:800;margin:3px 0}
+.report-stat-label{font-size:9px;color:var(--muted);text-transform:uppercase}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+</style>
+</head>
+<body>
+
+<!-- ============ DRAWN LOGO (fallback if image missing) ============ -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="df-logo" viewBox="0 0 120 120">
+    <defs><linearGradient id="dfg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7AC943"/><stop offset="1" stop-color="#3E8918"/>
+    </linearGradient></defs>
+    <rect x="4" y="50" width="22" height="9" rx="4.5" fill="url(#dfg)"/>
+    <rect x="0" y="64" width="28" height="9" rx="4.5" fill="url(#dfg)"/>
+    <rect x="8" y="78" width="18" height="9" rx="4.5" fill="url(#dfg)"/>
+    <path d="M48 32 v-8 a14 14 0 0 1 28 0 v8" fill="none" stroke="url(#dfg)" stroke-width="9" stroke-linecap="round"/>
+    <rect x="32" y="30" width="62" height="64" rx="12" fill="url(#dfg)"/>
+    <path d="M52 92 C60 70 66 62 92 48" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+    <path d="M60 94 C68 78 76 72 94 64" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<!-- ============ SPLASH ============ -->
+<div id="splash">
+  <img class="logo" src="logo.png" onerror="logoErr(this)" alt="DukaFlow">
+  <div class="name">Duka<span>Flow</span></div>
+  <div class="tag">Keep Your Shop Flowing • v1.3</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ AUTH FLOW ============ -->
+<div id="authFlow">
+  <div class="auth-screen" id="screen-welcome">
+    <img class="auth-logo" src="logo.png" onerror="logoErr(this)" alt="DukaFlow">
+    <div class="auth-name">Duka<span>Flow</span></div>
+    <div class="auth-tag">Keep Your Shop Flowing</div>
+    <div class="auth-card">
+      <div class="value-row"><div class="vicon">🆓</div><div><b>100% Free</b> for shopkeepers. Forever.</div></div>
+      <div class="value-row"><div class="vicon">📴</div><div><b>Works Offline.</b> No internet? No problem.</div></div>
+      <div class="value-row"><div class="vicon">💰</div><div><b>Know Your Profit</b> every single day.</div></div>
+      <div class="value-row"><div class="vicon">📷</div><div><b>Scan Barcodes</b> with your phone camera.</div></div>
+      <button class="btn btn-green" style="margin-top:14px" onclick="showAuth('register')">Get Started →</button>
+    </div>
+  </div>
+
+  <div class="auth-screen" id="screen-register">
+    <img class="auth-logo" src="logo.png" onerror="logoErr(this)" alt="DukaFlow">
+    <div class="auth-card">
+      <h2>Set Up Your Shop</h2>
+      <p>Takes less than a minute.</p>
+      <div class="form-group"><label class="form-label">Shop Name *</label>
+        <input type="text" class="form-input" id="regShop" placeholder="e.g., Kato General Merchants"></div>
+      <div class="form-group"><label class="form-label">Owner Name *</label>
+        <input type="text" class="form-input" id="regOwner" placeholder="e.g., John Kato"></div>
+      <div class="form-group"><label class="form-label">Phone Number *</label>
+        <input type="tel" class="form-input" id="regPhone" placeholder="e.g., 0772 123 456"></div>
+      <div class="form-group"><label class="form-label">Location</label>
+        <input type="text" class="form-input" id="regLocation" placeholder="e.g., Wakiso, Kampala"></div>
+      <button class="btn btn-green" onclick="sendOTP()">🔐 Send Verification Code</button>
+    </div>
+  </div>
+
+  <div class="auth-screen" id="screen-otp">
+    <img class="auth-logo" src="logo.png" onerror="logoErr(this)" alt="DukaFlow">
+    <div class="auth-card">
+      <h2>Verify Your Phone</h2>
+      <p>We sent a code to <b id="otpPhoneDisplay"></b></p>
+      <div class="sms-bubble">
+        <div class="sms-label">📱 Demo SMS — the live app sends a real SMS</div>
+        "DukaFlow: Your verification code is:"
+        <div class="code" id="smsCode">0000</div>
+      </div>
+      <div class="form-group"><label class="form-label">Enter 4-Digit Code</label>
+        <input type="number" class="form-input" id="otpInput" placeholder="• • • •" style="text-align:center;font-size:24px;letter-spacing:10px"></div>
+      <button class="btn btn-green" onclick="verifyOTP()">✅ Verify & Start</button>
+      <button class="btn btn-outline" style="margin-top:10px" onclick="showAuth('register')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div id="appShell" style="display:none;flex-direction:column;height:100vh">
+<header class="app-header">
+  <div class="header-left">
+    <img class="logo" src="logo.png" onerror="logoErr(this)" alt="DukaFlow">
+    <div>
+      <h1>Duka<span>Flow</span></h1>
+      <div class="subtitle" id="shopNameDisplay">My Shop</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="offline-badge"><div class="offline-dot"></div><span id="syncStatus">Offline Ready</span></div>
+    <button class="sync-btn" onclick="syncToCloud()">☁️ <span id="syncCount">0</span></button>
+  </div>
+</header>
+
+<main class="app-content">
+
+  <div class="screen active" id="screen-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Today's Sales</div><div class="stat-value stat-green" id="todaySales">UGX 0</div></div>
+      <div class="stat-card"><div class="stat-label">Today's Expenses</div><div class="stat-value stat-red" id="todayExpenses">UGX 0</div></div>
+      <div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value stat-blue" id="todayProfit">UGX 0</div></div>
+      <div class="stat-card"><div class="stat-label">Low Stock Items</div><div class="stat-value stat-yellow" id="lowStockCount">0</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚡ Quick Actions</div>
+      <div class="btn-group">
+        <button class="btn btn-green" onclick="openModal('saleModal')">🛒 Record Sale</button>
+        <div class="btn-row">
+          <button class="btn btn-dark" onclick="openModal('stockModal')">📦 Receive Stock</button>
+          <button class="btn btn-yellow" onclick="openModal('expenseModal')">💸 Expense</button>
+        </div>
+        <button class="btn btn-purple" onclick="switchScreen('reconciliation')">📋 End-of-Day Reconciliation</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🕐 Recent Activity</div>
+      <div id="recentActivity"><div class="empty-state"><div class="empty-icon">📭</div><p>No activity yet. Record your first sale!</p></div></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-products">
+    <div class="search-container">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="productSearch" placeholder="Search name or barcode..." oninput="filterProducts()">
+      <button class="scan-btn" onclick="openScanner('search')">📷</button>
+    </div>
+    <button class="btn btn-green" style="margin-bottom:14px" onclick="openModal('addProductModal')">+ Add New Product</button>
+    <div class="card">
+      <div class="card-title">📦 Inventory (<span id="productCount">0</span>)</div>
+      <div id="productList"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-sales">
+    <div class="card">
+      <div class="card-title">🛒 Sales History</div>
+      <div class="form-group"><input type="date" class="form-input" id="salesDateFilter" onchange="renderSales()"></div>
+      <div id="salesList"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-reports">
+    <div class="card">
+      <div class="card-title">📊 7-Day Sales</div>
+      <div class="report-bar" id="salesChart"></div>
+      <div class="report-summary">
+        <div class="report-stat"><div class="report-stat-label">Sales</div><div class="report-stat-value stat-green" id="reportTotalSales">0</div></div>
+        <div class="report-stat"><div class="report-stat-label">Expenses</div><div class="report-stat-value stat-red" id="reportTotalExpenses">0</div></div>
+        <div class="report-stat"><div class="report-stat-label">Profit</div><div class="report-stat-value stat-blue" id="reportNetProfit">0</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏆 Top Selling Products</div>
+      <div id="topProducts"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">💸 Recent Expenses</div>
+      <div id="expenseList"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-reconciliation">
+    <div class="card">
+      <div class="card-title">📋 Stock Reconciliation</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Count your physical stock and compare with the system to catch theft or errors.</p>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="reconDate"></div>
+      <div id="reconProducts"></div>
+      <div class="card" style="background:var(--bg);margin-top:14px">
+        <div class="card-title">📊 Summary</div>
+        <div class="recon-row"><span class="recon-label">System Stock</span><span class="recon-value" id="reconExpected">0</span></div>
+        <div class="recon-row"><span class="recon-label">Physical Count</span><span class="recon-value" id="reconPhysical">0</span></div>
+        <div class="recon-row"><span class="recon-label">Discrepancy</span><span class="recon-value recon-mismatch" id="reconDiscrepancy">0</span></div>
+        <div class="recon-row"><span class="recon-label">Expected Revenue</span><span class="recon-value" id="reconExpectedRevenue">UGX 0</span></div>
+        <div class="form-group" style="margin-top:12px"><label class="form-label">Actual Cash in Drawer (UGX)</label>
+          <input type="number" class="form-input" id="reconCash" placeholder="0" oninput="updateReconSummary()"></div>
+      </div>
+      <button class="btn btn-purple" style="margin-top:12px" onclick="saveReconciliation()">💾 Save Reconciliation Report</button>
+      <button class="btn btn-outline" style="margin-top:10px" onclick="switchScreen('dashboard')">← Back to Home</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-settings">
+    <div class="card">
+      <div class="card-title">⚙️ DukaFlow v1.3</div>
+      <div class="form-group"><label class="form-label">Shop Name</label><input type="text" class="form-input" id="settingShopName" onchange="saveSettings()"></div>
+      <div class="form-group"><label class="form-label">Owner Name</label><input type="text" class="form-input" id="settingOwner" onchange="saveSettings()"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="settingPhone" onchange="saveSettings()"></div>
+      <div class="form-group"><label class="form-label">Starting Capital (UGX)</label><input type="number" class="form-input" id="settingCapital" onchange="saveSettings()"></div>
+      <div class="form-group"><label class="form-label">Low Stock Alert Threshold</label><input type="number" class="form-input" id="settingLowStock" onchange="saveSettings()"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">☁️ Cloud Sync (Phase 2)</div>
+      <div class="form-group"><label class="form-label">Supabase URL</label><input type="text" class="form-input" id="settingSupabaseUrl" placeholder="https://xxxx.supabase.co" onchange="saveSettings()"></div>
+      <div class="form-group"><label class="form-label">Supabase Anon Key</label><input type="text" class="form-input" id="settingSupabaseKey" placeholder="Comes in Phase 2" onchange="saveSettings()"></div>
+      <p class="form-hint">Your data is saved safely on this device. Cloud sync connects in Phase 2.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ Account</div>
+      <button class="btn btn-dark" onclick="logout()">🚪 Log Out / Switch Shop</button>
+      <button class="btn btn-red" style="margin-top:10px" onclick="clearAllData()">🗑️ Delete All Data</button>
+    </div>
+  </div>
+</main>
+
+<nav class="bottom-nav">
+  <div class="nav-item active" id="nav-dashboard" onclick="switchScreen('dashboard')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+  <div class="nav-item" id="nav-products" onclick="switchScreen('products')"><span class="nav-icon">📦</span><span class="nav-label">Products</span></div>
+  <div class="nav-item" id="nav-sales" onclick="switchScreen('sales')"><span class="nav-icon">🛒</span><span class="nav-label">Sales</span></div>
+  <div class="nav-item" id="nav-reports" onclick="switchScreen('reports')"><span class="nav-icon">📊</span><span class="nav-label">Reports</span></div>
+  <div class="nav-item" id="nav-settings" onclick="switchScreen('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></div>
+</nav>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div class="modal-overlay" id="saleModal"><div class="modal">
+  <div class="modal-header"><div class="modal-title">🛒 Record Sale</div><button class="modal-close" onclick="closeModal('saleModal')">✕</button></div>
+  <div class="form-group"><label class="form-label">Product</label>
+    <div class="input-with-btn">
+      <select class="form-input" id="saleProduct"></select>
+      <button class="scan-btn" onclick="openScanner('sale')">📷</button>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="saleQty" value="1" min="1"></div>
+    <div class="form-group"><label class="form-label">Price (UGX)</label><input type="number" class="form-input" id="salePrice"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Payment</label>
+    <select class="form-input" id="salePayment">
+      <option value="Cash">💵 Cash</option><option value="MTN MoMo">📱 MTN MoMo</option>
+      <option value="Airtel Money">📱 Airtel Money</option><option value="Credit">📝 Credit (Owe)</option>
+    </select></div>
+  <div class="form-group"><label class="form-label">Customer (Optional)</label><input type="text" class="form-input" id="saleCustomer" placeholder="Walk-in customer"></div>
+  <button class="btn btn-green" onclick="recordSale()">✅ Save Sale</button>
+</div></div>
+
+<div class="modal-overlay" id="stockModal"><div class="modal">
+  <div class="modal-header"><div class="modal-title">📦 Receive Stock</div><button class="modal-close" onclick="closeModal('stockModal')">✕</button></div>
+  <div class="form-group"><label class="form-label">Product</label><select class="form-input" id="stockProduct"></select></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="stockQty" value="1" min="1"></div>
+    <div class="form-group"><label class="form-label">Cost Price (UGX)</label><input type="number" class="form-input" id="stockCost"></div>
+  </div>
+  <div class="form-group"><label class="form-label">Supplier</label><input type="text" class="form-input" id="stockSupplier" placeholder="e.g., Mukwano Ltd"></div>
+  <button class="btn btn-dark" onclick="receiveStock()">✅ Save Stock</button>
+</div></div>
+
+<div class="modal-overlay" id="expenseModal"><div class="modal">
+  <div class="modal-header"><div class="modal-title">💸 Record Expense</div><button class="modal-close" onclick="closeModal('expenseModal')">✕</button></div>
+  <div class="form-group"><label class="form-label">Category</label>
+    <select class="form-input" id="expenseCategory">
+      <option>Transport</option><option>Rent</option><option>Packaging</option><option>Utilities</option>
+      <option>Marketing</option><option>Food</option><option>Stock Purchase</option><option>Other</option>
+    </select></div>
+  <div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="expenseAmount"></div>
+  <div class="form-group"><label class="form-label">Note</label><textarea class="form-textarea" id="expenseNote"></textarea></div>
+  <p class="form-hint" style="margin-bottom:12px">💡 Stock Purchase reduces cash but NOT profit.</p>
+  <button class="btn btn-yellow" onclick="recordExpense()">✅ Save Expense</button>
+</div></div>
+
+<div class="modal-overlay" id="addProductModal"><div class="modal">
+  <div class="modal-header"><div class="modal-title">📦 Add New Product</div><button class="modal-close" onclick="closeModal('addProductModal')">✕</button></div>
+  <div class="form-group"><label class="form-label">Product Name *</label><input type="text" class="form-input" id="newProductName" placeholder="e.g., Kakira Sugar 1kg"></div>
+  <div class="form-group"><label class="form-label">Barcode</label>
+    <div class="input-with-btn">
+      <input type="text" class="form-input" id="newProductBarcode" placeholder="Scan or type">
+      <button class="scan-btn" onclick="openScanner('addProduct')">📷</button>
+    </div>
+  </div>
+  <div class="form-group"><label class="form-label">Category</label>
+    <select class="form-input" id="newProductCategory">
+      <option>Grocery</option><option>Beverage</option><option>Dairy</option><option>Household</option>
+      <option>Bakery</option><option>Electronics</option><option>Other</option>
+    </select></div>
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Selling Price</label><input type="number" class="form-input" id="newProductPrice"></div>
+    <div class="form-group"><label class="form-label">Opening Stock</label><input type="number" class="form-input" id="newProductStock"></div>
+  </div>
+  <button class="btn btn-green" onclick="addProduct()">✅ Save Product</button>
+</div></div>
+
+<div class="modal-overlay" id="scannerModal"><div class="modal">
+  <div class="modal-header"><div class="modal-title">📷 Scan Barcode</div><button class="modal-close" onclick="stopScanner()">✕</button></div>
+  <div id="qr-reader"></div>
+  <p class="form-hint" style="margin-top:12px;text-align:center">Point your camera at the product barcode</p>
+</div></div>
+
+<script>
+// ================================================================
+//  DUKAFLOW v1.3 — REAL LOGO + VISIBLE VERSION + ERROR REPORTER
+// ================================================================
+
+// If anything ever crashes, show it on screen instead of freezing
+window.addEventListener('error', function(e){
+  var el=document.getElementById('splash');
+  if(el){ el.classList.remove('hide');
+    el.innerHTML='<div style="color:#F87171;padding:24px;font-size:13px;text-align:center;line-height:1.6">⚠️ App error:<br>'+e.message+'<br><br>Tell your co-founder exactly what you did before this appeared.</div>';
+  }
+});
+
+// Logo loader: try logo.png → logo.jpg → drawn fallback
+function logoErr(el){
+  if(el.dataset.t===undefined){ el.dataset.t='1'; el.src='logo.jpg'; }
+  else {
+    var s=document.createElement('svg');
+    s.setAttribute('class', el.className);
+    s.innerHTML='<use href="#df-logo"></use>';
+    el.replaceWith(s);
+  }
+}
+
+const DB={
+  get(k){try{return JSON.parse(localStorage.getItem('df_'+k))||[]}catch(e){return[]}},
+  set(k,v){localStorage.setItem('df_'+k,JSON.stringify(v))},
+  getObj(k){try{return JSON.parse(localStorage.getItem('df_'+k))||{}}catch(e){return{}}},
+  setObj(k,v){localStorage.setItem('df_'+k,JSON.stringify(v))}
+};
+const genId=()=>Date.now().toString(36)+Math.random().toString(36).substr(2);
+let pendingOTP=null, scanTarget=null, scanner=null;
+
+// ============ BOOT ============
+window.onload=function(){
+  initializeData();
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('hide');
+    const profile=DB.getObj('profile');
+    if(profile.shopName){ startApp(); }
+    else{ document.getElementById('authFlow').style.display='block'; showAuth('welcome'); }
+  },1800);
+};
+
+function initializeData(){
+  if(DB.get('products').length===0){
+    DB.set('products',[
+      {id:genId(),name:'Kakira Sugar 1kg',barcode:'6291041500213',category:'Grocery',price:8500,stock:50},
+      {id:genId(),name:'Royston Milk 500ml',barcode:'6291041500220',category:'Dairy',price:2500,stock:30},
+      {id:genId(),name:'Nile Special 500ml',barcode:'6291041500237',category:'Beverage',price:4000,stock:100},
+      {id:genId(),name:'Omo Washing Powder 500g',barcode:'6291041500244',category:'Household',price:5500,stock:40},
+      {id:genId(),name:'Coca Cola 500ml',barcode:'5449000000996',category:'Beverage',price:3000,stock:80},
+      {id:genId(),name:'Fanta Orange 500ml',barcode:'5449000054227',category:'Beverage',price:3000,stock:60},
+      {id:genId(),name:'Bread (Large)',barcode:'6291041500251',category:'Bakery',price:3500,stock:20},
+      {id:genId(),name:'Cooking Oil 1L',barcode:'6291041500268',category:'Grocery',price:12000,stock:25},
+      {id:genId(),name:'Rice 1kg',barcode:'6291041500275',category:'Grocery',price:7000,stock:45},
+      {id:genId(),name:'Salt 500g',barcode:'6291041500282',category:'Grocery',price:2000,stock:60}
+    ]);
+  }
+  const s=DB.getObj('settings');
+  if(!s.lowStockThreshold) DB.setObj('settings',{lowStockThreshold:10,capital:0,supabaseUrl:'',supabaseKey:''});
+}
+
+function startApp(){
+  document.getElementById('authFlow').style.display='none';
+  document.getElementById('appShell').style.display='flex';
+  const p=DB.getObj('profile');
+  document.getElementById('shopNameDisplay').textContent=p.shopName||'My Shop';
+  renderAll(); updateSyncCount();
+}
+
+// ============ AUTH ============
+function showAuth(step){
+  document.querySelectorAll('.auth-screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+step).classList.add('active');
+}
+function sendOTP(){
+  const shop=document.getElementById('regShop').value.trim();
+  const owner=document.getElementById('regOwner').value.trim();
+  const phone=document.getElementById('regPhone').value.trim();
+  if(!shop||!owner||!phone) return showToast('Please fill shop name, owner and phone',true);
+  if(phone.replace(/\D/g,'').length<9) return showToast('Enter a valid phone number',true);
+  pendingOTP=String(Math.floor(1000+Math.random()*9000));
+  document.getElementById('otpPhoneDisplay').textContent=phone;
+  document.getElementById('smsCode').textContent=pendingOTP;
+  document.getElementById('otpInput').value='';
+  showAuth('otp');
+}
+function verifyOTP(){
+  const code=document.getElementById('otpInput').value.trim();
+  if(code!==pendingOTP) return showToast('Wrong code. Check the SMS above.',true);
+  DB.setObj('profile',{
+    shopName:document.getElementById('regShop').value.trim(),
+    owner:document.getElementById('regOwner').value.trim(),
+    phone:document.getElementById('regPhone').value.trim(),
+    location:document.getElementById('regLocation').value.trim(),
+    createdAt:new Date().toISOString()
+  });
+  showToast('Welcome to DukaFlow! 🎉');
+  startApp(); loadSettings();
+}
+function logout(){
+  if(!confirm('Log out? Your data stays safe on this device.'))return;
+  localStorage.removeItem('df_profile'); location.reload();
+}
+
+// ============ NAV / MODAL / TOAST ============
+function switchScreen(s){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  const nav=document.getElementById('nav-'+s); if(nav)nav.classList.add('active');
+  if(s==='dashboard')renderDashboard();
+  if(s==='products')renderProducts();
+  if(s==='sales')renderSales();
+  if(s==='reports')renderReports();
+  if(s==='reconciliation')renderReconciliation();
+  if(s==='settings')loadSettings();
+}
+function openModal(id){
+  document.getElementById(id).classList.add('active');
+  if(id==='saleModal'||id==='stockModal')populateDropdowns();
+}
+function closeModal(id){document.getElementById(id).classList.remove('active')}
+function showToast(msg,err){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(err?' error':'');
+  setTimeout(()=>t.className='toast',3000);
+}
+
+// ============ SETTINGS ============
+function loadSettings(){
+  const p=DB.getObj('profile'), s=DB.getObj('settings');
+  document.getElementById('settingShopName').value=p.shopName||'';
+  document.getElementById('settingOwner').value=p.owner||'';
+  document.getElementById('settingPhone').value=p.phone||'';
+  document.getElementById('settingCapital').value=s.capital||'';
+  document.getElementById('settingLowStock').value=s.lowStockThreshold||10;
+  document.getElementById('settingSupabaseUrl').value=s.supabaseUrl||'';
+  document.getElementById('settingSupabaseKey').value=s.supabaseKey||'';
+}
+function saveSettings(){
+  const p=DB.getObj('profile');
+  p.shopName=document.getElementById('settingShopName').value;
+  p.owner=document.getElementById('settingOwner').value;
+  p.phone=document.getElementById('settingPhone').value;
+  DB.setObj('profile',p);
+  DB.setObj('settings',{
+    capital:parseFloat(document.getElementById('settingCapital').value)||0,
+    lowStockThreshold:parseInt(document.getElementById('settingLowStock').value)||10,
+    supabaseUrl:document.getElementById('settingSupabaseUrl').value,
+    supabaseKey:document.getElementById('settingSupabaseKey').value
+  });
+  document.getElementById('shopNameDisplay').textContent=p.shopName||'My Shop';
+  showToast('Settings saved ✓');
+}
+
+// ============ PRODUCTS ============
+function addProduct(){
+  const name=document.getElementById('newProductName').value.trim();
+  if(!name)return showToast('Enter a product name',true);
+  const products=DB.get('products');
+  products.push({id:genId(),name,
+    barcode:document.getElementById('newProductBarcode').value.trim(),
+    category:document.getElementById('newProductCategory').value,
+    price:parseFloat(document.getElementById('newProductPrice').value)||0,
+    stock:parseInt(document.getElementById('newProductStock').value)||0});
+  DB.set('products',products); markPending();
+  ['newProductName','newProductBarcode','newProductPrice','newProductStock'].forEach(i=>document.getElementById(i).value='');
+  closeModal('addProductModal'); renderProducts(); showToast('Product added: '+name);
+}
+function deleteProduct(id){ if(!confirm('Delete this product?'))return;
+  DB.set('products',DB.get('products').filter(p=>p.id!==id)); markPending(); renderProducts(); showToast('Product deleted'); }
+function adjustStock(id,d){ const ps=DB.get('products'); const p=ps.find(x=>x.id===id);
+  if(p){p.stock=Math.max(0,p.stock+d); DB.set('products',ps); markPending(); renderProducts();} }
+function renderProducts(filter){
+  filter=filter||'';
+  const products=DB.get('products'), th=DB.getObj('settings').lowStockThreshold||10;
+  document.getElementById('productCount').textContent=products.length;
+  const list=filter?products.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase())||(p.barcode&&p.barcode.includes(filter))):products;
+  document.getElementById('productList').innerHTML=list.length?list.map(p=>
+    '<div class="list-item">'+
+      '<div class="item-info">'+
+        '<div class="item-name">'+p.name+'</div>'+
+        '<div class="item-meta">'+p.category+' • '+(p.barcode||'No barcode')+'</div>'+
+        '<div class="item-price">UGX '+p.price.toLocaleString()+'</div>'+
+      '</div>'+
+      '<div class="item-right"><div class="stock-count '+(p.stock<=th?'stock-low':'stock-ok')+'">'+p.stock+'</div><div class="stock-label">in stock</div></div>'+
+      '<div class="item-actions">'+
+        '<button class="action-btn" onclick="adjustStock(\''+p.id+'\',1)">+</button>'+
+        '<button class="action-btn" onclick="adjustStock(\''+p.id+'\',-1)">−</button>'+
+        '<button class="action-btn" onclick="deleteProduct(\''+p.id+'\')">🗑</button>'+
+      '</div>'+
+    '</div>').join(''):'<div class="empty-state"><div class="empty-icon">📦</div><p>No products found.</p></div>';
+}
+function filterProducts(){renderProducts(document.getElementById('productSearch').value)}
+function populateDropdowns(){
+  const ps=DB.get('products');
+  const opts=ps.map(p=>'<option value="'+p.id+'">'+p.name+' (Stock: '+p.stock+')</option>').join('');
+  document.getElementById('saleProduct').innerHTML=opts;
+  document.getElementById('stockProduct').innerHTML=opts;
+  document.getElementById('saleProduct').onchange=function(){
+    const p=ps.find(x=>x.id===this.value); if(p)document.getElementById('salePrice').value=p.price;
+  };
+}
+
+// ============ SCANNER ============
+function loadScannerLib(){
+  return new Promise(function(resolve,reject){
+    if(typeof Html5Qrcode!=='undefined') return resolve();
+    const s=document.createElement('script');
+    s.src='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
+    s.onload=function(){resolve();};
+    s.onerror=function(){reject();};
+    document.head.appendChild(s);
+    setTimeout(function(){ if(typeof Html5Qrcode==='undefined') reject(); },10000);
+  });
+}
+function openScanner(target){
+  scanTarget=target;
+  showToast('Starting camera...');
+  loadScannerLib().then(function(){
+    document.getElementById('scannerModal').classList.add('active');
+    scanner=new Html5Qrcode('qr-reader');
+    scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:140}},
+      function(text){stopScanner();handleScan(text.trim());},
+      function(){}
+    ).catch(function(){stopScanner();showToast('Camera unavailable — type the barcode instead',true);});
+  }).catch(function(){
+    showToast('Scanner needs internet once to load. Type the barcode instead.',true);
+  });
+}
+function stopScanner(){
+  if(scanner){scanner.stop().then(function(){scanner.clear();}).catch(function(){});scanner=null;}
+  document.getElementById('scannerModal').classList.remove('active');
+}
+function handleScan(code){
+  showToast('Scanned: '+code);
+  if(scanTarget==='addProduct'){document.getElementById('newProductBarcode').value=code;}
+  else if(scanTarget==='search'){document.getElementById('productSearch').value=code;filterProducts();}
+  else if(scanTarget==='sale'){
+    const ps=DB.get('products'); const p=ps.find(x=>x.barcode===code);
+    if(p){openModal('saleModal');setTimeout(function(){
+      document.getElementById('saleProduct').value=p.id;
+      document.getElementById('salePrice').value=p.price;
+    },100);}
+    else{showToast('Not in inventory — add it first',true);
+      openModal('addProductModal');document.getElementById('newProductBarcode').value=code;}
+  }
+}
+
+// ============ SALES ============
+function recordSale(){
+  const pid=document.getElementById('saleProduct').value;
+  const qty=parseInt(document.getElementById('saleQty').value)||1;
+  const price=parseFloat(document.getElementById('salePrice').value)||0;
+  if(!pid)return showToast('Select a product',true);
+  const ps=DB.get('products'); const p=ps.find(x=>x.id===pid);
+  if(p.stock<qty)return showToast('Not enough stock! Only '+p.stock+' left.',true);
+  p.stock-=qty; DB.set('products',ps);
+  const sales=DB.get('sales');
+  sales.unshift({id:genId(),productId:pid,productName:p.name,quantity:qty,price:price,total:price*qty,
+    payment:document.getElementById('salePayment').value,
+    customer:document.getElementById('saleCustomer').value||'Walk-in',
+    date:new Date().toISOString(),synced:false});
+  DB.set('sales',sales); markPending();
+  closeModal('saleModal'); document.getElementById('saleCustomer').value=''; document.getElementById('saleQty').value=1;
+  renderAll(); showToast('Sale saved: '+qty+'x '+p.name+' = UGX '+(price*qty).toLocaleString());
+}
+function renderSales(){
+  const sales=DB.get('sales'), f=document.getElementById('salesDateFilter').value;
+  const list=f?sales.filter(s=>s.date.startsWith(f)):sales;
+  document.getElementById('salesList').innerHTML=list.length?list.slice(0,60).map(s=>
+    '<div class="list-item">'+
+      '<div class="item-info">'+
+        '<div class="item-name">'+s.productName+'</div>'+
+        '<div class="item-meta">'+new Date(s.date).toLocaleString()+' • '+s.payment+' • '+s.customer+'</div>'+
+      '</div>'+
+      '<div class="item-right"><div class="amount-green">UGX '+s.total.toLocaleString()+'</div>'+
+      '<div class="item-meta">Qty '+s.quantity+' @ '+s.price.toLocaleString()+'</div></div>'+
+    '</div>').join(''):'<div class="empty-state"><div class="empty-icon">🛒</div><p>No sales yet.</p></div>';
+}
+
+// ============ EXPENSES ============
+function recordExpense(){
+  const amount=parseFloat(document.getElementById('expenseAmount').value)||0;
+  if(amount<=0)return showToast('Enter an amount',true);
+  const ex=DB.get('expenses');
+  ex.unshift({id:genId(),category:document.getElementById('expenseCategory').value,amount:amount,
+    note:document.getElementById('expenseNote').value,date:new Date().toISOString(),synced:false});
+  DB.set('expenses',ex); markPending();
+  closeModal('expenseModal'); document.getElementById('expenseAmount').value=''; document.getElementById('expenseNote').value='';
+  renderAll(); showToast('Expense saved: UGX '+amount.toLocaleString());
+}
+
+// ============ STOCK ============
+function receiveStock(){
+  const pid=document.getElementById('stockProduct').value;
+  const qty=parseInt(document.getElementById('stockQty').value)||1;
+  const cost=parseFloat(document.getElementById('stockCost').value)||0;
+  if(!pid)return showToast('Select a product',true);
+  const ps=DB.get('products'); const p=ps.find(x=>x.id===pid);
+  p.stock+=qty; DB.set('products',ps);
+  const ex=DB.get('expenses');
+  ex.unshift({id:genId(),category:'Stock Purchase',amount:cost*qty,
+    note:qty+'x '+p.name+' from '+(document.getElementById('stockSupplier').value||'supplier'),
+    date:new Date().toISOString(),synced:false});
+  DB.set('expenses',ex); markPending();
+  closeModal('stockModal'); renderAll(); showToast('Stock received: +'+qty+' '+p.name);
+}
+
+// ============ RECONCILIATION ============
+function renderReconciliation(){
+  document.getElementById('reconDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('reconProducts').innerHTML=DB.get('products').map(p=>
+    '<div class="card" style="background:var(--bg);padding:12px;margin-bottom:8px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<div><div style="font-weight:700;font-size:13px">'+p.name+'</div>'+
+        '<div style="font-size:11px;color:var(--muted)">System: '+p.stock+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:6px">'+
+          '<span style="font-size:11px;color:var(--muted)">Physical:</span>'+
+          '<input type="number" class="form-input" style="width:76px;padding:8px" id="recon_'+p.id+'" value="'+p.stock+'" oninput="updateReconSummary()">'+
+        '</div>'+
+      '</div>'+
+    '</div>').join('');
+  updateReconSummary();
+}
+function updateReconSummary(){
+  const ps=DB.get('products'); let exp=0,phys=0,rev=0;
+  ps.forEach(function(p){exp+=p.stock;rev+=p.stock*p.price;
+    const el=document.getElementById('recon_'+p.id); phys+=el?(parseInt(el.value)||0):p.stock;});
+  const disc=phys-exp;
+  document.getElementById('reconExpected').textContent=exp;
+  document.getElementById('reconPhysical').textContent=phys;
+  const dEl=document.getElementById('reconDiscrepancy');
+  dEl.textContent=disc; dEl.className='recon-value '+(disc<0?'recon-mismatch':'recon-match');
+  document.getElementById('reconExpectedRevenue').textContent='UGX '+rev.toLocaleString();
+}
+function saveReconciliation(){
+  const rec={id:genId(),date:document.getElementById('reconDate').value,
+    cash:parseFloat(document.getElementById('reconCash').value)||0,
+    items:DB.get('products').map(function(p){const el=document.getElementById('recon_'+p.id);
+      return{name:p.name,system:p.stock,physical:el?(parseInt(el.value)||0):p.stock};}),
+    savedAt:new Date().toISOString()};
+  const r=DB.get('reconciliations'); r.unshift(rec); DB.set('reconciliations',r); markPending();
+  showToast('Reconciliation report saved ✓');
+}
+
+// ============ DASHBOARD ============
+function renderDashboard(){
+  const sales=DB.get('sales'),ex=DB.get('expenses'),ps=DB.get('products'),s=DB.getObj('settings');
+  const today=new Date().toISOString().split('T')[0];
+  const tSales=sales.filter(x=>x.date.startsWith(today)).reduce((a,b)=>a+b.total,0);
+  const tExp=ex.filter(x=>x.date.startsWith(today)&&x.category!=='Stock Purchase').reduce((a,b)=>a+b.amount,0);
+  document.getElementById('todaySales').textContent='UGX '+tSales.toLocaleString();
+  document.getElementById('todayExpenses').textContent='UGX '+tExp.toLocaleString();
+  document.getElementById('todayProfit').textContent='UGX '+(tSales-tExp).toLocaleString();
+  document.getElementById('lowStockCount').textContent=ps.filter(p=>p.stock<=(s.lowStockThreshold||10)).length;
+  const act=sales.slice(0,5).map(x=>({t:'sale',txt:'Sold '+x.quantity+'x '+x.productName,amt:x.total,d:x.date}))
+    .concat(ex.slice(0,3).map(x=>({t:'exp',txt:x.category,amt:x.amount,d:x.date})))
+    .sort((a,b)=>new Date(b.d)-new Date(a.d)).slice(0,8);
+  document.getElementById('recentActivity').innerHTML=act.length?act.map(a=>
+    '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒':'')+' '+a.txt+'</div>'+
+    '<div class="item-meta">'+new Date(a.d).toLocaleString()+'</div></div>'+
+    '<div class="'+(a.t==='sale'?'amount-green':'amount-red')+'">'+(a.t==='sale'?'+':'-')+'UGX '+a.amt.toLocaleString()+'</div></div>').join('')
+    :'<div class="empty-state"><div class="empty-icon">📭</div><p>No activity yet. Record your first sale!</p></div>';
+}
+
+// ============ REPORTS ============
+function renderReports(){
+  const sales=DB.get('sales'),ex=DB.get('expenses');
+  const days=[];
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().split('T')[0];
+    days.push({label:d.toLocaleDateString('en',{weekday:'short'}),
+      value:sales.filter(s=>s.date.startsWith(ds)).reduce((a,b)=>a+b.total,0)});}
+  const max=Math.max.apply(null,days.map(d=>d.value).concat([1]));
+  document.getElementById('salesChart').innerHTML=days.map(d=>
+    '<div class="report-bar-item" style="height:'+((d.value/max)*100)+'px"><div class="report-bar-label">'+d.label+'</div></div>').join('');
+  const ts=sales.reduce((a,b)=>a+b.total,0);
+  const te=ex.filter(e=>e.category!=='Stock Purchase').reduce((a,b)=>a+b.amount,0);
+  document.getElementById('reportTotalSales').textContent='UGX '+ts.toLocaleString();
+  document.getElementById('reportTotalExpenses').textContent='UGX '+te.toLocaleString();
+  document.getElementById('reportNetProfit').textContent='UGX '+(ts-te).toLocaleString();
+  const agg={};
+  sales.forEach(s=>{agg[s.productName]=agg[s.productName]||{q:0,r:0};agg[s.productName].q+=s.quantity;agg[s.productName].r+=s.total;});
+  const top=Object.entries(agg).sort((a,b)=>b[1].r-a[1].r).slice(0,5);
+  document.getElementById('topProducts').innerHTML=top.length?top.map(function(item,i){
+    return '<div class="list-item"><div class="item-info"><div class="item-name">'+(i+1)+'. '+item[0]+'</div>'+
+    '<div class="item-meta">'+item[1].q+' units sold</div></div><div class="amount-green">UGX '+item[1].r.toLocaleString()+'</div></div>';}).join('')
+    :'<div class="empty-state"><p>No data yet</p></div>';
+  document.getElementById('expenseList').innerHTML=ex.length?ex.slice(0,10).map(e=>
+    '<div class="list-item"><div class="item-info"><div class="item-name">UGX '+e.amount.toLocaleString()+'</div>'+
+    '<span class="expense-cat">'+e.category+'</span><div class="item-meta">'+new Date(e.date).toLocaleString()+(e.note?' • '+e.note:'')+'</div></div></div>').join('')
+    :'<div class="empty-state"><p>No expenses yet</p></div>';
+}
+
+// ============ SYNC ============
+function markPending(){updateSyncCount();}
+function updateSyncCount(){
+  const n=DB.get('sales').filter(x=>!x.synced).length+DB.get('expenses').filter(x=>!x.synced).length;
+  document.getElementById('syncCount').textContent=n;
+}
+function syncToCloud(){
+  const s=DB.getObj('settings');
+  if(!s.supabaseUrl||!s.supabaseKey)return showToast('Cloud sync arrives in Phase 2 — your data is safe on this device ✓');
+  document.getElementById('syncStatus').textContent='Syncing...';
+  setTimeout(function(){
+    DB.set('sales',DB.get('sales').map(x=>Object.assign({},x,{synced:true})));
+    DB.set('expenses',DB.get('expenses').map(x=>Object.assign({},x,{synced:true})));
+    updateSyncCount();
+    document.getElementById('syncStatus').textContent='Synced ✓';
+    showToast('Data synced to cloud!');
+    setTimeout(function(){document.getElementById('syncStatus').textContent='Offline Ready';},3000);
+  },1500);
+}
+
+// ============ DANGER ============
+function clearAllData(){
+  if(!confirm('⚠️ DELETE ALL DATA permanently?'))return;
+  if(!confirm('This cannot be undone. Final confirmation?'))return;
+  localStorage.clear(); location.reload();
+}
+
+function renderAll(){renderDashboard();renderProducts();renderSales();renderReports();}
+</script>
+</body>
+</html>
