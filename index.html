@@ -64,11 +64,9 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 .header-left h1{font-size:19px;font-weight:800;color:#fff}
 .header-left h1 span{color:var(--green)}
 .header-left .subtitle{font-size:11px;color:var(--muted)}
-.header-right{display:flex;align-items:center;gap:8px}
-.offline-badge{background:rgba(91,179,36,.12);padding:5px 10px;border-radius:16px;font-size:10px;color:var(--green2);display:flex;align-items:center;gap:5px}
+.offline-badge{background:rgba(91,179,36,.12);padding:6px 12px;border-radius:16px;font-size:10px;color:var(--green2);display:flex;align-items:center;gap:6px;font-weight:700}
 .offline-dot{width:7px;height:7px;background:var(--green2);border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.sync-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:10px;font-size:12px;cursor:pointer;font-weight:700}
 
 .app-content{flex:1;overflow-y:auto;padding:18px;padding-bottom:95px}
 .screen{display:none}
@@ -139,6 +137,7 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 .report-stat{text-align:center;padding:12px 6px;background:var(--bg);border-radius:12px}
 .report-stat-value{font-size:14px;font-weight:800;margin:3px 0}
 .report-stat-label{font-size:9px;color:var(--muted);text-transform:uppercase}
+.about-line{text-align:center;font-size:11px;color:var(--muted);padding:10px 0 0 0}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 </style>
 </head>
@@ -162,7 +161,7 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 <div id="splash">
   <img class="logo" src="logo.png" onerror="logoErr(this)" alt="DukaFlow">
   <div class="name">Duka<span>Flow</span></div>
-  <div class="tag">Keep Your Shop Flowing • v2.0</div>
+  <div class="tag">Keep Your Shop Flowing</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -204,7 +203,7 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
       <h2>Verify Your Phone</h2>
       <p>We sent a code to <b id="otpPhoneDisplay"></b></p>
       <div class="sms-bubble">
-        <div class="sms-label">📱 Demo SMS — the live app sends a real SMS</div>
+        <div class="sms-label">📱 Message</div>
         "DukaFlow: Your verification code is:"
         <div class="code" id="smsCode">0000</div>
       </div>
@@ -225,10 +224,7 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
       <div class="subtitle" id="shopNameDisplay">My Shop</div>
     </div>
   </div>
-  <div class="header-right">
-    <div class="offline-badge"><div class="offline-dot"></div><span id="syncStatus">Offline Ready</span></div>
-    <button class="sync-btn" onclick="syncToCloud()">☁️ <span id="syncCount">0</span></button>
-  </div>
+  <div class="offline-badge"><div class="offline-dot"></div><span id="cloudStatus">On this phone</span></div>
 </header>
 
 <main class="app-content">
@@ -318,19 +314,9 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
     </div>
   </div>
 
-  <div class="screen" id="screen-founder">
-    <div class="card">
-      <div class="card-title">🏭 Founder Intelligence</div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Live data from ALL shops. This is the exact view factories will pay for.</p>
-      <div id="founderBody"><p style="color:var(--muted);font-size:13px">Tap the button to load live market data.</p></div>
-      <button class="btn btn-green" style="margin-top:12px" onclick="loadFounder()">📡 Load Live Market Data</button>
-      <button class="btn btn-outline" style="margin-top:10px" onclick="switchScreen('settings')">← Back</button>
-    </div>
-  </div>
-
   <div class="screen" id="screen-settings">
     <div class="card">
-      <div class="card-title">⚙️ DukaFlow v2.0</div>
+      <div class="card-title">🏪 My Shop</div>
       <div class="form-group"><label class="form-label">Shop Name</label><input type="text" class="form-input" id="settingShopName" onchange="saveSettings()"></div>
       <div class="form-group"><label class="form-label">Owner Name</label><input type="text" class="form-input" id="settingOwner" onchange="saveSettings()"></div>
       <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="settingPhone" onchange="saveSettings()"></div>
@@ -338,20 +324,10 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
       <div class="form-group"><label class="form-label">Low Stock Alert Threshold</label><input type="number" class="form-input" id="settingLowStock" onchange="saveSettings()"></div>
     </div>
     <div class="card">
-      <div class="card-title">☁️ Cloud Sync (Supabase)</div>
-      <div class="form-group"><label class="form-label">Supabase URL</label><input type="text" class="form-input" id="settingSupabaseUrl" placeholder="https://xxxx.supabase.co" onchange="saveSettings()"></div>
-      <div class="form-group"><label class="form-label">Supabase Anon Key</label><input type="text" class="form-input" id="settingSupabaseKey" placeholder="Paste your anon public key" onchange="saveSettings()"></div>
-      <button class="btn btn-blue btn-green" onclick="connectAndSync()">☁️ Connect & Sync to Cloud</button>
-      <p class="form-hint" style="margin-top:10px">Data is saved on the device first, then flies to your cloud automatically.</p>
-    </div>
-    <div class="card">
-      <div class="card-title">🏭 Founder Tools</div>
-      <button class="btn btn-purple" onclick="switchScreen('founder')">🏭 Founder Dashboard</button>
-    </div>
-    <div class="card">
       <div class="card-title">⚠️ Account</div>
       <button class="btn btn-dark" onclick="logout()">🚪 Log Out / Switch Shop</button>
-      <button class="btn btn-red" style="margin-top:10px" onclick="clearAllData()">🗑️ Delete All Data</button>
+      <button class="btn btn-red" style="margin-top:10px" onclick="clearAllData()">🗑️ Delete Data on This Phone</button>
+      <div class="about-line">DukaFlow v3.0 • Your records are backed up automatically when online.</div>
     </div>
   </div>
 </main>
@@ -439,12 +415,15 @@ img.logo,img.auth-logo{object-fit:contain;border-radius:10px}
 
 <script>
 // ================================================================
-//  DUKAFLOW v2.0 — CLOUD SYNC + FOUNDER DASHBOARD
+//  DUKAFLOW v3.0 — FINAL PRODUCTION BUILD
+// ================================================================
+var CLOUD_URL='https://mrkawvyaybphbfpqrvqb.supabase.co';
+var CLOUD_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
 // ================================================================
 window.addEventListener('error', function(e){
   var el=document.getElementById('splash');
   if(el){ el.classList.remove('hide');
-    el.innerHTML='<div style="color:#F87171;padding:24px;font-size:13px;text-align:center;line-height:1.6">⚠️ App error:<br>'+e.message+'<br><br>Tell your co-founder exactly what you did before this appeared.</div>';
+    el.innerHTML='<div style="color:#F87171;padding:24px;font-size:13px;text-align:center;line-height:1.6">⚠️ App error:<br>'+e.message+'<br><br>Please update to the latest version from your link.</div>';
   }
 });
 
@@ -467,7 +446,14 @@ const DB={
 const genId=()=>Date.now().toString(36)+Math.random().toString(36).substr(2);
 let pendingOTP=null, scanTarget=null, scanner=null, sb=null, syncTimer=null;
 
-// ============ BOOT ============
+function cloudConfigured(){ return CLOUD_URL.indexOf('supabase.co')!==-1 && CLOUD_KEY.length>20; }
+function setCloud(mode){
+  var el=document.getElementById('cloudStatus');
+  if(mode==='on')el.textContent='Backed up ✓';
+  else if(mode==='wait')el.textContent='Backing up…';
+  else el.textContent='On this phone';
+}
+
 window.onload=function(){
   initializeData();
   setTimeout(()=>{
@@ -494,7 +480,7 @@ function initializeData(){
     ]);
   }
   const s=DB.getObj('settings');
-  if(!s.lowStockThreshold) DB.setObj('settings',{lowStockThreshold:10,capital:0,supabaseUrl:'',supabaseKey:''});
+  if(!s.lowStockThreshold) DB.setObj('settings',{lowStockThreshold:10,capital:0});
 }
 
 function startApp(){
@@ -502,12 +488,10 @@ function startApp(){
   document.getElementById('appShell').style.display='flex';
   const p=DB.getObj('profile');
   document.getElementById('shopNameDisplay').textContent=p.shopName||'My Shop';
-  renderAll(); updateSyncCount();
-  const st=DB.getObj('settings');
-  if(st.supabaseUrl&&st.supabaseKey){ setTimeout(silentSync,1500); }
+  renderAll(); updatePending();
+  setTimeout(silentConnect,1200);
 }
 
-// ============ AUTH ============
 function showAuth(step){
   document.querySelectorAll('.auth-screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+step).classList.add('active');
@@ -526,7 +510,7 @@ function sendOTP(){
 }
 function verifyOTP(){
   const code=document.getElementById('otpInput').value.trim();
-  if(code!==pendingOTP) return showToast('Wrong code. Check the SMS above.',true);
+  if(code!==pendingOTP) return showToast('Wrong code. Check the message above.',true);
   DB.setObj('profile',{
     shopName:document.getElementById('regShop').value.trim(),
     owner:document.getElementById('regOwner').value.trim(),
@@ -536,13 +520,76 @@ function verifyOTP(){
   });
   showToast('Welcome to DukaFlow! 🎉');
   startApp(); loadSettings();
+  silentConnect();
 }
 function logout(){
-  if(!confirm('Log out? Your data stays safe on this device.'))return;
+  if(!confirm('Log out? Your records stay safe on this phone.'))return;
   localStorage.removeItem('df_profile'); location.reload();
 }
 
-// ============ NAV / MODAL / TOAST ============
+function loadSupabaseLib(){
+  return new Promise(function(res,rej){
+    if(window.supabase&&window.supabase.createClient) return res();
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    s.onload=function(){res();};
+    s.onerror=function(){rej();};
+    document.head.appendChild(s);
+    setTimeout(function(){ if(!(window.supabase&&window.supabase.createClient)) rej(); },12000);
+  });
+}
+async function ensureClient(){
+  if(!cloudConfigured()) return null;
+  if(sb) return sb;
+  try{ await loadSupabaseLib(); sb=window.supabase.createClient(CLOUD_URL,CLOUD_KEY); return sb; }
+  catch(e){ return null; }
+}
+async function silentConnect(){
+  try{
+    if(!navigator.onLine) { setCloud('wait'); return; }
+    const client=await ensureClient();
+    if(!client){ setCloud('off'); return; }
+    const p=DB.getObj('profile');
+    if(!p.shopName){ setCloud('off'); return; }
+    if(!p.cloudId){
+      const key=p.shopKey||(genId()+genId());
+      p.shopKey=key;
+      const ins=await client.from('shops').insert({
+        shop_key:key, shop_name:p.shopName, owner_name:p.owner, phone:p.phone, location:p.location
+      }).select().single();
+      if(ins.error) throw new Error(ins.error.message);
+      p.cloudId=ins.data.id; DB.setObj('profile',p);
+    }
+    await pushAll(client,p.cloudId);
+    updatePending();
+  }catch(e){ setCloud('wait'); }
+}
+window.addEventListener('online',silentConnect);
+async function pushAll(client,shopId){
+  await pushTable(client,shopId,'products',DB.get('products'),function(r){return{
+    local_id:r.id,name:r.name,barcode:r.barcode,category:r.category,price:r.price,stock:r.stock};});
+  await pushTable(client,shopId,'sales',DB.get('sales'),function(r){return{
+    local_id:r.id,product_name:r.productName,quantity:r.quantity,price:r.price,total:r.total,
+    payment:r.payment,customer:r.customer,sale_date:r.date};});
+  await pushTable(client,shopId,'expenses',DB.get('expenses'),function(r){return{
+    local_id:r.id,category:r.category,amount:r.amount,note:r.note,expense_date:r.date};});
+  await pushTable(client,shopId,'reconciliations',DB.get('reconciliations'),function(r){return{
+    local_id:r.id,recon_date:r.date,cash:r.cash,items:r.items};});
+}
+async function pushTable(client,shopId,table,rows,mapFn){
+  if(!rows.length) return;
+  const ex=await client.from(table).select('local_id').eq('shop_id',shopId);
+  const have=(ex.data||[]).map(x=>x.local_id);
+  const fresh=rows.filter(r=>have.indexOf(r.id)===-1);
+  if(fresh.length){
+    const payload=fresh.map(r=>Object.assign({shop_id:shopId},mapFn(r)));
+    const ins=await client.from(table).insert(payload);
+    if(ins.error) throw new Error(ins.error.message);
+  }
+  rows.forEach(r=>{r.synced=true;});
+  DB.set(table,rows);
+}
+
 function switchScreen(s){
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
@@ -566,7 +613,6 @@ function showToast(msg,err){
   setTimeout(()=>t.className='toast',3000);
 }
 
-// ============ SETTINGS ============
 function loadSettings(){
   const p=DB.getObj('profile'), s=DB.getObj('settings');
   document.getElementById('settingShopName').value=p.shopName||'';
@@ -574,8 +620,6 @@ function loadSettings(){
   document.getElementById('settingPhone').value=p.phone||'';
   document.getElementById('settingCapital').value=s.capital||'';
   document.getElementById('settingLowStock').value=s.lowStockThreshold||10;
-  document.getElementById('settingSupabaseUrl').value=s.supabaseUrl||'';
-  document.getElementById('settingSupabaseKey').value=s.supabaseKey||'';
 }
 function saveSettings(){
   const p=DB.getObj('profile');
@@ -585,123 +629,13 @@ function saveSettings(){
   DB.setObj('profile',p);
   DB.setObj('settings',{
     capital:parseFloat(document.getElementById('settingCapital').value)||0,
-    lowStockThreshold:parseInt(document.getElementById('settingLowStock').value)||10,
-    supabaseUrl:document.getElementById('settingSupabaseUrl').value.trim(),
-    supabaseKey:document.getElementById('settingSupabaseKey').value.trim()
+    lowStockThreshold:parseInt(document.getElementById('settingLowStock').value)||10
   });
   document.getElementById('shopNameDisplay').textContent=p.shopName||'My Shop';
   showToast('Settings saved ✓');
+  markPending();
 }
 
-// ============ CLOUD SYNC (SUPABASE) ============
-function loadSupabaseLib(){
-  return new Promise(function(res,rej){
-    if(window.supabase&&window.supabase.createClient) return res();
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    s.onload=function(){res();};
-    s.onerror=function(){rej();};
-    document.head.appendChild(s);
-    setTimeout(function(){ if(!(window.supabase&&window.supabase.createClient)) rej(); },12000);
-  });
-}
-async function ensureClient(){
-  const s=DB.getObj('settings');
-  if(!s.supabaseUrl||!s.supabaseKey) return null;
-  await loadSupabaseLib();
-  if(!sb) sb=window.supabase.createClient(s.supabaseUrl,s.supabaseKey);
-  return sb;
-}
-async function connectAndSync(){
-  try{
-    const client=await ensureClient();
-    if(!client){ showToast('Paste your Supabase URL and key in Settings first',true); return; }
-    showToast('Connecting to cloud...');
-    const p=DB.getObj('profile');
-    if(!p.cloudId){
-      const key=p.shopKey||(genId()+genId());
-      p.shopKey=key;
-      const ins=await client.from('shops').insert({
-        shop_key:key, shop_name:p.shopName, owner_name:p.owner, phone:p.phone, location:p.location
-      }).select().single();
-      if(ins.error) throw new Error(ins.error.message);
-      p.cloudId=ins.data.id; DB.setObj('profile',p);
-    }
-    await pushAll(client,p.cloudId);
-    updateSyncCount();
-    document.getElementById('syncStatus').textContent='Cloud ✓';
-    showToast('Connected! Data synced to cloud ☁️');
-  }catch(e){
-    showToast('Cloud error: '+e.message,true);
-  }
-}
-function syncToCloud(){ connectAndSync(); }
-async function silentSync(){
-  try{
-    const s=DB.getObj('settings');
-    if(!s.supabaseUrl||!s.supabaseKey||!navigator.onLine) return;
-    const p=DB.getObj('profile');
-    if(!p.cloudId) return;
-    const client=await ensureClient();
-    await pushAll(client,p.cloudId);
-    updateSyncCount();
-    document.getElementById('syncStatus').textContent='Cloud ✓';
-  }catch(e){}
-}
-window.addEventListener('online',silentSync);
-async function pushAll(client,shopId){
-  await pushTable(client,shopId,'products',DB.get('products'),function(r){return{
-    local_id:r.id,name:r.name,barcode:r.barcode,category:r.category,price:r.price,stock:r.stock};});
-  await pushTable(client,shopId,'sales',DB.get('sales'),function(r){return{
-    local_id:r.id,product_name:r.productName,quantity:r.quantity,price:r.price,total:r.total,
-    payment:r.payment,customer:r.customer,sale_date:r.date};});
-  await pushTable(client,shopId,'expenses',DB.get('expenses'),function(r){return{
-    local_id:r.id,category:r.category,amount:r.amount,note:r.note,expense_date:r.date};});
-  await pushTable(client,shopId,'reconciliations',DB.get('reconciliations'),function(r){return{
-    local_id:r.id,recon_date:r.date,cash:r.cash,items:r.items};});
-}
-async function pushTable(client,shopId,table,rows,mapFn){
-  if(!rows.length) return;
-  const ex=await client.from(table).select('local_id').eq('shop_id',shopId);
-  const have=(ex.data||[]).map(x=>x.local_id);
-  const fresh=rows.filter(r=>have.indexOf(r.id)===-1);
-  if(fresh.length){
-    const payload=fresh.map(r=>Object.assign({shop_id:shopId},mapFn(r)));
-    const ins=await client.from(table).insert(payload);
-    if(ins.error) throw new Error(table+': '+ins.error.message);
-  }
-  rows.forEach(r=>{r.synced=true;});
-  DB.set(table,rows);
-}
-
-// ============ FOUNDER DASHBOARD ============
-async function loadFounder(){
-  try{
-    const c=await ensureClient();
-    if(!c){ showToast('Paste keys & connect first',true); return; }
-    document.getElementById('founderBody').innerHTML='<p style="color:var(--muted);font-size:13px">Loading live market data...</p>';
-    const sh=await c.from('shops').select('id');
-    const sa=await c.from('sales').select('product_name,quantity,total,shop_id');
-    const shops=(sh.data||[]).length;
-    const sales=sa.data||[];
-    const units=sales.reduce((a,b)=>a+(Number(b.quantity)||0),0);
-    const rev=sales.reduce((a,b)=>a+Number(b.total||0),0);
-    const agg={};
-    sales.forEach(function(s){agg[s.product_name]=agg[s.product_name]||{q:0,r:0};
-      agg[s.product_name].q+=Number(s.quantity)||0; agg[s.product_name].r+=Number(s.total)||0;});
-    const top=Object.entries(agg).sort((a,b)=>b[1].q-a[1].q).slice(0,5);
-    document.getElementById('founderBody').innerHTML=
-      '<div class="report-summary" style="margin-bottom:14px">'+
-      '<div class="report-stat"><div class="report-stat-label">Shops</div><div class="report-stat-value stat-green">'+shops+'</div></div>'+
-      '<div class="report-stat"><div class="report-stat-label">Units Sold</div><div class="report-stat-value stat-blue">'+units.toLocaleString()+'</div></div>'+
-      '<div class="report-stat"><div class="report-stat-label">Revenue</div><div class="report-stat-value stat-yellow">'+rev.toLocaleString()+'</div></div>'+
-      '</div>'+
-      (top.length? top.map(function(t,i){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(i+1)+'. '+t[0]+'</div><div class="item-meta">'+t[1].q.toLocaleString()+' units • UGX '+t[1].r.toLocaleString()+'</div></div></div>';}).join('')
-      : '<p style="color:var(--muted);font-size:13px">No sales in cloud yet. Record some sales and sync!</p>');
-  }catch(e){ showToast('Founder load error: '+e.message,true); }
-}
-
-// ============ PRODUCTS ============
 function addProduct(){
   const name=document.getElementById('newProductName').value.trim();
   if(!name)return showToast('Enter a product name',true);
@@ -750,7 +684,6 @@ function populateDropdowns(){
   };
 }
 
-// ============ SCANNER ============
 function loadScannerLib(){
   return new Promise(function(resolve,reject){
     if(typeof Html5Qrcode!=='undefined') return resolve();
@@ -795,7 +728,6 @@ function handleScan(code){
   }
 }
 
-// ============ SALES ============
 function recordSale(){
   const pid=document.getElementById('saleProduct').value;
   const qty=parseInt(document.getElementById('saleQty').value)||1;
@@ -827,7 +759,6 @@ function renderSales(){
     '</div>').join(''):'<div class="empty-state"><div class="empty-icon">🛒</div><p>No sales yet.</p></div>';
 }
 
-// ============ EXPENSES ============
 function recordExpense(){
   const amount=parseFloat(document.getElementById('expenseAmount').value)||0;
   if(amount<=0)return showToast('Enter an amount',true);
@@ -839,7 +770,6 @@ function recordExpense(){
   renderAll(); showToast('Expense saved: UGX '+amount.toLocaleString());
 }
 
-// ============ STOCK ============
 function receiveStock(){
   const pid=document.getElementById('stockProduct').value;
   const qty=parseInt(document.getElementById('stockQty').value)||1;
@@ -855,7 +785,6 @@ function receiveStock(){
   closeModal('stockModal'); renderAll(); showToast('Stock received: +'+qty+' '+p.name);
 }
 
-// ============ RECONCILIATION ============
 function renderReconciliation(){
   document.getElementById('reconDate').value=new Date().toISOString().split('T')[0];
   document.getElementById('reconProducts').innerHTML=DB.get('products').map(p=>
@@ -892,7 +821,6 @@ function saveReconciliation(){
   showToast('Reconciliation report saved ✓');
 }
 
-// ============ DASHBOARD ============
 function renderDashboard(){
   const sales=DB.get('sales'),ex=DB.get('expenses'),ps=DB.get('products'),s=DB.getObj('settings');
   const today=new Date().toISOString().split('T')[0];
@@ -906,13 +834,12 @@ function renderDashboard(){
     .concat(ex.slice(0,3).map(x=>({t:'exp',txt:x.category,amt:x.amount,d:x.date})))
     .sort((a,b)=>new Date(b.d)-new Date(a.d)).slice(0,8);
   document.getElementById('recentActivity').innerHTML=act.length?act.map(a=>
-    '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒':'💸')+' '+a.txt+'</div>'+
+    '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒':'')+' '+a.txt+'</div>'+
     '<div class="item-meta">'+new Date(a.d).toLocaleString()+'</div></div>'+
     '<div class="'+(a.t==='sale'?'amount-green':'amount-red')+'">'+(a.t==='sale'?'+':'-')+'UGX '+a.amt.toLocaleString()+'</div></div>').join('')
     :'<div class="empty-state"><div class="empty-icon">📭</div><p>No activity yet. Record your first sale!</p></div>';
 }
 
-// ============ REPORTS ============
 function renderReports(){
   const sales=DB.get('sales'),ex=DB.get('expenses');
   const days=[];
@@ -941,26 +868,27 @@ function renderReports(){
     :'<div class="empty-state"><p>No expenses yet</p></div>';
 }
 
-// ============ SYNC COUNTER ============
-function markPending(){
-  updateSyncCount();
-  const s=DB.getObj('settings');
-  if(s.supabaseUrl&&s.supabaseKey&&navigator.onLine){
-    clearTimeout(syncTimer);
-    syncTimer=setTimeout(silentSync,4000);
-  }
-}
-function updateSyncCount(){
+function pendingCount(){
   let n=0;
   ['sales','expenses','products','reconciliations'].forEach(function(k){
     DB.get(k).forEach(function(r){ if(r.synced!==true) n++; });
   });
-  document.getElementById('syncCount').textContent=n;
+  return n;
+}
+function updatePending(){
+  if(!cloudConfigured()){ setCloud('off'); return; }
+  setCloud(pendingCount()===0?'on':'wait');
+}
+function markPending(){
+  updatePending();
+  if(cloudConfigured()&&navigator.onLine){
+    clearTimeout(syncTimer);
+    syncTimer=setTimeout(silentConnect,4000);
+  }
 }
 
-// ============ DANGER ============
 function clearAllData(){
-  if(!confirm('⚠️ DELETE ALL DATA on this device permanently? (Cloud data stays safe)'))return;
+  if(!confirm('⚠️ DELETE all records on THIS PHONE? (Cloud backup stays safe)'))return;
   if(!confirm('This cannot be undone. Final confirmation?'))return;
   localStorage.clear(); location.reload();
 }
