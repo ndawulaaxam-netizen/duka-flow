@@ -1434,6 +1434,25 @@ fixOrder();
 setTimeout(fixOrder,2500);
 })();
 </script>
+<script>
+(function(){
+if(typeof DB==='undefined')return;
+function isUUID(id){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id||''))}
+function sink(){
+var ch=false;
+['sales','expenses'].forEach(function(k){
+var cur=DB.get(k);
+for(var i=0;i<cur.length;i++){
+if(isUUID(cur[i].id)&&String(cur[i].date||'').indexOf('2000-01-01')!==0){cur[i].date='2000-01-01T00:00:00.000Z';ch=true;}
+}
+DB.set(k,cur);
+});
+if(ch&&typeof renderAll==='function')renderAll();
+}
+sink();
+setTimeout(sink,2500);
+})();
+</script>
 </body>
 <script>
 (function(){
