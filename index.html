@@ -991,5 +991,65 @@ setTimeout(function(){location.reload()},1000);
 };
 })();
 </script>
+<script>
+(function(){
+var U='https://mrkawvyaybphbfpqrvqb.supabase.co';
+var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
+var oa=document.getElementById('dfm');if(oa)oa.remove();
+var ob=document.getElementById('dfm-open');if(ob)ob.remove();
+var html='';
+html+='<div id="dfm2" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;align-items:center;justify-content:center;padding:20px;">';
+html+='<div style="background:#1a1a1a;max-width:350px;width:100%;border-radius:12px;padding:20px;color:#fff;text-align:center;">';
+html+='<h3 style="margin:0 0 10px;color:#28a745;">Cloud Re-Login</h3>';
+html+='<div id="dfm2-msg" style="color:#ffcc00;font-size:14px;min-height:20px;"></div>';
+html+='<input id="dfm2-ph" type="tel" placeholder="Phone e.g. 07..." style="width:100%;padding:12px;margin-bottom:10px;border-radius:8px;border:none;background:#2a2a2a;color:#fff;box-sizing:border-box;">';
+html+='<input id="dfm2-pin" type="password" maxlength="4" placeholder="****" style="width:100%;padding:12px;margin-bottom:15px;border-radius:8px;border:none;background:#2a2a2a;color:#fff;text-align:center;letter-spacing:8px;box-sizing:border-box;">';
+html+='<button id="dfm2-go" style="width:100%;padding:12px;background:#28a745;color:#fff;border:none;border-radius:8px;">Unlock My Shop</button>';
+html+='<button id="dfm2-x" style="width:100%;padding:10px;background:none;color:#888;border:none;margin-top:8px;">Cancel</button>';
+html+='</div></div>';
+html+='<button id="dfm2-open" style="position:fixed;bottom:20px;right:20px;width:55px;height:55px;border-radius:50%;background:#28a745;color:#fff;border:none;font-size:26px;z-index:9998;">☁️</button>';
+var wrap=document.createElement('div');
+wrap.innerHTML=html;
+while(wrap.firstChild){document.body.appendChild(wrap.firstChild);}
+var M=document.getElementById('dfm2');
+document.getElementById('dfm2-open').onclick=function(){M.style.display='flex'};
+document.getElementById('dfm2-x').onclick=function(){M.style.display='none'};
+function np(p){return p.replace(/\D/g,'').slice(-9)}
+function hp(p){
+return crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)).then(function(b){
+var a=Array.from(new Uint8Array(b));
+return a.map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
+function gph(s){
+return String(s.phone||s.phone_number||s.phonenumber||s.contact||s.owner_phone||'').replace(/\D/g,'')}
+document.getElementById('dfm2-go').onclick=async function(){
+var ph=document.getElementById('dfm2-ph').value.trim();
+var pin=document.getElementById('dfm2-pin').value.trim();
+var msg=document.getElementById('dfm2-msg');
+if(!ph||!pin){msg.textContent='Enter phone and PIN';return}
+var p9=np(ph);
+var hsh=await hp(pin);
+msg.textContent='Checking...';
+var r=await fetch(U+'/rest/v1/shops?select=*',{headers:{apikey:K,Authorization:'Bearer '+K}});
+var all=await r.json();
+var s=null;
+if(Array.isArray(all)){
+for(var i=0;i<all.length;i++){
+if(gph(all[i]).slice(-9)===p9){s=all[i];break}
+}
+}
+if(!s){msg.textContent='Shop not found. Register first.';return}
+var sh=s.pin_hash||s.pinhash||'';
+if(sh&&sh!==hsh){msg.textContent='Wrong PIN';return}
+if(!sh){
+await fetch(U+'/rest/v1/shops?id=eq.'+s.id,{method:'PATCH',headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify({pin_hash:hsh})});
+}
+var j=JSON.stringify(s);
+var keys=['shop','currentShop','dukaflow_shop','df_session','shopData','dukaShop','shop_data','shopInfo','myShop','user'];
+for(var k=0;k<keys.length;k++){localStorage.setItem(keys[k],j)}
+msg.textContent='Success! Loading...';
+setTimeout(function(){location.reload()},1000);
+};
+})();
+</script>
 </body>
 </html>
