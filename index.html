@@ -1132,5 +1132,42 @@ setTimeout(function(){location.reload()},900);
 };
 })();
 </script>
+<script>
+(function(){
+if(!document.getElementById('g-go'))return;
+document.getElementById('g-go').onclick=async function(){
+var ph=document.getElementById('g-lph').value.trim();
+var pin=document.getElementById('g-lpin').value.trim();
+if(!ph||!pin){DF_MSG('Enter phone and PIN');return}
+DF_MSG('Checking...');
+var p9=DF_NP(ph);
+var h=await DF_HP(pin);
+var all=await DF_GET('/rest/v1/shops?select=*');
+var s=null;
+if(Array.isArray(all)){for(var i=0;i<all.length;i++){if(DF_PH(all[i]).slice(-9)===p9){s=all[i];break}}}
+if(!s){DF_MSG('Shop not found. Register first.');return}
+var sh=s.pin_hash||s.pinhash||'';
+if(sh&&sh!==h){DF_MSG('Wrong PIN');return}
+if(!sh){await fetch(DF_U+'/rest/v1/shops?id=eq.'+s.id,{method:'PATCH',headers:{apikey:DF_K,Authorization:'Bearer '+DF_K,'Content-Type':'application/json'},body:JSON.stringify({pin_hash:h})});}
+try{
+var sale=await DF_GET('/rest/v1/sales?select=*');
+var prod=await DF_GET('/rest/v1/products?select=*');
+var exp=await DF_GET('/rest/v1/expenses?select=*');
+function mine(rows){
+if(!Array.isArray(rows))return[];
+return rows.filter(function(r){var t=JSON.stringify(r);return t.indexOf(p9)>-1||(s.id&&t.indexOf(s.id)>-1)});
+}
+var ms=mine(sale),mp=mine(prod),me=mine(exp);
+if(ms.length)localStorage.setItem('df_sales',JSON.stringify(ms));
+if(mp.length)localStorage.setItem('df_products',JSON.stringify(mp));
+if(me.length)localStorage.setItem('df_expenses',JSON.stringify(me));
+}catch(e){}
+if(!localStorage.getItem('df_settings'))localStorage.setItem('df_settings',JSON.stringify([{capital:0,lowStockThreshold:2}]));
+localStorage.setItem('df_profile',JSON.stringify([{id:s.id,shopName:DF_NM(s),owner:DF_OW(s),phone:ph,location:s.location||''}]));
+DF_MSG('Success! Loading...');
+setTimeout(function(){location.reload()},900);
+};
+})();
+</script>
 </body>
 </html>
