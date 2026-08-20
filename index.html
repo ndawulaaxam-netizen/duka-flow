@@ -1285,6 +1285,33 @@ window.silentConnect=function(){var r=origSC.apply(this,arguments);setTimeout(de
 </body>
 <script>
 (function(){
+if(typeof DB==='undefined')return;
+function dd(arr,kf){var seen={},out=[];for(var i=0;i<arr.length;i++){var k=kf(arr[i]);if(seen[k])continue;seen[k]=1;out.push(arr[i]);}return out;}
+function doctor(){
+try{
+var s=DB.get('sales');
+var s2=dd(s,function(r){return (r.date||'')+'|'+(r.total!=null?r.total:'')+'|'+(r.productName||'')+'|'+(r.quantity||'')});
+if(s2.length!==s.length)DB.set('sales',s2);
+var e=DB.get('expenses');
+var e2=dd(e,function(r){return (r.date||'')+'|'+(r.amount!=null?r.amount:'')+'|'+(r.category||'')+'|'+(r.note||'')});
+if(e2.length!==e.length)DB.set('expenses',e2);
+var p=DB.get('products');var seen={};var p2=[];
+for(var i=0;i<p.length;i++){var k=((p[i].name||'').toLowerCase())+'|'+(p[i].barcode||'');if(seen[k])continue;seen[k]=1;p2.push(p[i]);}
+if(p2.length!==p.length)DB.set('products',p2);
+if(s2.length!==s.length||e2.length!==e.length||p2.length!==p.length){if(typeof renderAll==='function')renderAll();}
+}catch(err){}
+}
+doctor();
+setTimeout(doctor,2500);
+setTimeout(doctor,6000);
+if(typeof silentConnect==='function'){
+var o=silentConnect;
+window.silentConnect=function(){var r=o.apply(this,arguments);setTimeout(doctor,3000);return r;};
+}
+})();
+</script>
+<script>
+(function(){
 function fd(r){return r.date||r.created_at||r.sale_date||new Date().toISOString()}
 try{
 var pr=localStorage.getItem('df_profile');
