@@ -1330,6 +1330,45 @@ setTimeout(function(){location.reload()},1500);
 };
 })();
 </script>
+<script>
+(function(){
+if(typeof DB==='undefined')return;
+function num(v){var n=parseFloat(v);return isNaN(n)?0:n}
+function nSale(r){
+var d=String(r.date||r.created_at||r.sale_date||'')||new Date().toISOString();
+return{id:r.id||('x'+Math.random().toString(36).slice(2)),productId:r.productId||r.product_id||'',productName:r.productName||r.product_name||r.name||'Item',quantity:parseInt(r.quantity||r.qty)||1,price:num(r.price!=null?r.price:r.unit_price),total:num(r.total!=null?r.total:(r.amount!=null?r.amount:num(r.quantity||r.qty||1)*num(r.price||r.unit_price||0))),payment:r.payment||r.payment_method||'Cash',customer:r.customer||'Walk-in',date:d,synced:r.synced===true};
+}
+function nExp(r){
+var d=String(r.date||r.created_at||'')||new Date().toISOString();
+return{id:r.id||('x'+Math.random().toString(36).slice(2)),category:r.category||'Other',amount:num(r.amount!=null?r.amount:r.total),note:r.note||r.description||'',date:d,synced:r.synced===true};
+}
+function nProd(r){
+return{id:r.id||('x'+Math.random().toString(36).slice(2)),name:r.name||r.product_name||'Item',barcode:r.barcode||r.barc||'',category:r.category||'Grocery',price:num(r.price!=null?r.price:r.sale_price),stock:parseInt(r.stock!=null?r.stock:r.quantity)||0};
+}
+function ded(arr,kf){var seen={},out=[];for(var i=0;i<arr.length;i++){var k=kf(arr[i]);if(seen[k])continue;seen[k]=1;out.push(arr[i]);}return out;}
+function fix(){
+try{
+var s=DB.get('sales').map(function(r){return (r.date&&r.productName&&r.total!=null)?r:nSale(r)});
+s=ded(s,function(r){return r.date+'|'+r.total+'|'+r.productName+'|'+r.quantity});
+DB.set('sales',s);
+var e=DB.get('expenses').map(function(r){return (r.date&&r.category&&r.amount!=null)?r:nExp(r)});
+e=ded(e,function(r){return r.date+'|'+r.amount+'|'+r.category+'|'+r.note});
+DB.set('expenses',e);
+var p=DB.get('products').map(function(r){return (r.name&&r.stock!=null&&r.price!=null)?r:nProd(r)});
+p=ded(p,function(r){return (r.name||'').toLowerCase()+'|'+(r.barcode||'')});
+DB.set('products',p);
+if(typeof renderAll==='function')renderAll();
+var el=document.getElementById('xray');
+if(!el){el=document.createElement('div');el.id='xray';el.style.cssText='position:fixed;bottom:70px;left:6px;right:6px;background:#ff0;color:#000;z-index:999999;font-size:10px;padding:4px;word-break:break-all;border-radius:6px;';document.body.appendChild(el);}
+el.textContent='X-RAY sales:'+s.length+' exp:'+e.length+' prod:'+p.length+' | sale0='+(s[0]?JSON.stringify(s[0]).slice(0,120):'none');
+}catch(err){}
+}
+fix();
+setTimeout(fix,2500);
+setTimeout(fix,6000);
+if(typeof silentConnect==='function'){var o=silentConnect;window.silentConnect=function(){var r=o.apply(this,arguments);setTimeout(fix,3000);return r;};}
+})();
+</script>
 </body>
 <script>
 (function(){
