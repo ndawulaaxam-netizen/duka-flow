@@ -1051,5 +1051,18 @@ setTimeout(function(){location.reload()},1000);
 };
 })();
 </script>
+<div id="dbg" style="position:fixed;top:0;left:0;right:0;background:#ff0;color:#000;z-index:999999;font-size:11px;padding:4px;word-break:break-all;"></div>
+<script>
+function dump(){
+var out='KEYS: ';
+for(var i=0;i<localStorage.length;i++){
+var k=localStorage.key(i);
+out+=k+'=['+String(localStorage.getItem(k)).slice(0,60)+'] ';
+}
+document.getElementById('dbg').textContent=out;
+}
+dump();
+setInterval(dump,2000);
+</script>
 </body>
 </html>
