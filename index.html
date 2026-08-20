@@ -937,5 +937,59 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<div id="dfm" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+<div style="background:#1a1a1a;max-width:350px;width:100%;border-radius:12px;padding:20px;color:#fff;text-align:center;">
+<h3 style="margin:0 0 10px;color:#28a745;">Cloud Re-Login</h3>
+<p style="font-size:13px;color:#aaa;">Phone + 4-digit PIN to restore.</p>
+<div id="dfm-msg" style="color:#ffcc00;font-size:14px;min-height:20px;"></div>
+<input id="dfm-ph" type="tel" placeholder="Phone e.g. 07..." style="width:100%;padding:12px;margin-bottom:10px;border-radius:8px;border:none;background:#2a2a2a;color:#fff;box-sizing:border-box;">
+<input id="dfm-pin" type="password" maxlength="4" placeholder="****" style="width:100%;padding:12px;margin-bottom:15px;border-radius:8px;border:none;background:#2a2a2a;color:#fff;text-align:center;letter-spacing:8px;box-sizing:border-box;">
+<button id="dfm-go" style="width:100%;padding:12px;background:#28a745;color:#fff;border:none;border-radius:8px;">Unlock My Shop</button>
+<button id="dfm-x" style="width:100%;padding:10px;background:none;color:#888;border:none;margin-top:8px;">Cancel</button>
+</div>
+</div>
+<button id="dfm-open" style="position:fixed;bottom:20px;right:20px;width:55px;height:55px;border-radius:50%;background:#28a745;color:#fff;border:none;font-size:26px;z-index:9998;">☁️</button>
+<script>
+(function(){
+var U='https://mrkawvyaybphbfpqrvqb.supabase.co';
+var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
+var M=document.getElementById('dfm');
+function np(p){return p.replace(/\D/g,'').slice(-9)}
+function hp(p){
+return crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)).then(function(b){
+var a=Array.from(new Uint8Array(b));
+return a.map(function(x){return x.toString(16).padStart(2,'0')}).join('')
+})}
+document.getElementById('dfm-open').onclick=function(){M.style.display='flex'};
+document.getElementById('dfm-x').onclick=function(){M.style.display='none'};
+document.getElementById('dfm-go').onclick=async function(){
+var ph=document.getElementById('dfm-ph').value.trim();
+var pin=document.getElementById('dfm-pin').value.trim();
+var msg=document.getElementById('dfm-msg');
+if(!ph||!pin){msg.textContent='Enter phone and PIN';return}
+var p9=np(ph);
+var h=await hp(pin);
+var q='?select=*&or=(phone.ilike.%25'+p9+',phone_number.ilike.%25'+p9+')';
+var r=await fetch(U+'/rest/v1/shops'+q,{headers:{apikey:K,Authorization:'Bearer '+K}});
+var d=await r.json();
+if(d&&d.length>0){
+var s=d[0];
+var sh=s.pin_hash||'';
+if(sh===h||!sh){
+if(!sh){
+await fetch(U+'/rest/v1/shops?id=eq.'+s.id,{method:'PATCH',headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify({pin_hash:h})})
+}
+var j=JSON.stringify(s);
+localStorage.setItem('shop',j);
+localStorage.setItem('currentShop',j);
+localStorage.setItem('dukaflow_shop',j);
+localStorage.setItem('df_session',j);
+msg.textContent='Success! Loading...';
+setTimeout(function(){location.reload()},1000);
+}else{msg.textContent='Wrong PIN'}
+}else{msg.textContent='Shop not found. Register first.'}
+};
+})();
+</script>
 </body>
 </html>
