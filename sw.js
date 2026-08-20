@@ -1,4 +1,4 @@
-const CACHE = 'dukaflow-v4';
+const CACHE = 'dukaflow-v5-pin';
 const SHELL = ['./', './index.html', './logo.png'];
 
 self.addEventListener('install', function(e){
@@ -7,7 +7,7 @@ self.addEventListener('install', function(e){
 });
 
 self.addEventListener('activate', function(e){
-  e.waitUntil(caches.delete('dukaflow-v3').then(function(){ return self.clients.claim(); }));
+  e.waitUntil(caches.delete('dukaflow-v4').then(function(){ return self.clients.claim(); }));
 });
 
 self.addEventListener('fetch', function(e){
