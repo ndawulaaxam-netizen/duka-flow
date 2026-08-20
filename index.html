@@ -1234,6 +1234,54 @@ if(p)cloudDelete(p,prof,ph);
 };
 })();
 </script>
+<script>
+(function(){
+if(typeof DB==='undefined')return;
+var U='https://mrkawvyaybphbfpqrvqb.supabase.co';
+var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
+function dedupeLocal(){
+try{
+var ps=DB.get('products');var seen={};var out=[];
+for(var i=0;i<ps.length;i++){
+var k=((ps[i].name||'').toLowerCase())+'|'+(ps[i].barcode||'');
+if(!seen[k]){seen[k]=1;out.push(ps[i]);}
+}
+if(out.length!==ps.length){DB.set('products',out);if(typeof renderProducts==='function')renderProducts();}
+}catch(e){}
+}
+function dedupeCloud(){
+try{
+var prof={};try{prof=JSON.parse(localStorage.getItem('df_profile'))||{}}catch(e){}
+var ph=String(prof.phone||'').replace(/\D/g,'').slice(-9);
+if(!ph&&!prof.cloudId)return;
+fetch(U+'/rest/v1/products?select=*',{headers:{apikey:K,Authorization:'Bearer '+K}})
+.then(function(r){return r.json()})
+.then(function(all){
+if(!Array.isArray(all))return;
+var mine=all.filter(function(r){var t=JSON.stringify(r);return (ph&&t.indexOf(ph)>-1)||(prof.cloudId&&t.indexOf(prof.cloudId)>-1)});
+var byName={};
+mine.forEach(function(r){var n=String(r.name||r.product_name||'').toLowerCase();(byName[n]=byName[n]||[]).push(r)});
+Object.keys(byName).forEach(function(n){
+var g=byName[n];
+if(g.length>1){
+g.sort(function(a,b){return String(a.id)<String(b.id)?-1:1});
+for(var i=1;i<g.length;i++){
+fetch(U+'/rest/v1/products?id=eq.'+g[i].id,{method:'DELETE',headers:{apikey:K,Authorization:'Bearer '+K}});
+}
+}
+});
+});
+}catch(e){}
+}
+dedupeLocal();
+setTimeout(dedupeLocal,2500);
+if(!sessionStorage.getItem('df_deduped')){sessionStorage.setItem('df_deduped','1');setTimeout(dedupeCloud,4000);}
+if(typeof silentConnect==='function'){
+var origSC=silentConnect;
+window.silentConnect=function(){var r=origSC.apply(this,arguments);setTimeout(dedupeLocal,3000);return r;};
+}
+})();
+</script>
 </body>
 <script>
 (function(){
