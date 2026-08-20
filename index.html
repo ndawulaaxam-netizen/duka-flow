@@ -1196,6 +1196,44 @@ return old?old.call(this,e):undefined;
 };
 })();
 </script>
+<script>
+(function(){
+var U='https://mrkawvyaybphbfpqrvqb.supabase.co';
+var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
+if(typeof DB==='undefined')return;
+function cloudDelete(p,prof,ph){
+try{
+fetch(U+'/rest/v1/products?select=*',{headers:{apikey:K,Authorization:'Bearer '+K}})
+.then(function(r){return r.json()})
+.then(function(all){
+if(!Array.isArray(all))return;
+var name=String(p.name||'').toLowerCase();
+all.forEach(function(r){
+var t=JSON.stringify(r);
+var inShop=(ph&&t.indexOf(ph)>-1)||(prof.cloudId&&t.indexOf(prof.cloudId)>-1);
+if(!inShop)return;
+var rn=String(r.name||r.product_name||'').toLowerCase();
+if(r.id===p.id||(name&&rn===name)){
+fetch(U+'/rest/v1/products?id=eq.'+r.id,{method:'DELETE',headers:{apikey:K,Authorization:'Bearer '+K}});
+}
+});
+});
+}catch(e){}
+}
+window.deleteProduct=function(id){
+if(!confirm('Delete this product? It will also be removed from your cloud backup.'))return;
+var ps=DB.get('products');var p=null;
+ps=ps.filter(function(x){if(x.id===id){p=x;return false}return true});
+DB.set('products',ps);
+if(typeof markPending==='function')markPending();
+if(typeof renderProducts==='function')renderProducts();
+if(typeof showToast==='function')showToast('Product deleted');
+var prof={};try{prof=JSON.parse(localStorage.getItem('df_profile'))||{}}catch(e){}
+var ph=String(prof.phone||'').replace(/\D/g,'').slice(-9);
+if(p)cloudDelete(p,prof,ph);
+};
+})();
+</script>
 </body>
 <script>
 (function(){
