@@ -1412,6 +1412,28 @@ var x=document.getElementById('xray');if(x)x.remove();
 new MutationObserver(function(){var y=document.getElementById('xray');if(y)y.remove();}).observe(document.body,{childList:true});
 })();
 </script>
+<script>
+(function(){
+if(typeof DB==='undefined')return;
+var prev=DB.set;
+DB.set=function(k,v){
+if(k==='sales'||k==='expenses'){
+v=(v||[]).slice().sort(function(a,b){return (new Date(b.date||0))-(new Date(a.date||0))});
+}
+return prev.call(DB,k,v);
+};
+function fixOrder(){
+['sales','expenses'].forEach(function(k){
+var cur=DB.get(k);
+var sorted=cur.slice().sort(function(a,b){return (new Date(b.date||0))-(new Date(a.date||0))});
+if(JSON.stringify(cur)!==JSON.stringify(sorted)){DB.set(k,sorted);}
+});
+if(typeof renderAll==='function')renderAll();
+}
+fixOrder();
+setTimeout(fixOrder,2500);
+})();
+</script>
 </body>
 <script>
 (function(){
