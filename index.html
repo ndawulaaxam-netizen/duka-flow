@@ -1369,6 +1369,49 @@ setTimeout(fix,6000);
 if(typeof silentConnect==='function'){var o=silentConnect;window.silentConnect=function(){var r=o.apply(this,arguments);setTimeout(fix,3000);return r;};}
 })();
 </script>
+<script>
+(function(){
+if(typeof DB==='undefined')return;
+var origSet=DB.set;
+function isUUID(id){return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id||''))}
+function keyFor(r,k){
+if(k==='sales')return (r.total!=null?r.total:'')+'|'+(r.productName||'')+'|'+(r.quantity||'');
+if(k==='expenses')return (r.amount!=null?r.amount:'')+'|'+(r.category||'')+'|'+(r.note||'');
+return ((r.name||'').toLowerCase())+'|'+(r.barcode||'');
+}
+function dedupTwins(v,k){
+var seen={};var out=[];
+for(var i=0;i<v.length;i++){
+var r=v[i];var key=keyFor(r,k);var ex=seen[key];
+if(ex){
+if(isUUID(r.id)&&!isUUID(ex.id))continue;
+if(!isUUID(r.id)&&isUUID(ex.id)){for(var j=0;j<out.length;j++){if(out[j]===ex)out[j]=r}seen[key]=r;continue;}
+out.push(r);continue;
+}
+seen[key]=r;out.push(r);
+}
+return out;
+}
+DB.set=function(k,v){
+if(k==='sales'||k==='expenses'||k==='products'||k==='reconciliations'){
+var cur=DB.get(k);var ids={};
+for(var i=0;i<cur.length;i++){if(cur[i]&&cur[i].id)ids[cur[i].id]=1}
+v=(v||[]).filter(function(r){
+if(!r)return false;
+if(r.id&&ids[r.id])return true;
+if(isUUID(r.id))return false;
+return true;
+});
+v=dedupTwins(v,k);
+}
+return origSet.call(DB,k,v);
+};
+['sales','expenses','products'].forEach(function(k){DB.set(k,DB.get(k))});
+if(typeof renderAll==='function')renderAll();
+var x=document.getElementById('xray');if(x)x.remove();
+new MutationObserver(function(){var y=document.getElementById('xray');if(y)y.remove();}).observe(document.body,{childList:true});
+})();
+</script>
 </body>
 <script>
 (function(){
