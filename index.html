@@ -1064,5 +1064,73 @@ document.getElementById('dbg').textContent=out;
 dump();
 setInterval(dump,2000);
 </script>
+<script>
+(function(){
+var d=document.getElementById('dbg');if(d)d.remove();
+if(typeof dump==='function'){window.dump=function(){}}
+var m;
+m=document.getElementById('dfm');if(m)m.remove();
+m=document.getElementById('dfm-open');if(m)m.remove();
+m=document.getElementById('dfm2');if(m)m.remove();
+m=document.getElementById('dfm2-open');if(m)m.remove();
+if(localStorage.getItem('df_profile'))return;
+window.DF_U='https://mrkawvyaybphbfpqrvqb.supabase.co';
+window.DF_K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
+var IN='width:100%;padding:12px;margin-bottom:10px;border-radius:8px;border:1px solid #30363d;background:#161b22;color:#fff;box-sizing:border-box;font-size:15px;';
+var BTN='width:100%;padding:14px;background:#238636;color:#fff;border:none;border-radius:10px;font-size:16px;';
+var BK='width:100%;padding:10px;background:none;color:#8b949e;border:none;margin-top:8px;';
+var g=document.createElement('div');
+g.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#0d1117;z-index:999999;color:#fff;overflow:auto;padding:20px;box-sizing:border-box;text-align:center;';
+g.innerHTML='<h1 style="margin:25px 0 5px;color:#28a745;">DukaFlow</h1>'+
+'<p style="color:#8b949e;margin-bottom:25px;">Keep Your Shop Flowing</p>'+
+'<div id="g-menu"><button id="g-login" style="'+BTN+'">🔑 I have a shop - Log In</button>'+
+'<button id="g-reg" style="'+BTN.replace('#238636','#21262d')+'border:1px solid #30363d;margin-top:12px;">🆕 New shop - Register</button></div>'+
+'<div id="g-lbox" style="display:none;"><input id="g-lph" type="tel" placeholder="Phone number" style="'+IN+'"><input id="g-lpin" type="password" maxlength="4" placeholder="4-digit PIN" style="'+IN+'"><button id="g-go" style="'+BTN+'">Unlock My Shop</button><button id="g-b1" style="'+BK+'">← Back</button></div>'+
+'<div id="g-rbox" style="display:none;"><input id="g-rname" placeholder="Shop name" style="'+IN+'"><input id="g-rown" placeholder="Owner name" style="'+IN+'"><input id="g-rph" type="tel" placeholder="Phone number" style="'+IN+'"><input id="g-rloc" placeholder="Location e.g. Wakiso" style="'+IN+'"><input id="g-rpin" type="password" maxlength="4" placeholder="Choose 4-digit PIN" style="'+IN+'"><button id="g-rgo" style="'+BTN+'">Register & Start</button><button id="g-b2" style="'+BK+'">← Back</button></div>'+
+'<div id="g-msg" style="color:#ffcc00;margin-top:12px;min-height:20px;font-size:14px;"></div>';
+document.body.appendChild(g);
+function show(id){
+['g-menu','g-lbox','g-rbox'].forEach(function(x){document.getElementById(x).style.display=x===id?'block':'none'});
+}
+document.getElementById('g-login').onclick=function(){show('g-lbox')};
+document.getElementById('g-reg').onclick=function(){show('g-rbox')};
+document.getElementById('g-b1').onclick=function(){show('g-menu')};
+document.getElementById('g-b2').onclick=function(){show('g-menu')};
+window.DF_MSG=function(t){document.getElementById('g-msg').textContent=t};
+window.DF_NP=function(p){return String(p).replace(/\D/g,'').slice(-9)};
+window.DF_HP=function(p){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})};
+window.DF_GET=function(p){return fetch(DF_U+p,{headers:{apikey:DF_K,Authorization:'Bearer '+DF_K}}).then(function(r){return r.json()})};
+window.DF_PH=function(s){return String(s.phone||s.phone_number||s.phonenumber||s.contact||'').replace(/\D/g,'')};
+window.DF_NM=function(s){return s.shop_name||s.name||s.shopname||s.title||s.business_name||'My Shop'};
+window.DF_OW=function(s){return s.owner_name||s.owner||''};
+document.getElementById('g-rgo').onclick=async function(){
+var nm=document.getElementById('g-rname').value.trim();
+var ow=document.getElementById('g-rown').value.trim();
+var ph=document.getElementById('g-rph').value.trim();
+var lc=document.getElementById('g-rloc').value.trim();
+var pin=document.getElementById('g-rpin').value.trim();
+if(!nm||!ow||!ph){DF_MSG('Fill shop, owner and phone');return}
+if(!/^\d{4}$/.test(pin)){DF_MSG('PIN must be 4 digits');return}
+DF_MSG('Checking...');
+var all=await DF_GET('/rest/v1/shops?select=*');
+var p9=DF_NP(ph);
+if(Array.isArray(all)){for(var i=0;i<all.length;i++){if(DF_PH(all[i]).slice(-9)===p9){DF_MSG('Shop exists. Use Log In.');return}}}
+var h=await DF_HP(pin);
+var body={shop_name:nm,owner_name:ow,phone:ph,pin_hash:h};
+if(lc)body.location=lc;
+var r=await fetch(DF_U+'/rest/v1/shops',{method:'POST',headers:{apikey:DF_K,Authorization:'Bearer '+DF_K,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(body)});
+if(!r.ok){delete body.location;r=await fetch(DF_U+'/rest/v1/shops',{method:'POST',headers:{apikey:DF_K,Authorization:'Bearer '+DF_K,'Content-Type':'application/json',Prefer:'return=representation'},body:JSON.stringify(body)});}
+var nr=await r.json();
+var id=(Array.isArray(nr)&&nr[0]&&nr[0].id)||'';
+localStorage.setItem('df_profile',JSON.stringify([{id:id,shopName:nm,owner:ow,phone:ph,location:lc}]));
+if(!localStorage.getItem('df_sales'))localStorage.setItem('df_sales','[]');
+if(!localStorage.getItem('df_products'))localStorage.setItem('df_products','[]');
+if(!localStorage.getItem('df_expenses'))localStorage.setItem('df_expenses','[]');
+if(!localStorage.getItem('df_settings'))localStorage.setItem('df_settings',JSON.stringify([{capital:0,lowStockThreshold:2}]));
+DF_MSG('Welcome! Loading...');
+setTimeout(function(){location.reload()},900);
+};
+})();
+</script>
 </body>
 </html>
