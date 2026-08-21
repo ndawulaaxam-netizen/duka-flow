@@ -8,6 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="mobile-web-app-capable" content="yes">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 :root{--bg:#0B0F0B;--card:#161D16;--border:#273327;--green:#5BB324;--green2:#7AC943;--green3:#3E8918;--text:#EAF2EA;--muted:#8FA38F;--red:#F87171;--yellow:#FBBF24;--blue:#60A5FA}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -156,7 +157,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="card"><div class="card-title">🕐 Recent Activity</div><div id="recentActivity"></div></div>
 </div>
 <div class="screen" id="screen-products">
-<div class="form-group"><input class="form-input" id="productSearch" placeholder="Search products..." oninput="renderProducts(this.value)"></div>
+<div style="display:flex;gap:8px;margin-bottom:14px">
+<input class="form-input" id="productSearch" placeholder="Search products..." oninput="renderProducts(this.value)" style="flex:1">
+<button type="button" class="btn btn-dark" style="width:auto;padding:13px 18px" onclick="openScanner(searchProductByBarcode)">📷</button>
+</div>
 <button class="btn btn-green" style="margin-bottom:14px" onclick="openModal('addProductModal')">+ Add New Product</button>
 <div class="card"><div class="card-title">📦 Inventory (<span id="productCount">0</span>)</div><div id="productList"></div></div>
 </div>
@@ -201,7 +205,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="card"><div class="card-title">⚠️ Account</div>
 <button class="btn btn-dark" onclick="logout()">🚪 Log Out / Switch Shop</button>
 <button class="btn btn-red" style="margin-top:10px" onclick="clearAllData()">🗑️ Delete Data on This Phone</button>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding-top:10px">DukaFlow v4.1 • Records backed up automatically when online.</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding-top:10px">DukaFlow v4.3 (Global Network) • Records backed up automatically when online.</div>
 </div>
 </div>
 </main>
@@ -216,6 +220,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <div class="modal-overlay" id="saleModal"><div class="modal">
 <div class="modal-header"><b>🛒 Record Sale</b><button class="modal-close" onclick="closeModal('saleModal')">✕</button></div>
+<button type="button" class="btn btn-purple" style="margin-bottom:14px" onclick="openScanner(findProductByBarcode)">📷 Scan Barcode</button>
 <div class="form-group"><label class="form-label">Product</label><select class="form-input" id="saleProduct"></select></div>
 <div class="form-row">
 <div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="saleQty" value="1" min="1"></div>
@@ -228,6 +233,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
 <div class="modal-overlay" id="stockModal"><div class="modal">
 <div class="modal-header"><b>📦 Receive Stock</b><button class="modal-close" onclick="closeModal('stockModal')">✕</button></div>
+<button type="button" class="btn btn-purple" style="margin-bottom:14px" onclick="openScanner(findProductByBarcode)">📷 Scan Barcode</button>
 <div class="form-group"><label class="form-label">Product</label><select class="form-input" id="stockProduct"></select></div>
 <div class="form-row">
 <div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="stockQty" value="1" min="1"></div>
@@ -248,13 +254,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="modal-overlay" id="addProductModal"><div class="modal">
 <div class="modal-header"><b>📦 Add New Product</b><button class="modal-close" onclick="closeModal('addProductModal')">✕</button></div>
 <div class="form-group"><label class="form-label">Product Name *</label><input class="form-input" id="newProductName" placeholder="e.g., Kakira Sugar 1kg"></div>
-<div class="form-group"><label class="form-label">Barcode</label><input class="form-input" id="newProductBarcode" placeholder="Type barcode (optional)"></div>
+<div class="form-group"><label class="form-label">Barcode</label>
+<div style="display:flex;gap:8px">
+<input class="form-input" id="newProductBarcode" placeholder="Type or scan" style="flex:1">
+<button type="button" class="btn btn-dark" style="width:auto;padding:13px 18px" onclick="openScanner(fillNewProductBarcode)">📷</button>
+</div></div>
 <div class="form-group"><label class="form-label">Category</label><select class="form-input" id="newProductCategory"><option>Grocery</option><option>Beverage</option><option>Dairy</option><option>Household</option><option>Bakery</option><option>Electronics</option><option>Other</option></select></div>
 <div class="form-row">
 <div class="form-group"><label class="form-label">Selling Price</label><input type="number" class="form-input" id="newProductPrice"></div>
 <div class="form-group"><label class="form-label">Opening Stock</label><input type="number" class="form-input" id="newProductStock"></div>
 </div>
 <button class="btn btn-green" onclick="addProduct()">✅ Save Product</button>
+</div></div>
+
+<div class="modal-overlay" id="scannerModal"><div class="modal">
+<div class="modal-header"><b>📷 Scan Barcode</b><button class="modal-close" onclick="stopScanner()">✕</button></div>
+<div id="reader" style="width:100%;min-height:250px;background:#000;border-radius:12px"></div>
+<p style="text-align:center;color:var(--muted);font-size:12px;margin-top:12px">Point camera at barcode</p>
 </div></div>
 
 <script>
@@ -351,14 +367,34 @@ loadSettings();renderAll();updatePending();syncAll();
 }
 function loadSettings(){var p=DB.getObj('profile'),s=DB.getObj('settings');$('shopNameDisplay').textContent=p.shopName||'My Shop';$('settingShopName').value=p.shopName||'';$('settingOwner').value=p.owner||'';$('settingPhone').value=p.phone||'';$('settingCapital').value=s.capital||'';$('settingLowStock').value=s.lowStockThreshold||10}
 function saveSettings(){var p=DB.getObj('profile');p.shopName=$('settingShopName').value;p.owner=$('settingOwner').value;p.phone=$('settingPhone').value;DB.setObj('profile',p);DB.setObj('settings',{capital:parseFloat($('settingCapital').value)||0,lowStockThreshold:parseInt($('settingLowStock').value)||10});$('shopNameDisplay').textContent=p.shopName||'My Shop';showToast('Settings saved ✓');markPending()}
-function addProduct(){var name=$('newProductName').value.trim();if(!name)return showToast('Enter a product name',true);var ps=DB.get('products');ps.push({id:genId(),name:name,barcode:$('newProductBarcode').value.trim(),category:$('newProductCategory').value,price:parseFloat($('newProductPrice').value)||0,stock:parseInt($('newProductStock').value)||0,synced:false});DB.set('products',ps);markPending();['newProductName','newProductBarcode','newProductPrice','newProductStock'].forEach(function(i){$(i).value=''});closeModal('addProductModal');renderProducts();showToast('Product added: '+name)}
+function addProduct(){
+var name=$('newProductName').value.trim();
+if(!name)return showToast('Enter a product name',true);
+var barcode=$('newProductBarcode').value.trim();
+var category=$('newProductCategory').value;
+var price=parseFloat($('newProductPrice').value)||0;
+var stock=parseInt($('newProductStock').value)||0;
+var ps=DB.get('products');
+ps.push({id:genId(),name:name,barcode:barcode,category:category,price:price,stock:stock,synced:false});
+DB.set('products',ps);
+markPending();
+['newProductName','newProductBarcode','newProductPrice','newProductStock'].forEach(function(i){$(i).value=''});
+closeModal('addProductModal');
+renderProducts();
+showToast('Product added: '+name);
+if(barcode){saveGlobalProduct(barcode,name,category,price)}
+}
+function saveGlobalProduct(barcode,name,category,price){
+if(!barcode)return;
+api('/rest/v1/global_products',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates'},body:JSON.stringify({barcode:barcode,name:name,category:category,default_price:price})}).catch(function(){});
+}
 function deleteProduct(id){if(!confirm('Delete this product?'))return;DB.set('products',DB.get('products').filter(function(p){return p.id!==id}));markPending();renderProducts();showToast('Product deleted')}
 function adjustStock(id,d){var ps=DB.get('products');var p=ps.find(function(x){return x.id===id});if(p){p.stock=Math.max(0,p.stock+d);p.synced=false;DB.set('products',ps);markPending();renderProducts()}}
 function recordSale(){var pid=$('saleProduct').value;var qty=parseInt($('saleQty').value)||1;var price=parseFloat($('salePrice').value)||0;if(!pid)return showToast('Select a product',true);var ps=DB.get('products');var p=ps.find(function(x){return x.id===pid});if(p.stock<qty)return showToast('Not enough stock! Only '+p.stock+' left.',true);p.stock-=qty;p.synced=false;DB.set('products',ps);var sales=DB.get('sales');sales.unshift({id:genId(),productId:pid,productName:p.name,quantity:qty,price:price,total:price*qty,payment:$('salePayment').value,customer:$('saleCustomer').value||'Walk-in',date:iso(),synced:false});DB.set('sales',sales);markPending();closeModal('saleModal');$('saleCustomer').value='';$('saleQty').value=1;renderAll();showToast('Sale saved: '+qty+'x '+p.name)}
 function receiveStock(){var pid=$('stockProduct').value;var qty=parseInt($('stockQty').value)||1;var cost=parseFloat($('stockCost').value)||0;if(!pid)return showToast('Select a product',true);var ps=DB.get('products');var p=ps.find(function(x){return x.id===pid});p.stock+=qty;p.synced=false;DB.set('products',ps);var ex=DB.get('expenses');ex.unshift({id:genId(),category:'Stock Purchase',amount:cost*qty,note:qty+'x '+p.name+' from '+($('stockSupplier').value||'supplier'),date:iso(),synced:false});DB.set('expenses',ex);markPending();closeModal('stockModal');renderAll();showToast('Stock received: +'+qty+' '+p.name)}
 function recordExpense(){var amount=parseFloat($('expenseAmount').value)||0;if(amount<=0)return showToast('Enter an amount',true);var ex=DB.get('expenses');ex.unshift({id:genId(),category:$('expenseCategory').value,amount:amount,note:$('expenseNote').value,date:iso(),synced:false});DB.set('expenses',ex);markPending();closeModal('expenseModal');$('expenseAmount').value='';$('expenseNote').value='';renderAll();showToast('Expense saved')}
 function populateDropdowns(){var ps=DB.get('products');var opts=ps.map(function(p){return '<option value="'+p.id+'">'+p.name+' (Stock: '+p.stock+')</option>'}).join('');$('saleProduct').innerHTML=opts;$('stockProduct').innerHTML=opts;$('saleProduct').onchange=function(){var p=ps.find(function(x){return x.id===this.value}.bind(this));if(p)$('salePrice').value=p.price}}
-function renderProducts(filter){filter=filter||'';var products=DB.get('products'),th=DB.getObj('settings').lowStockThreshold||10;$('productCount').textContent=products.length;var list=filter?products.filter(function(p){return p.name.toLowerCase().indexOf(filter.toLowerCase())>-1}):products;$('productList').innerHTML=list.length?list.map(function(p){return '<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+p.category+' • '+(p.barcode||'No barcode')+'</div><div class="item-meta" style="color:var(--green2)">UGX '+fmt(p.price)+'</div></div><div style="text-align:right"><div class="stock-count '+(p.stock<=th?'stock-low':'stock-ok')+'">'+p.stock+'</div><div style="font-size:10px;color:var(--muted)">in stock</div></div><div class="item-actions"><button class="action-btn" onclick="adjustStock(\''+p.id+'\',1)">+</button><button class="action-btn" onclick="adjustStock(\''+p.id+'\',-1)">−</button><button class="action-btn" onclick="deleteProduct(\''+p.id+'\')">🗑</button></div></div>'}).join(''):'<div class="empty-state">📦<p>No products yet.</p></div>'}
+function renderProducts(filter){filter=filter||'';var products=DB.get('products'),th=DB.getObj('settings').lowStockThreshold||10;$('productCount').textContent=products.length;var list=filter?products.filter(function(p){return p.name.toLowerCase().indexOf(filter.toLowerCase())>-1||p.barcode===filter}):products;$('productList').innerHTML=list.length?list.map(function(p){return '<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+p.category+' • '+(p.barcode||'No barcode')+'</div><div class="item-meta" style="color:var(--green2)">UGX '+fmt(p.price)+'</div></div><div style="text-align:right"><div class="stock-count '+(p.stock<=th?'stock-low':'stock-ok')+'">'+p.stock+'</div><div style="font-size:10px;color:var(--muted)">in stock</div></div><div class="item-actions"><button class="action-btn" onclick="adjustStock(\''+p.id+'\',1)">+</button><button class="action-btn" onclick="adjustStock(\''+p.id+'\',-1)">−</button><button class="action-btn" onclick="deleteProduct(\''+p.id+'\')">🗑</button></div></div>'}).join(''):'<div class="empty-state">📦<p>No products yet.</p></div>'}
 function renderSales(){var sales=DB.get('sales'),f=$('salesDateFilter').value;var list=f?sales.filter(function(s){return String(s.date||'').indexOf(f)===0}):sales;$('salesList').innerHTML=list.length?list.slice(0,60).map(function(s){return '<div class="list-item"><div class="item-info"><div class="item-name">'+s.productName+'</div><div class="item-meta">'+new Date(s.date).toLocaleString()+' • '+s.payment+'</div></div><div style="text-align:right"><div class="amount-green">UGX '+fmt(s.total)+'</div><div class="item-meta">Qty '+s.quantity+'</div></div></div>'}).join(''):'<div class="empty-state">🛒<p>No sales yet.</p></div>'}
 function renderDashboard(){var sales=DB.get('sales'),ex=DB.get('expenses'),ps=DB.get('products'),s=DB.getObj('settings');var t=today();var tSales=sales.filter(function(x){return String(x.date||'').indexOf(t)===0}).reduce(function(a,b){return a+b.total},0);var tExp=ex.filter(function(x){return String(x.date||'').indexOf(t)===0&&x.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);$('todaySales').textContent='UGX '+fmt(tSales);$('todayExpenses').textContent='UGX '+fmt(tExp);$('todayProfit').textContent='UGX '+fmt(tSales-tExp);$('lowStockCount').textContent=ps.filter(function(p){return p.stock<=(s.lowStockThreshold||10)}).length;var act=sales.slice(0,5).map(function(x){return{t:'sale',txt:'Sold '+x.quantity+'x '+x.productName,amt:x.total,d:x.date}}).concat(ex.slice(0,3).map(function(x){return{t:'exp',txt:x.category,amt:x.amount,d:x.date}})).sort(function(a,b){return new Date(b.d)-new Date(a.d)}).slice(0,8);$('recentActivity').innerHTML=act.length?act.map(function(a){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒 ':'')+a.txt+'</div><div class="item-meta">'+new Date(a.d).toLocaleString()+'</div></div><div class="'+(a.t==='sale'?'amount-green':'amount-red')+'">'+(a.t==='sale'?'+':'-')+'UGX '+fmt(a.amt)+'</div></div>'}).join(''):'<div class="empty-state">📭<p>No activity yet. Record your first sale!</p></div>'}
 function renderReports(){var sales=DB.get('sales'),ex=DB.get('expenses');var days=[];for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var ds=d.toISOString().split('T')[0];days.push({label:d.toLocaleDateString('en',{weekday:'short'}),value:sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0)})}var max=Math.max.apply(null,days.map(function(d){return d.value}).concat([1]));$('salesChart').innerHTML=days.map(function(d){return '<div class="report-bar-item" style="height:'+((d.value/max)*100)+'px"><div class="report-bar-label">'+d.label+'</div></div>'}).join('');var ts=sales.reduce(function(a,b){return a+b.total},0);var te=ex.filter(function(e){return e.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);$('reportTotalSales').textContent='UGX '+fmt(ts);$('reportTotalExpenses').textContent='UGX '+fmt(te);$('reportNetProfit').textContent='UGX '+fmt(ts-te);var agg={};sales.forEach(function(s){agg[s.productName]=agg[s.productName]||{q:0,r:0};agg[s.productName].q+=s.quantity;agg[s.productName].r+=s.total});var top=Object.keys(agg).sort(function(a,b){return agg[b].r-agg[a].r}).slice(0,5);$('topProducts').innerHTML=top.length?top.map(function(k,i){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(i+1)+'. '+k+'</div><div class="item-meta">'+agg[k].q+' units sold</div></div><div class="amount-green">UGX '+fmt(agg[k].r)+'</div></div>'}).join(''):'<div class="empty-state"><p>No data yet</p></div>';$('expenseList').innerHTML=ex.length?ex.slice(0,10).map(function(e){return '<div class="list-item"><div class="item-info"><div class="item-name">UGX '+fmt(e.amount)+'</div><div class="item-meta">'+e.category+(e.note?' • '+e.note:'')+'</div></div></div>'}).join(''):'<div class="empty-state"><p>No expenses yet</p></div>'}
@@ -398,6 +434,117 @@ jobs.forEach(function(j){chain=chain.then(function(){return upsertRow(j.t,j.row)
 chain.then(function(){DB.set('sales',sales);DB.set('expenses',exps);DB.set('products',prods);updatePending()}).catch(function(){setCloud('wait')});
 }).catch(function(){setCloud('wait')});
 }
+
+var scannerInstance = null;
+var scannerCallback = null;
+
+function openScanner(cb) {
+  scannerCallback = cb;
+  openModal('scannerModal');
+  
+  setTimeout(function() {
+    scannerInstance = new Html5Qrcode("reader");
+    scannerInstance.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      function(decodedText) {
+        scannerInstance.stop().then(function() {
+          scannerInstance.clear();
+          closeModal('scannerModal');
+          if (scannerCallback) scannerCallback(decodedText);
+        }).catch(function(err) { console.log(err); });
+      },
+      function(errorMessage) {
+        // ignore
+      }
+    ).catch(function(err) {
+      showToast("Camera error. Check permissions.", true);
+      closeModal('scannerModal');
+    });
+  }, 300);
+}
+
+function stopScanner() {
+  if (scannerInstance) {
+    scannerInstance.stop().then(function() {
+      scannerInstance.clear();
+    }).catch(function(err) { console.log(err); });
+  }
+  closeModal('scannerModal');
+}
+
+function fillNewProductBarcode(code) {
+  $('newProductBarcode').value = code;
+}
+
+function searchProductByBarcode(code) {
+  $('productSearch').value = code;
+  renderProducts(code);
+}
+
+function findProductByBarcode(code) {
+  var products = DB.get('products');
+  var found = null;
+  for (var i = 0; i < products.length; i++) {
+    if (products[i].barcode === code) {
+      found = products[i];
+      break;
+    }
+  }
+  
+  if (found) {
+    selectScannedProduct(found);
+    return;
+  }
+  
+  showToast('Checking global network...', false);
+  api('/rest/v1/global_products?barcode=eq.' + encodeURIComponent(code) + '&select=*')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (Array.isArray(data) && data.length > 0) {
+        var gp = data[0];
+        var ps = DB.get('products');
+        var newProd = {
+          id: genId(),
+          name: gp.name || 'Unknown Item',
+          barcode: code,
+          category: gp.category || 'Other',
+          price: parseFloat(gp.default_price) || 0,
+          stock: 0,
+          synced: false
+        };
+        ps.push(newProd);
+        DB.set('products', ps);
+        markPending();
+        renderProducts(); 
+        selectScannedProduct(newProd);
+        showToast('Added ' + newProd.name + ' from global network!');
+      } else {
+        showToast("Product not found. Add it manually!", true);
+      }
+    })
+    .catch(function() {
+      showToast("Network error checking global database.", true);
+    });
+}
+
+function selectScannedProduct(found) {
+  if ($('saleModal').classList.contains('active')) {
+    populateDropdowns(); 
+    $('saleProduct').value = found.id;
+    $('salePrice').value = found.price;
+    if (found.stock <= 0) {
+      showToast("Warning: " + found.name + " has 0 stock! Receive stock first.", true);
+    } else {
+      showToast("Selected: " + found.name);
+    }
+  } else if ($('stockModal').classList.contains('active')) {
+    populateDropdowns();
+    $('stockProduct').value = found.id;
+    showToast("Selected: " + found.name);
+  }
+}
+
 window.onload=function(){setTimeout(function(){$('splash').classList.add('hide');var p=DB.getObj('profile');if(p.shopName){startApp()}else{$('authFlow').style.display='block';showAuth('welcome')}},1200)};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
