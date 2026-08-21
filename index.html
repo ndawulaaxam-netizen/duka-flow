@@ -201,7 +201,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="card"><div class="card-title">⚠️ Account</div>
 <button class="btn btn-dark" onclick="logout()">🚪 Log Out / Switch Shop</button>
 <button class="btn btn-red" style="margin-top:10px" onclick="clearAllData()">🗑️ Delete Data on This Phone</button>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding-top:10px">DukaFlow v4.0 • Records backed up automatically when online.</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding-top:10px">DukaFlow v4.1 • Records backed up automatically when online.</div>
 </div>
 </div>
 </main>
@@ -210,7 +210,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="nav-item" id="nav-products" onclick="switchScreen('products')"><span class="nav-icon">📦</span><span class="nav-label">Products</span></div>
 <div class="nav-item" id="nav-sales" onclick="switchScreen('sales')"><span class="nav-icon">🛒</span><span class="nav-label">Sales</span></div>
 <div class="nav-item" id="nav-reports" onclick="switchScreen('reports')"><span class="nav-icon">📊</span><span class="nav-label">Reports</span></div>
-<div class="nav-item" id="nav-settings" onclick="switchScreen('settings')"><span class="nav-icon">️</span><span class="nav-label">Settings</span></div>
+<div class="nav-item" id="nav-settings" onclick="switchScreen('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></div>
 </nav>
 </div>
 
@@ -333,7 +333,7 @@ var cs=Array.isArray(res[0])?res[0]:[],ce=Array.isArray(res[1])?res[1]:[],cp=Arr
 function merge(local,cloud,map){
 var ids={};var out=local.slice();
 out.forEach(function(r){ids[r.id]=1});
-cloud.forEach(function(r){var id=r.local_id||r.id;if(ids[id])return;ids[id]=1;out.push(map(r,id))});
+cloud.forEach(function(r){var id=r.local_id;if(!id)return;if(ids[id])return;ids[id]=1;out.push(map(r,id))});
 out.sort(function(a,b){return new Date(b.date||0)-new Date(a.date||0)});
 return out;
 }
@@ -344,7 +344,11 @@ DB.set('products',merge(DB.get('products'),cp,function(r,id){return{id:id,name:r
 }
 function logout(){if(!confirm('Log out? Your records stay safe on this phone.'))return;localStorage.removeItem('df_profile');location.reload()}
 function clearAllData(){if(!confirm('DELETE all records on THIS PHONE? (Cloud backup stays safe)'))return;if(!confirm('Final confirmation?'))return;localStorage.clear();location.reload()}
-function startApp(){$('authFlow').style.display='none';$('appShell').style.display='flex';loadSettings();renderAll();updatePending();syncAll()}
+function startApp(){
+$('authFlow').style.display='none';$('appShell').style.display='flex';
+if(!localStorage.getItem('df_v4_resync')){localStorage.setItem('df_v4_resync','1');['sales','expenses','products'].forEach(function(k){var a=DB.get(k);a.forEach(function(r){r.synced=false});DB.set(k,a)});}
+loadSettings();renderAll();updatePending();syncAll();
+}
 function loadSettings(){var p=DB.getObj('profile'),s=DB.getObj('settings');$('shopNameDisplay').textContent=p.shopName||'My Shop';$('settingShopName').value=p.shopName||'';$('settingOwner').value=p.owner||'';$('settingPhone').value=p.phone||'';$('settingCapital').value=s.capital||'';$('settingLowStock').value=s.lowStockThreshold||10}
 function saveSettings(){var p=DB.getObj('profile');p.shopName=$('settingShopName').value;p.owner=$('settingOwner').value;p.phone=$('settingPhone').value;DB.setObj('profile',p);DB.setObj('settings',{capital:parseFloat($('settingCapital').value)||0,lowStockThreshold:parseInt($('settingLowStock').value)||10});$('shopNameDisplay').textContent=p.shopName||'My Shop';showToast('Settings saved ✓');markPending()}
 function addProduct(){var name=$('newProductName').value.trim();if(!name)return showToast('Enter a product name',true);var ps=DB.get('products');ps.push({id:genId(),name:name,barcode:$('newProductBarcode').value.trim(),category:$('newProductCategory').value,price:parseFloat($('newProductPrice').value)||0,stock:parseInt($('newProductStock').value)||0,synced:false});DB.set('products',ps);markPending();['newProductName','newProductBarcode','newProductPrice','newProductStock'].forEach(function(i){$(i).value=''});closeModal('addProductModal');renderProducts();showToast('Product added: '+name)}
@@ -368,7 +372,16 @@ function pendingCount(){var n=0;['sales','expenses','products'].forEach(function
 function setCloud(m){var el=$('cloudStatus');if(!el)return;el.textContent=m==='on'?'Backed up ✓':(m==='wait'?'Backing up…':'On this phone')}
 function updatePending(){setCloud(pendingCount()===0?'on':'wait')}
 function ensureShop(){var p=DB.getObj('profile');if(p.cloudId)return Promise.resolve(p.cloudId);var key=p.shopKey||(genId()+genId());return api('/rest/v1/shops',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({shop_key:key,shop_name:p.shopName,owner_name:p.owner,phone:p.phone,location:p.location})}).then(function(r){return r.json()}).then(function(nr){var id=(Array.isArray(nr)&&nr[0]&&nr[0].id)||'';p.cloudId=id;p.shopKey=key;DB.setObj('profile',p);return id})}
-function upsertRow(table,row){return api('/rest/v1/'+table+'?on_conflict=shop_id,local_id',{method:'POST',headers:{Prefer:'return=minimal,resolution=merge-duplicates'},body:JSON.stringify(row)})}
+function upsertRow(table,row){
+var q='/rest/v1/'+table+'?shop_id=eq.'+row.shop_id+'&local_id=eq.'+encodeURIComponent(row.local_id);
+return api(q,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify(row)}).then(function(r){
+if(!r.ok)return false;
+return r.json().then(function(d){
+if(Array.isArray(d)&&d.length>0)return true;
+return api('/rest/v1/'+table,{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(row)}).then(function(p){return p.ok});
+});
+});
+}
 function syncAll(){
 if(!navigator.onLine){setCloud('wait');return}
 var p=DB.getObj('profile');
@@ -381,7 +394,7 @@ sales.forEach(function(r){if(r.synced!==true)jobs.push({t:'sales',r:r,row:{shop_
 exps.forEach(function(r){if(r.synced!==true)jobs.push({t:'expenses',r:r,row:{shop_id:shopId,local_id:r.id,category:r.category,amount:r.amount,note:r.note,date:r.date}})});
 prods.forEach(function(r){if(r.synced!==true)jobs.push({t:'products',r:r,row:{shop_id:shopId,local_id:r.id,name:r.name,barcode:r.barcode,category:r.category,price:r.price,stock:r.stock}})});
 var chain=Promise.resolve();
-jobs.forEach(function(j){chain=chain.then(function(){return upsertRow(j.t,j.row).then(function(){j.r.synced=true})})});
+jobs.forEach(function(j){chain=chain.then(function(){return upsertRow(j.t,j.row).then(function(ok){if(ok)j.r.synced=true})})});
 chain.then(function(){DB.set('sales',sales);DB.set('expenses',exps);DB.set('products',prods);updatePending()}).catch(function(){setCloud('wait')});
 }).catch(function(){setCloud('wait')});
 }
