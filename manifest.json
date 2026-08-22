@@ -1,8 +1,10 @@
 {
+  "id": "./",
   "name": "DukaFlow - Shop Manager",
   "short_name": "DukaFlow",
   "description": "Free offline sales, stock & profit tracker for Ugandan dukas.",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0B0F0B",
   "theme_color": "#0B0F0B",
