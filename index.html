@@ -153,6 +153,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <button class="btn btn-green" onclick="openModal('saleModal')">🛒 Record Sale</button>
 <div class="btn-row"><button class="btn btn-dark" onclick="openModal('stockModal')">📦 Receive Stock</button><button class="btn btn-yellow" onclick="openModal('expenseModal')">💸 Expense</button></div>
 <button class="btn btn-purple" onclick="switchScreen('reconciliation')">📋 End-of-Day Reconciliation</button>
+<button class="btn btn-dark" id="refreshBtn" onclick="refreshFromCloud()">🔄 Refresh from Cloud</button>
 </div></div>
 <div class="card"><div class="card-title">🕐 Recent Activity</div><div id="recentActivity"></div></div>
 </div>
@@ -205,7 +206,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="card"><div class="card-title">⚠️ Account</div>
 <button class="btn btn-dark" onclick="logout()">🚪 Log Out / Switch Shop</button>
 <button class="btn btn-red" style="margin-top:10px" onclick="clearAllData()">🗑️ Delete Data on This Phone</button>
-<div style="text-align:center;font-size:11px;color:var(--muted);padding-top:10px">DukaFlow v4.3 (Global Network) • Records backed up automatically when online.</div>
+<div style="text-align:center;font-size:11px;color:var(--muted);padding-top:10px">DukaFlow v4.4 • Refresh Sync • Records backed up automatically when online.</div>
 </div>
 </div>
 </main>
@@ -340,23 +341,57 @@ if(!sh){api('/rest/v1/shops?id=eq.'+s.id,{method:'PATCH',body:JSON.stringify({pi
 });
 }
 function restore(shopId){
+if(!shopId)return Promise.resolve(false);
 return Promise.all([
 api('/rest/v1/sales?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),
 api('/rest/v1/expenses?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),
 api('/rest/v1/products?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()})
 ]).then(function(res){
 var cs=Array.isArray(res[0])?res[0]:[],ce=Array.isArray(res[1])?res[1]:[],cp=Array.isArray(res[2])?res[2]:[];
-function merge(local,cloud,map){
-var ids={};var out=local.slice();
-out.forEach(function(r){ids[r.id]=1});
-cloud.forEach(function(r){var id=r.local_id;if(!id)return;if(ids[id])return;ids[id]=1;out.push(map(r,id))});
+function mergeDated(local,cloud,map){
+var byId={};var out=local.slice();
+out.forEach(function(r){byId[r.id]=r});
+cloud.forEach(function(cr){
+var id=cr.local_id;
+if(!id)return;
+var mapped=map(cr,id);
+if(byId[id]){
+if(byId[id].synced===true){
+Object.keys(mapped).forEach(function(k){byId[id][k]=mapped[k]});
+byId[id].synced=true;
+}
+}else{
+byId[id]=mapped;
+out.push(mapped);
+}
+});
 out.sort(function(a,b){return new Date(b.date||0)-new Date(a.date||0)});
 return out;
 }
-DB.set('sales',merge(DB.get('sales'),cs,function(r,id){return{id:id,productId:r.product_id||'',productName:r.product_name||r.name||'Item',quantity:parseInt(r.quantity)||1,price:parseFloat(r.price)||0,total:parseFloat(r.total!=null?r.total:r.amount)||0,payment:r.payment||'Cash',customer:r.customer||'Walk-in',date:r.date||r.created_at||iso(),synced:true}}));
-DB.set('expenses',merge(DB.get('expenses'),ce,function(r,id){return{id:id,category:r.category||'Other',amount:parseFloat(r.amount!=null?r.amount:r.total)||0,note:r.note||'',date:r.date||r.created_at||iso(),synced:true}}));
-DB.set('products',merge(DB.get('products'),cp,function(r,id){return{id:id,name:r.name||r.product_name||'Item',barcode:r.barcode||'',category:r.category||'Grocery',price:parseFloat(r.price)||0,stock:parseInt(r.stock)||0}}));
-}).catch(function(){});
+function mergeProducts(local,cloud,map){
+var byId={};var out=local.slice();
+out.forEach(function(r){byId[r.id]=r});
+cloud.forEach(function(cr){
+var id=cr.local_id;
+if(!id)return;
+var mapped=map(cr,id);
+if(byId[id]){
+if(byId[id].synced===true){
+Object.keys(mapped).forEach(function(k){byId[id][k]=mapped[k]});
+byId[id].synced=true;
+}
+}else{
+byId[id]=mapped;
+out.push(mapped);
+}
+});
+return out;
+}
+DB.set('sales',mergeDated(DB.get('sales'),cs,function(r,id){return{id:id,productId:r.product_id||'',productName:r.product_name||r.name||'Item',quantity:parseInt(r.quantity)||1,price:parseFloat(r.price)||0,total:parseFloat(r.total!=null?r.total:r.amount)||0,payment:r.payment||'Cash',customer:r.customer||'Walk-in',date:r.date||r.created_at||iso(),synced:true}}));
+DB.set('expenses',mergeDated(DB.get('expenses'),ce,function(r,id){return{id:id,category:r.category||'Other',amount:parseFloat(r.amount!=null?r.amount:r.total)||0,note:r.note||'',date:r.date||r.created_at||iso(),synced:true}}));
+DB.set('products',mergeProducts(DB.get('products'),cp,function(r,id){return{id:id,name:r.name||r.product_name||'Item',barcode:r.barcode||'',category:r.category||'Grocery',price:parseFloat(r.price)||0,stock:parseInt(r.stock)||0,synced:true}}));
+return true;
+}).catch(function(){return false});
 }
 function logout(){if(!confirm('Log out? Your records stay safe on this phone.'))return;localStorage.removeItem('df_profile');location.reload()}
 function clearAllData(){if(!confirm('DELETE all records on THIS PHONE? (Cloud backup stays safe)'))return;if(!confirm('Final confirmation?'))return;localStorage.clear();location.reload()}
@@ -418,21 +453,53 @@ return api('/rest/v1/'+table,{method:'POST',headers:{Prefer:'return=minimal'},bo
 });
 });
 }
-function syncAll(){
-if(!navigator.onLine){setCloud('wait');return}
+function pushPendingToCloud(){
+if(!navigator.onLine){setCloud('wait');return Promise.reject(new Error('offline'))}
 var p=DB.getObj('profile');
-if(!p.shopName){setCloud('off');return}
-ensureShop().then(function(shopId){
-if(!shopId){setCloud('off');return}
+if(!p.shopName){setCloud('off');return Promise.reject(new Error('no-shop'))}
+return ensureShop().then(function(shopId){
+if(!shopId){setCloud('off');return Promise.reject(new Error('no-shop-id'))}
 var sales=DB.get('sales'),exps=DB.get('expenses'),prods=DB.get('products');
 var jobs=[];
 sales.forEach(function(r){if(r.synced!==true)jobs.push({t:'sales',r:r,row:{shop_id:shopId,local_id:r.id,product_id:r.productId||'',product_name:r.productName,quantity:r.quantity,price:r.price,total:r.total,payment:r.payment,customer:r.customer,date:r.date}})});
 exps.forEach(function(r){if(r.synced!==true)jobs.push({t:'expenses',r:r,row:{shop_id:shopId,local_id:r.id,category:r.category,amount:r.amount,note:r.note,date:r.date}})});
 prods.forEach(function(r){if(r.synced!==true)jobs.push({t:'products',r:r,row:{shop_id:shopId,local_id:r.id,name:r.name,barcode:r.barcode,category:r.category,price:r.price,stock:r.stock}})});
 var chain=Promise.resolve();
-jobs.forEach(function(j){chain=chain.then(function(){return upsertRow(j.t,j.row).then(function(ok){if(ok)j.r.synced=true})})});
-chain.then(function(){DB.set('sales',sales);DB.set('expenses',exps);DB.set('products',prods);updatePending()}).catch(function(){setCloud('wait')});
-}).catch(function(){setCloud('wait')});
+jobs.forEach(function(j){chain=chain.then(function(){return upsertRow(j.t,j.row).then(function(ok){if(ok)j.r.synced=true;return ok})})});
+return chain.then(function(){DB.set('sales',sales);DB.set('expenses',exps);DB.set('products',prods);updatePending();return true});
+});
+}
+function syncAll(){
+return pushPendingToCloud().catch(function(){setCloud('wait')});
+}
+var refreshBusy=false;
+function refreshFromCloud(){
+if(refreshBusy)return;
+if(!navigator.onLine)return showToast('Connect to internet first',true);
+var p=DB.getObj('profile');
+if(!p.shopName)return showToast('Log in first',true);
+refreshBusy=true;
+var btn=$('refreshBtn');
+if(btn){btn.disabled=true;btn.textContent='⏳ Refreshing…'}
+setCloud('wait');
+pushPendingToCloud().then(function(){
+var prof=DB.getObj('profile');
+if(!prof.cloudId){
+return ensureShop().then(function(id){return restore(id)});
+}
+return restore(prof.cloudId);
+}).then(function(ok){
+if(!ok)throw new Error('restore-failed');
+renderAll();
+updatePending();
+showToast('Refresh complete ✓');
+}).catch(function(){
+updatePending();
+showToast('Refresh failed. Check connection.',true);
+}).then(function(){
+refreshBusy=false;
+if(btn){btn.disabled=false;btn.textContent='🔄 Refresh from Cloud'}
+});
 }
 
 var scannerInstance = null;
