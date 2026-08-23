@@ -3,25 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DukaFlow Privacy Policy</title>
-<style>body{font-family:Arial,sans-serif;line-height:1.6;padding:20px;max-width:800px;margin:auto;color:#333}h1{color:#2c3e50}h2{color:#34495e;margin-top:18px}a{color:#28a745}</style>
+<meta name="theme-color" content="#0B0F0B">
+<title>DukaFlow — Privacy Policy</title>
+<style>
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0B0F0B;color:#EAF2EA;margin:0;padding:20px;line-height:1.65}
+.wrap{max-width:720px;margin:0 auto}
+h1{color:#fff;font-size:26px;margin-bottom:4px}
+h1 span{color:#7AC943}
+h2{color:#7AC943;font-size:16px;margin:26px 0 8px}
+.card{background:#161D16;border:1px solid #273327;border-radius:16px;padding:18px;margin-top:10px}
+p,li{font-size:14px}
+li{margin-bottom:8px}
+.muted{color:#8FA38F;font-size:12px}
+a{color:#7AC943}
+.badge{display:inline-block;background:rgba(91,179,36,.12);color:#7AC943;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;margin:8px 0}
+.never{color:#F87171}
+.terms-logo{width:96px;height:96px;border-radius:18px;object-fit:contain;display:block;margin:0 auto 12px auto}
+.head{text-align:center}
+</style>
 </head>
 <body>
-<h1>DukaFlow Privacy Policy</h1>
-<p>Last updated: 21 August 2026</p>
-<h2>1. What we collect</h2>
-<p>When you register, we collect your shop name, owner name, phone number and location. When you use the app, we collect the sales, expenses and stock records you enter.</p>
-<h2>2. How we use it</h2>
-<p>Your records power your personal business reports (profit, stock levels, sales history) and your automatic cloud backup.</p>
-<h2>3. What we share</h2>
-<p>We may combine the records of many shops after removing all names, phone numbers and shop identities. Only these combined, anonymous market trends are shared with partners such as manufacturers and distributors, to help them supply shops better. Your individual shop data is never shared in a way that identifies you or your shop.</p>
-<h2>4. Data security</h2>
-<p>Data is stored on secure cloud servers and works offline on your phone until a connection is available. Your cloud re-login is protected by your secret PIN.</p>
-<h2>5. Your choices</h2>
-<p>You can delete the data on your phone anytime in Settings, or ask us to delete your cloud backup by contacting us below.</p>
-<h2>6. Contact</h2>
-<p>Questions? Reach out to the founder directly:</p>
-<p>Email: <a href="mailto:axamndawula@gmail.com">axamndawula@gmail.com</a></p>
-<p>Phone/WhatsApp: <a href="tel:+256742679856">+256 742 679 856</a></p>
+<div class="wrap">
+<div class="head">
+<img class="terms-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="DukaFlow">
+<h1>Duka<span>Flow</span> — Privacy Policy</h1>
+<div class="badge">Last updated: 23 August 2026</div>
+</div>
+<p class="muted">Written in plain English on purpose. The short version: your records belong to you, we never sell your individual shop data, and we only earn money from combined, anonymized market summaries.</p>
+
+<h2>1. Who we are</h2>
+<div class="card">
+<p>DukaFlow is a free shop-assistant app built in Uganda by Aksam Ndawula.<br>
+Email: <a href="mailto:axamndawula@gmail.com">axamndawula@gmail.com</a> • Phone/WhatsApp: <a href="tel:+256742679856">+256 742 679 856</a></p>
+</div>
+
+<h2>2. What we collect</h2>
+<div class="card">
+<ul>
+<li><b>Shop profile:</b> shop name, owner name, phone number, location — the details you type at registration.</li>
+<li><b>Your records:</b> the sales, stock, expenses, products, barcodes and prices you enter.</li>
+<li><b>Your PIN:</b> stored ONLY as an encrypted fingerprint (a SHA-256 hash). We can never read your PIN, and we cannot reset it.</li>
+<li><b>Technical basics:</b> the app stores data on your phone (localStorage) so it works offline, and keeps a copy in our secure cloud (Supabase) as your backup.</li>
+</ul>
+<p class="muted">We do not use advertising cookies and we do not track you across other websites.</p>
+</div>
+
+<h2>3. The shared product index (barcode network)</h2>
+<div class="card">
+<p>When you add a product with a barcode, we add a small public entry containing ONLY: <b>barcode number, product name, category and typical price</b>. This lets any other shop scan that barcode and get the product name instantly.</p>
+<p>These entries contain <b>no shop name, no phone number, no sales counts and no owner identity</b>.</p>
+</div>
+
+<h2>4. How we use your data</h2>
+<div class="card">
+<ul>
+<li>To run the app: backup, restore, multi-device refresh, reports and stock alerts.</li>
+<li>With your consent, to build <b>aggregated, anonymized market summaries</b> (for example: total units of a product sold per region per week). These summaries are sold to FMCG manufacturers, distributors and financial institutions — this is how DukaFlow stays free for you.</li>
+</ul>
+<p><b>What we will NEVER do:</b></p>
+<ul>
+<li class="never">Never sell or share your individual shop records.</li>
+<li class="never">Never reveal your shop name, owner, phone or location in any report.</li>
+<li class="never">Never build a report small enough to identify a single shop.</li>
+<li class="never">Never store your PIN in readable form.</li>
+</ul>
+</div>
+
+<h2>5. Where your data lives</h2>
+<div class="card">
+<p>On your phone (so the app works with no internet) and in our secure cloud database (Supabase) over encrypted connections (HTTPS). Our cloud provider is contractually bound to keep data secure.</p>
+</div>
+
+<h2>6. How long we keep it</h2>
+<div class="card">
+<p>While your shop account exists. If you ask us to close your account and delete your cloud backup, we complete deletion within 14 days. Aggregated summaries created before deletion remain, but they can never be traced back to you.</p>
+</div>
+
+<h2>7. Your rights</h2>
+<div class="card">
+<ul>
+<li>See your data in the app at any time.</li>
+<li>Correct it by editing in the app.</li>
+<li>Delete the phone copy in Settings, and request cloud deletion by email or WhatsApp.</li>
+<li>Withdraw your analytics consent at any time — DukaFlow stays free for you.</li>
+<li>Complain to the Uganda Personal Data Protection Office if you believe we mishandled your data.</li>
+</ul>
+</div>
+
+<h2>8. Security</h2>
+<div class="card">
+<p>Encrypted connections everywhere, hashed PINs, and a private key per shop. You are responsible for keeping your PIN secret — anyone with your phone number and PIN can open your records in the app.</p>
+</div>
+
+<h2>9. Children</h2>
+<div class="card">
+<p>DukaFlow is a business tool intended for users aged 18 and over. We do not knowingly collect data from children.</p>
+</div>
+
+<h2>10. Changes</h2>
+<div class="card">
+<p>If we change this policy we will update this page and show a notice in the app for major changes. Continued use means acceptance.</p>
+</div>
+
+<h2>11. Contact & law</h2>
+<div class="card">
+<p>Aksam Ndawula — Founder, DukaFlow<br>
+Email: <a href="mailto:axamndawula@gmail.com">axamndawula@gmail.com</a> • Phone/WhatsApp: <a href="tel:+256742679856">+256 742 679 856</a><br>
+Governed by the laws of the Republic of Uganda.</p>
+<p class="muted"><a href="index.html">← Back to DukaFlow</a> • <a href="terms.html">Terms & Conditions</a></p>
+</div>
+</div>
 </body>
 </html>
