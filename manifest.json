@@ -9,6 +9,45 @@
   "background_color": "#0B0F0B",
   "theme_color": "#0B0F0B",
   "orientation": "portrait",
+  "categories": ["business", "finance", "productivity"],
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.dukaflow.app",
+      "url": "https://play.google.com/store/apps/details?id=com.dukaflow.app"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "shot-1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard - today's sales and profit"
+    },
+    {
+      "src": "shot-2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Record a sale in seconds"
+    },
+    {
+      "src": "shot-3.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Inventory and stock tracking"
+    },
+    {
+      "src": "shot-4.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "7-day sales reports"
+    }
+  ],
   "icons": [
     {
       "src": "icon-512.png",
