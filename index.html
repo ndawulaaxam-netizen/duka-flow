@@ -389,7 +389,7 @@ function np(p){return String(p).replace(/\D/g,'').slice(-9)}
 function hashPin(p){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
 var toastTimer=null;
 function showToast(t,err){var el=$('toast');el.textContent=t;el.className='toast show'+(err?' error':'');clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.className='toast'},2500)}
-function api(path,opts){opts=opts||{};opts.headers=Object.assign({'apikey':CLOUD_KEY,'Authorization':'Bearer '+CLOUD_KEY,'Content-Type':'application/json'},opts.headers||{});return fetch(CLOUD_URL+path,opts)}
+function j(r){if(!r.ok){showToast('Connection problem. Try again.',true);throw new Error('HTTP '+r.status)}return r.json()} function api(path,opts){opts=opts||{};opts.headers=Object.assign({'apikey':CLOUD_KEY,'Authorization':'Bearer '+CLOUD_KEY,'Content-Type':'application/json'},opts.headers||{});return fetch(CLOUD_URL+path,opts)}
 function showAuth(s){document.querySelectorAll('.auth-screen').forEach(function(x){x.classList.remove('active')});$('screen-'+s).classList.add('active')}
 function switchScreen(s){document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')});$('screen-'+s).classList.add('active');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active')});var n=$('nav-'+s);if(n)n.classList.add('active');if(s==='reconciliation')renderReconciliation();$('notifPanel').style.display='none'}
 function openModal(id){$(id).classList.add('active');if(id==='saleModal'||id==='stockModal')populateDropdowns()}
@@ -401,11 +401,11 @@ if(np(ph).length<9)return showToast('Enter a valid phone',true);
 if(!/^\d{4}$/.test(pin))return showToast('PIN must be 4 digits',true);
 if(!$('regConsent').checked)return showToast('Please accept the Terms first',true);
 hashPin(pin).then(function(h){
-api('/rest/v1/shops?select=*').then(function(r){return r.json()}).then(function(all){
+api('/rest/v1/shops?select=*').then(j).then(function(all){
 var p9=np(ph);
 if(Array.isArray(all)){for(var i=0;i<all.length;i++){if(np(all[i].phone||'')===p9)return showToast('Shop exists. Use Log In.',true)}}
 var key=genId()+genId();
-api('/rest/v1/shops',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({shop_key:key,shop_name:nm,owner_name:ow,phone:ph,location:lc,pin_hash:h,sector:sc})}).then(function(r){return r.json()}).then(function(nr){
+api('/rest/v1/shops',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({shop_key:key,shop_name:nm,owner_name:ow,phone:ph,location:lc,pin_hash:h,sector:sc})}).then(j).then(function(nr){
 var id=(Array.isArray(nr)&&nr[0]&&nr[0].id)||'';
 DB.setObj('profile',{shopName:nm,owner:ow,phone:ph,location:lc,createdAt:iso(),cloudId:id,shopKey:key,sector:sc});
 if(!localStorage.getItem('df_sales'))DB.set('sales',[]);
