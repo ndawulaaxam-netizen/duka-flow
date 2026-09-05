@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#09090B">
+<title>DukaFlow — Keep Your Shop Flowing</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="logo.png">
+<meta name="mobile-web-app-capable" content="yes">
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{--bg:#09090B;--card:#18181B;--border:#27272A;--green:#10B981;--green2:#34D399;--green3:#059669;--text:#F4F4F5;--muted:#A1A1AA;--red:#EF4444;--yellow:#F59E0B;--blue:#3B82F6;--purple:#8B5CF6}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+img.logo,img.auth-logo{object-fit:contain;border-radius:12px}
+.auth-logo{width:90px;height:90px;margin:0 auto 12px auto;display:block;box-shadow:0 10px 25px -5px rgba(16,185,129,0.3)}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-left .logo{width:40px;height:40px;border-radius:10px}
+.header-right{display:flex;align-items:center;gap:12px}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
+#splash{position:fixed;inset:0;background:var(--bg);z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s ease}
+#splash.hide{opacity:0;pointer-events:none}
+#splash .name{font-size:42px;font-weight:900;color:#fff;letter-spacing:-1px}
+#splash .name span{color:var(--green)}
+#splash .tag{font-size:13px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;font-weight:600}
+#authFlow{position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;display:none}
+.auth-screen{display:none;padding:40px 20px 60px;text-align:center}
+.auth-screen.active{display:block}
+.auth-name{font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px}
+.auth-name span{color:var(--green)}
+.auth-tag{font-size:12px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin:8px 0 30px;font-weight:600}
+.auth-card{width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;margin:0 auto;text-align:left;box-shadow:0 20px 25px -5px rgba(0,0,0,0.3)}
+.auth-card h2{font-size:22px;margin-bottom:6px;font-weight:800}
+.auth-card p{font-size:14px;color:var(--muted);margin-bottom:20px}
+.value-row{display:flex;gap:12px;align-items:center;margin-bottom:14px;font-size:14px;color:var(--text)}
+.value-row .vicon{width:40px;height:40px;border-radius:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.form-input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;outline:none;transition:border-color 0.2s}
+.form-input:focus{border-color:var(--green)}
+.form-row{display:flex;gap:12px}.form-row .form-group{flex:1}
+.btn{border:none;border-radius:12px;padding:15px 20px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:all 0.2s;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
+.btn:active{transform:scale(0.98)}
+.btn-green{background:linear-gradient(135deg,var(--green),var(--green3));color:#fff}
+.btn-dark{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.btn-yellow{background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff}
+.btn-purple{background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff}
+.btn-red{background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-row{display:flex;gap:12px}.btn-row .btn{flex:1}
+.btn-group{display:flex;flex-direction:column;gap:12px}
+.app-header{background:rgba(9,9,11,0.8);backdrop-filter:blur(12px);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.header-left h1{font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.5px}
+.header-left h1 span{color:var(--green)}
+.header-left .subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+.offline-badge{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);padding:6px 12px;border-radius:20px;font-size:11px;color:var(--green2);font-weight:700}
+.notification-bell{position:relative;cursor:pointer;font-size:22px;padding:6px}
+.notification-badge{position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
+.notification-panel{position:fixed;top:60px;right:10px;left:10px;background:var(--card);border:1px solid var(--border);border-radius:16px;max-height:70vh;overflow-y:auto;z-index:200;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5)}
+.notif-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:10}
+.notif-close{background:var(--bg);border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.notif-item{padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s}
+.notif-item:active{background:var(--bg)}
+.notif-item:last-child{border-bottom:none}
+.notif-icon{font-size:18px;margin-right:12px}
+.notif-title{font-size:14px;font-weight:700;margin-bottom:4px}
+.notif-desc{font-size:12px;color:var(--muted)}
+.notif-urgent{border-left:3px solid var(--red)}
+.notif-warning{border-left:3px solid var(--yellow)}
+.notif-info{border-left:3px solid var(--blue)}
+.app-content{flex:1;overflow-y:auto;padding:20px;padding-bottom:100px}
+.screen{display:none}.screen.active{display:block;animation:fadeIn 0.3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid var(--border);box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
+.card-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border);text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
+.stat-value{font-size:18px;font-weight:800;margin:6px 0}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
+.stat-green{color:var(--green2)}.stat-red{color:var(--red)}.stat-blue{color:var(--blue)}.stat-yellow{color:var(--yellow)}
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--bg);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);transition:background 0.2s}
+.item-info{flex:1}.item-name{font-weight:700;font-size:14px}.item-meta{font-size:12px;color:var(--muted);margin-top:4px}
+.amount-green{font-weight:800;color:var(--green2)}.amount-red{font-weight:800;color:var(--red)}
+.stock-count{font-size:20px;font-weight:800}
+.stock-low{color:var(--red)}.stock-ok{color:var(--green2)}
+.item-actions{display:flex;gap:8px;margin-left:12px}
+.action-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:10px;cursor:pointer;transition:all 0.2s}
+.action-btn:active{transform:scale(0.95)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);z-index:1000;align-items:flex-end;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal{background:var(--card);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;border-top:1px solid var(--border)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-close{background:var(--bg);border:1px solid var(--border);color:var(--muted);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(24,24,27,0.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0 24px 0;z-index:100}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 16px;border-radius:16px;color:var(--muted);transition:all 0.2s}
+.nav-item.active{color:var(--green2);background:rgba(16,185,129,0.1)}
+.nav-item .nav-icon{font-size:22px}.nav-item .nav-label{font-size:10px;font-weight:700}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--green);color:var(--text);padding:14px 24px;border-radius:12px;font-weight:700;font-size:14px;z-index:4000;display:none;max-width:90%;text-align:center;box-shadow:0 10px 15px -3px rgba(0,0,0,0.3)}
+.toast.error{border-color:var(--red);color:var(--red)}
+.toast.show{display:block;animation:fadeIn 0.3s ease}
+.report-bar{display:flex;align-items:flex-end;gap:8px;height:120px;margin:20px 0 30px;padding:0 4px}
+.report-bar-item{flex:1;background:linear-gradient(to top,var(--green),var(--green2));border-radius:6px 6px 0 0;min-height:4px;position:relative;transition:height 0.5s ease}
+.report-bar-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);font-weight:600}
+.report-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.report-stat{text-align:center;padding:14px 8px;background:var(--bg);border-radius:12px;border:1px solid var(--border)}
+.recon-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);text-align:left;margin-bottom:16px}
+.consent input{margin-top:2px;width:18px;height:18px;accent-color:var(--green)}
+.consent a{color:var(--green2);text-decoration:none}
+.brain-card{background:linear-gradient(135deg,var(--card),#1E293B);border:1px solid var(--blue);border-radius:16px;padding:20px;margin-bottom:16px}
+.brain-stat{font-size:32px;font-weight:900;color:#fff;margin:8px 0}
+.brain-change{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:700;margin-top:8px}
+.brain-change.up{background:rgba(16,185,129,0.2);color:var(--green2)}
+.brain-change.down{background:rgba(239,68,68,0.2);color:var(--red)}
+.insight-row{display:flex;gap:12px;margin-bottom:12px;padding:14px;background:var(--bg);border-radius:12px;border:1px solid var(--border)}
+.insight-icon{font-size:24px}
+.insight-text{flex:1}
+.insight-title{font-size:13px;font-weight:700;margin-bottom:4px}
+.insight-desc{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="splash"><img class="logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="DukaFlow" style="width:120px;height:120px"><div class="name">Duka<span>Flow</span></div><div class="tag">Keep Your Shop Flowing</div></div>
+<div class="toast" id="toast"></div>
+
+<div id="authFlow">
+<div class="auth-screen active" id="screen-welcome"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
+<div class="auth-name">Duka<span>Flow</span></div>
+<div class="auth-tag">Keep Your Shop Flowing</div>
+<div class="auth-card">
+<div class="value-row"><div class="vicon">🆓</div><div><b>100% Free</b> for shopkeepers. Forever.</div></div>
+<div class="value-row"><div class="vicon">📴</div><div><b>Works Offline.</b> No internet? No problem.</div></div>
+<div class="value-row"><div class="vicon">💰</div><div><b>Know Your Profit</b> every single day.</div></div>
+<div class="value-row"><div class="vicon">🔐</div><div><b>Your records are safe</b> with your secret PIN.</div></div>
+<button class="btn btn-green" style="margin-top:16px" onclick="showAuth('register')">Get Started →</button>
+<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('login')">🔑 I have a shop - Log In</button>
+</div>
+</div>
+<div class="auth-screen" id="screen-register"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
+<div class="auth-card">
+<h2>Set Up Your Shop</h2>
+<p>Takes less than a minute.</p>
+<div class="form-group"><label class="form-label">Shop Name *</label><input class="form-input" id="regShop" placeholder="e.g., Kato General Merchants"></div>
+<div class="form-group"><label class="form-label">Owner Name *</label><input class="form-input" id="regOwner" placeholder="e.g., John Kato"></div>
+<div class="form-group"><label class="form-label">Phone Number *</label><input type="tel" class="form-input" id="regPhone" placeholder="e.g., 0772 123 456"></div>
+<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="regLocation" placeholder="e.g., Wakiso, Kampala"></div>
+<div class="form-group"><label class="form-label">Business Type *</label><select class="form-input" id="regSector"><option value="Retail">🏪 DukaFlow - Retail Shop</option><option value="Agriculture">🌾 FarmFlow - Agriculture</option><option value="Manufacturing">🧶 CraftFlow - Manufacturing</option><option value="Services">✂️🔧 ServiceFlow - Salons, Mechanics, Services</option><option value="Transport">🚚 TransportFlow - Transport/Logistics</option><option value="Food">🍲 FoodFlow - Restaurant/Food Vendor</option><option value="Energy">⛽ EnergyFlow - Fuel/Energy</option></select></div>
+<div class="form-group"><label class="form-label">Choose 4-Digit PIN *</label><input type="password" class="form-input" id="regPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
+<label class="consent"><input type="checkbox" id="regConsent"><span>I accept the <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>. I am happy to join the DukaFlow family that helps shops like mine get better stock and service. 🤝</span></label>
+<button class="btn btn-green" onclick="doRegister()">✅ Register & Start</button>
+<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
+</div>
+</div>
+<div class="auth-screen" id="screen-login"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
+<div class="auth-card">
+<h2>Welcome Back</h2>
+<p>Enter your phone and secret PIN.</p>
+<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="logPhone" placeholder="e.g., 0772 123 456"></div>
+<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="logPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
+<button class="btn btn-green" onclick="doLogin()">🔓 Unlock My Shop</button>
+<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
+</div>
+</div>
+</div>
+
+<div id="appShell" style="display:none;flex-direction:column;height:100vh">
+<header class="app-header">
+<div class="header-left"><img class="logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt=""><div><h1>Duka<span>Flow</span></h1><div class="subtitle" id="shopNameDisplay">My Shop</div></div></div>
+<div class="header-right">
+<div class="offline-badge" id="cloudStatus">On this phone</div>
+<div class="notification-bell" onclick="toggleNotifications()">🔔<span class="notification-badge" id="notifBadge" style="display:none">0</span></div>
+</div>
+</header>
+<div class="notification-panel" id="notifPanel" style="display:none">
+<div class="notif-header"><b>🔔 Notifications</b><button class="notif-close" onclick="toggleNotifications()">✕</button></div>
+<div id="notifList"></div>
+</div>
+<main class="app-content">
+<div class="screen active" id="screen-dashboard">
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-label">Today's Sales</div><div class="stat-value stat-green" id="todaySales">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Today's Expenses</div><div class="stat-value stat-red" id="todayExpenses">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value stat-blue" id="todayProfit">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Low Stock Items</div><div class="stat-value stat-yellow" id="lowStockCount">0</div></div>
+<div class="stat-card" style="grid-column:span 2;background:linear-gradient(135deg,var(--card),#1E293B);border:1px solid var(--blue)"><div class="stat-label">Total Stock Value (Retail)</div><div class="stat-value stat-blue" style="font-size:24px" id="stockValue">UGX 0</div></div>
+</div>
+<div class="card"><div class="card-title">⚡ Quick Actions</div>
+<div class="btn-group">
+<button class="btn btn-green" onclick="openModal('saleModal')">🛒 Record Sale</button>
+<div class="btn-row"><button class="btn btn-dark" onclick="openModal('stockModal')">📦 Receive Stock</button><button class="btn btn-yellow" onclick="openModal('expenseModal')">💸 Expense</button></div>
+<button class="btn btn-purple" onclick="switchScreen('reconciliation')">📋 End-of-Day Reconciliation</button>
+<button class="btn btn-dark" onclick="switchScreen('credits')">📖 Credits Book</button>
+<button class="btn btn-dark" id="refreshBtn" onclick="refreshFromCloud()">🔄 Refresh from Cloud</button>
+</div></div>
+<div class="card"><div class="card-title">🕐 Recent Activity</div><div id="recentActivity"></div></div>
+</div>
+<div class="screen" id="screen-products">
+<div style="display:flex;gap:10px;margin-bottom:16px">
+<input class="form-input" id="productSearch" placeholder="Search products..." oninput="renderProducts(this.value)" style="flex:1">
+<button type="button" class="btn btn-dark" style="width:auto;padding:14px 18px" onclick="openScanner(searchProductByBarcode)">📷</button>
+</div>
+<button class="btn btn-green" style="margin-bottom:16px" onclick="openModal('addProductModal')">+ Add New Product</button>
+<div class="card"><div class="card-title">📦 Inventory (<span id="productCount">0</span>) • <span id="inventoryValue" class="stat-green">UGX 0</span></div><div id="productList"></div></div>
+</div>
+<div class="screen" id="screen-sales">
+<div class="card"><div class="card-title">🛒 Sales History</div>
+<div class="form-group"><input type="date" class="form-input" id="salesDateFilter" onchange="renderSales()"></div>
+<div id="salesList"></div></div>
+</div>
+<div class="screen" id="screen-reports">
+<div class="brain-card">
+<div class="card-title" style="color:var(--blue)">🧠 Business Intelligence</div>
+<div id="brainComparisons"></div>
+</div>
+<div class="card" style="background:linear-gradient(135deg,var(--card),#1E293B);border:1px solid var(--blue)">
+<div class="card-title" style="color:var(--blue)">📈 Overall Performance</div>
+<div style="font-size:12px;color:var(--muted);margin-bottom:4px">Net Profit (Sales - Expenses)</div>
+<div style="font-size:36px;font-weight:900;color:#fff" id="perfNetProfit">UGX 0</div>
+</div>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value stat-blue" id="perfRevenue">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Total Expenses</div><div class="stat-value stat-red" id="perfExpenses">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Money Owed</div><div class="stat-value stat-yellow" id="perfCredits">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Stock Value</div><div class="stat-value stat-green" id="perfStockValue">UGX 0</div></div>
+</div>
+<div class="card"><div class="card-title">💡 Smart Insights</div><div id="brainInsights"></div></div>
+<div class="card"><div class="card-title">📊 7-Day Sales Trend</div><div class="report-bar" id="salesChart"></div></div>
+<div class="card"><div class="card-title">🏆 Top Selling Products</div><div id="topProducts"></div></div>
+<div class="card"><div class="card-title">💸 Recent Expenses</div><div id="expenseList"></div></div>
+</div>
+<div class="screen" id="screen-reconciliation">
+<div class="card"><div class="card-title">📋 Stock Reconciliation</div>
+<p style="font-size:13px;color:var(--muted);margin-bottom:16px">Count your physical stock and compare with the system.</p>
+<div id="reconProducts"></div>
+<div class="card" style="background:var(--bg);margin-top:16px">
+<div class="recon-row"><span style="color:var(--muted)">System Stock</span><b id="reconExpected">0</b></div>
+<div class="recon-row"><span style="color:var(--muted)">Physical Count</span><b id="reconPhysical">0</b></div>
+<div class="recon-row"><span style="color:var(--muted)">Discrepancy</span><b id="reconDiscrepancy" class="stat-red">0</b></div>
+<div class="recon-row"><span style="color:var(--muted)">Expected Revenue</span><b id="reconExpectedRevenue">UGX 0</b></div>
+<div class="form-group" style="margin-top:14px"><label class="form-label">Actual Cash in Drawer (UGX)</label><input type="number" class="form-input" id="reconCash" oninput="updateReconSummary()"></div>
+</div>
+<button class="btn btn-purple" style="margin-top:14px" onclick="saveReconciliation()">💾 Save Reconciliation Report</button>
+<button class="btn btn-outline" style="margin-top:12px" onclick="switchScreen('dashboard')">← Back to Home</button>
+</div>
+</div>
+<div class="screen" id="screen-credits">
+<div class="card"><div class="card-title">📖 Credits Book</div>
+<div id="creditList"></div></div>
+</div>
+<div class="screen" id="screen-settings">
+<div class="card"><div class="card-title">🏪 My Shop</div>
+<div class="form-group"><label class="form-label">Shop Name</label><input class="form-input" id="settingShopName" onchange="saveSettings()"></div>
+<div class="form-group"><label class="form-label">Owner Name</label><input class="form-input" id="settingOwner" onchange="saveSettings()"></div>
+<div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="settingPhone" onchange="saveSettings()"></div>
+<div class="form-group"><label class="form-label">Starting Capital (UGX)</label><input type="number" class="form-input" id="settingCapital" onchange="saveSettings()"></div>
+<div class="form-group"><label class="form-label">Low Stock Alert Threshold</label><input type="number" class="form-input" id="settingLowStock" onchange="saveSettings()"></div>
+</div>
+<div class="card"><div class="card-title">⚠️ Account</div>
+<button class="btn btn-dark" onclick="logout()">🚪 Log Out / Switch Shop</button>
+<button class="btn btn-red" style="margin-top:12px" onclick="clearAllData()">🗑️ Delete Data on This Phone</button>
+<div style="text-align:center;font-size:12px;color:var(--muted);padding-top:12px;font-weight:600">DukaFlow v6.0.0 (Brains + Notifications) • Records backed up automatically when online.</div>
+</div>
+</div>
+</main>
+<nav class="bottom-nav">
+<div class="nav-item active" id="nav-dashboard" onclick="switchScreen('dashboard')"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></div>
+<div class="nav-item" id="nav-products" onclick="switchScreen('products')"><span class="nav-icon">📦</span><span class="nav-label">Products</span></div>
+<div class="nav-item" id="nav-sales" onclick="switchScreen('sales')"><span class="nav-icon">🛒</span><span class="nav-label">Sales</span></div>
+<div class="nav-item" id="nav-reports" onclick="switchScreen('reports')"><span class="nav-icon">📈</span><span class="nav-label">Performance</span></div>
+<div class="nav-item" id="nav-settings" onclick="switchScreen('settings')"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></div>
+</nav>
+</div>
+
+<div class="modal-overlay" id="saleModal"><div class="modal">
+<div class="modal-header"><b>🛒 Record Sale</b><button class="modal-close" onclick="closeModal('saleModal')">✕</button></div>
+<button type="button" class="btn btn-purple" style="margin-bottom:16px" onclick="openScanner(findProductByBarcode)">📷 Scan Barcode</button>
+<div class="form-group"><label class="form-label">Product</label><select class="form-input" id="saleProduct"></select></div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="saleQty" value="1" min="1"></div>
+<div class="form-group"><label class="form-label">Price (UGX)</label><input type="number" class="form-input" id="salePrice"></div>
+</div>
+<div class="form-group"><label class="form-label">Payment</label><select class="form-input" id="salePayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Credit</option></select></div>
+<div class="form-group"><label class="form-label">Customer (Optional)</label><input class="form-input" id="saleCustomer" placeholder="Walk-in customer"></div>
+<button class="btn btn-green" onclick="recordSale()">✅ Save Sale</button>
+</div></div>
+
+<div class="modal-overlay" id="stockModal"><div class="modal">
+<div class="modal-header"><b>📦 Receive Stock</b><button class="modal-close" onclick="closeModal('stockModal')">✕</button></div>
+<button type="button" class="btn btn-purple" style="margin-bottom:16px" onclick="openScanner(findProductByBarcode)">📷 Scan Barcode</button>
+<div class="form-group"><label class="form-label">Product</label><select class="form-input" id="stockProduct"></select></div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="stockQty" value="1" min="1"></div>
+<div class="form-group"><label class="form-label">Cost Price (UGX)</label><input type="number" class="form-input" id="stockCost"></div>
+</div>
+<div class="form-group"><label class="form-label">Supplier</label><input class="form-input" id="stockSupplier" placeholder="e.g., Mukwano Ltd"></div>
+<button class="btn btn-dark" onclick="receiveStock()">✅ Save Stock</button>
+</div></div>
+<div class="modal-overlay" id="expenseModal"><div class="modal">
+<div class="modal-header"><b>💸 Record Expense</b><button class="modal-close" onclick="closeModal('expenseModal')">✕</button></div>
+<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="expenseCategory"><option>Transport</option><option>Rent</option><option>Packaging</option><option>Utilities</option><option>Marketing</option><option>Food</option><option>Stock Purchase</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="expenseAmount"></div>
+<div class="form-group"><label class="form-label">Note</label><input class="form-input" id="expenseNote"></div>
+<button class="btn btn-yellow" onclick="recordExpense()">✅ Save Expense</button>
+</div></div>
+
+<div class="modal-overlay" id="addProductModal"><div class="modal">
+<div class="modal-header"><b>📦 Add New Product</b><button class="modal-close" onclick="closeModal('addProductModal')">✕</button></div>
+<div class="form-group"><label class="form-label">Product Name *</label><input class="form-input" id="newProductName" placeholder="e.g., Kakira Sugar 1kg"></div>
+<div class="form-group"><label class="form-label">Barcode</label>
+<div style="display:flex;gap:10px">
+<input class="form-input" id="newProductBarcode" placeholder="Type or scan" style="flex:1">
+<button type="button" class="btn btn-dark" style="width:auto;padding:14px 18px" onclick="openScanner(fillNewProductBarcode)">📷</button>
+</div></div>
+<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="newProductCategory"><option>Grocery</option><option>Beverage</option><option>Dairy</option><option>Household</option><option>Bakery</option><option>Electronics</option><option>Other</option></select></div>
+<div class="form-row">
+<div class="form-group"><label class="form-label">Selling Price</label><input type="number" class="form-input" id="newProductPrice"></div>
+<div class="form-group"><label class="form-label">Opening Stock</label><input type="number" class="form-input" id="newProductStock"></div>
+</div>
+<button class="btn btn-green" onclick="addProduct()">✅ Save Product</button>
+</div></div>
+
+<div class="modal-overlay" id="repaymentModal"><div class="modal">
+<div class="modal-header"><b>💰 Record Payment</b><button class="modal-close" onclick="closeModal('repaymentModal')">✕</button></div>
+<input type="hidden" id="repayCreditId">
+<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="repayAmount" placeholder="Enter amount"></div>
+<div class="form-group" style="font-size:13px;color:var(--muted)">Remaining: <b id="repayMax" class="stat-red">0</b></div>
+<div class="form-group"><label class="form-label">Notes (Optional)</label><input class="form-input" id="repayNotes" placeholder="e.g., Cash received"></div>
+<button class="btn btn-green" onclick="recordRepayment()">✅ Save Payment</button>
+</div></div>
+
+<div class="modal-overlay" id="scannerModal"><div class="modal">
+<div class="modal-header"><b>📷 Scan Barcode</b><button class="modal-close" onclick="stopScanner()">✕</button></div>
+<div id="reader" style="width:100%;min-height:250px;background:#000;border-radius:12px"></div>
+<p style="text-align:center;color:var(--muted);font-size:13px;margin-top:14px">Point camera at barcode</p>
+</div></div>
+<script>
+var CLOUD_URL='https://mrkawvyaybphbfpqrvqb.supabase.co';
+const SECTOR_SKINS = {
+  'Retail': { name: 'DukaFlow', icon: '🏪', stock: 'Stock', sale: 'Sale', customer: 'Customer', expense: 'Expense' },
+  'Agriculture': { name: 'FarmFlow', icon: '🌾', stock: 'Inputs/Harvest', sale: 'Yield Sold', customer: 'Buyer', expense: 'Farm Cost' },
+  'Manufacturing': { name: 'CraftFlow', icon: '🧶', stock: 'Materials', sale: 'Product Sold', customer: 'Client', expense: 'Production Cost' },
+  'Services': { name: 'ServiceFlow', icon: '✂️🔧', stock: 'Supplies & Tools', sale: 'Service Provided', customer: 'Client', expense: 'Business Expense' },
+  'Transport': { name: 'TransportFlow', icon: '🚚', stock: 'Fuel/Maintenance', sale: 'Trip/Fare', customer: 'Passenger', expense: 'Running Cost' },
+  'Food': { name: 'FoodFlow', icon: '🍲', stock: 'Ingredients', sale: 'Meal/Order', customer: 'Diner', expense: 'Food Cost' },
+  'Energy': { name: 'EnergyFlow', icon: '⛽', stock: 'Fuel/Bulk', sale: 'Dispensed', customer: 'Customer', expense: 'Operational Cost' }
+};
+function getSkin() {
+  var p = DB.getObj('profile');
+  var sector = (p && p.sector) ? p.sector : 'Retail';
+  return SECTOR_SKINS[sector] || SECTOR_SKINS['Retail'];
+}
+var CLOUD_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
+function $(id){return document.getElementById(id)}
+var DB={
+get:function(k){try{return JSON.parse(localStorage.getItem('df_'+k))||[]}catch(e){return[]}},
+set:function(k,v){localStorage.setItem('df_'+k,JSON.stringify(v))},
+getObj:function(k){try{return JSON.parse(localStorage.getItem('df_'+k))||{}}catch(e){return{}}},
+setObj:function(k,v){localStorage.setItem('df_'+k,JSON.stringify(v))}
+};
+function getActive(t){return DB.get(t).filter(function(r){return !r.deleted})}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2)}
+function iso(){return new Date().toISOString()}
+function today(){return iso().split('T')[0]}
+function fmt(n){return (n||0).toLocaleString()}
+function np(p){return String(p).replace(/\D/g,'').slice(-9)}
+function hashPin(p){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
+var toastTimer=null;
+function showToast(t,err){var el=$('toast');el.textContent=t;el.className='toast show'+(err?' error':'');clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.className='toast'},2500)}
+function api(path,opts){opts=opts||{};opts.headers=Object.assign({'apikey':CLOUD_KEY,'Authorization':'Bearer '+CLOUD_KEY,'Content-Type':'application/json'},opts.headers||{});return fetch(CLOUD_URL+path,opts)}
+function showAuth(s){document.querySelectorAll('.auth-screen').forEach(function(x){x.classList.remove('active')});$('screen-'+s).classList.add('active')}
+function switchScreen(s){document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')});$('screen-'+s).classList.add('active');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active')});var n=$('nav-'+s);if(n)n.classList.add('active');if(s==='reconciliation')renderReconciliation();$('notifPanel').style.display='none'}
+function openModal(id){$(id).classList.add('active');if(id==='saleModal'||id==='stockModal')populateDropdowns()}
+function closeModal(id){$(id).classList.remove('active')}
+function doRegister(){
+var nm=$('regShop').value.trim(),ow=$('regOwner').value.trim(),ph=$('regPhone').value.trim(),lc=$('regLocation').value.trim(),pin=$('regPin').value.trim(),sc=$('regSector').value;
+if(!nm||!ow||!ph)return showToast('Fill shop, owner and phone',true);
+if(np(ph).length<9)return showToast('Enter a valid phone',true);
+if(!/^\d{4}$/.test(pin))return showToast('PIN must be 4 digits',true);
+if(!$('regConsent').checked)return showToast('Please accept the Terms first',true);
+hashPin(pin).then(function(h){
+api('/rest/v1/shops?select=*').then(function(r){return r.json()}).then(function(all){
+var p9=np(ph);
+if(Array.isArray(all)){for(var i=0;i<all.length;i++){if(np(all[i].phone||'')===p9)return showToast('Shop exists. Use Log In.',true)}}
+var key=genId()+genId();
+api('/rest/v1/shops',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({shop_key:key,shop_name:nm,owner_name:ow,phone:ph,location:lc,pin_hash:h,sector:sc})}).then(function(r){return r.json()}).then(function(nr){
+var id=(Array.isArray(nr)&&nr[0]&&nr[0].id)||'';
+DB.setObj('profile',{shopName:nm,owner:ow,phone:ph,location:lc,createdAt:iso(),cloudId:id,shopKey:key,sector:sc});
+if(!localStorage.getItem('df_sales'))DB.set('sales',[]);
+if(!localStorage.getItem('df_products'))DB.set('products',[]);
+if(!localStorage.getItem('df_expenses'))DB.set('expenses',[]);
+if(!localStorage.getItem('df_credits'))DB.set('credits',[]);
+if(!localStorage.getItem('df_repayments'))DB.set('repayments',[]);
+if(!localStorage.getItem('df_settings'))DB.setObj('settings',{capital:0,lowStockThreshold:10});
+showToast('Welcome to DukaFlow! 🎉');
+startApp();
+});
+});
+});
+}
+function doLogin(){
+var ph=$('logPhone').value.trim(),pin=$('logPin').value.trim();
+if(!ph||!pin)return showToast('Enter phone and PIN',true);
+var p9=np(ph);
+hashPin(pin).then(function(h){
+api('/rest/v1/shops?select=*').then(function(r){return r.json()}).then(function(all){
+var s=null;
+if(Array.isArray(all)){for(var i=0;i<all.length;i++){if(np(all[i].phone||'')===p9){s=all[i];break}}}
+if(!s)return showToast('Shop not found. Register first.',true);
+var sh=s.pin_hash||'';
+if(sh&&sh!==h)return showToast('Wrong PIN',true);
+var done=function(){
+DB.setObj('profile',{shopName:s.shop_name||s.name||'My Shop',owner:s.owner_name||s.owner||'',phone:ph,location:s.location||'',createdAt:iso(),cloudId:s.id,shopKey:s.shop_key||'',sector:s.sector||'Retail'});
+restore(s.id).then(function(){showToast('Welcome back! 👋');startApp()});
+};
+if(!sh){api('/rest/v1/shops?id=eq.'+s.id,{method:'PATCH',body:JSON.stringify({pin_hash:h})}).then(done)}else{done()}
+});
+function restore(shopId){
+if(!shopId)return Promise.resolve(false);
+return Promise.all([
+api('/rest/v1/sales?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),
+api('/rest/v1/expenses?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),
+api('/rest/v1/products?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),
+api('/rest/v1/credits?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),
+api('/rest/v1/repayments?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()})
+]).then(function(res){
+var cs=Array.isArray(res[0])?res[0]:[],ce=Array.isArray(res[1])?res[1]:[],cp=Array.isArray(res[2])?res[2]:[];
+var cc=Array.isArray(res[3])?res[3]:[],cr=Array.isArray(res[4])?res[4]:[];
+function mergeDated(local,cloud,map){
+var byId={};var out=local.slice();
+out.forEach(function(r){byId[r.id]=r});
+cloud.forEach(function(cr){
+var id=cr.local_id;
+if(!id)return;
+var mapped=map(cr,id);
+if(byId[id]){
+if(byId[id].synced===true){
+if(mapped.deleted){byId[id].deleted=true;}
+else{Object.keys(mapped).forEach(function(k){byId[id][k]=mapped[k]});}
+byId[id].synced=true;
+}
+}else{
+if(!mapped.deleted){byId[id]=mapped;out.push(mapped);}
+}
+});
+out.sort(function(a,b){return new Date(b.date||0)-new Date(a.date||0)});
+return out;
+}
+function mergeProducts(local,cloud,map){
+var byId={};var out=local.slice();
+out.forEach(function(r){byId[r.id]=r});
+cloud.forEach(function(cr){
+var id=cr.local_id;
+if(!id)return;
+var mapped=map(cr,id);
+if(byId[id]){
+if(byId[id].synced===true){
+if(mapped.deleted){byId[id].deleted=true;}
+else{Object.keys(mapped).forEach(function(k){byId[id][k]=mapped[k]});}
+byId[id].synced=true;
+}
+}else{
+if(!mapped.deleted){byId[id]=mapped;out.push(mapped);}
+}
+});
+return out;
+}
+DB.set('sales',mergeDated(DB.get('sales'),cs,function(r,id){return{id:id,productId:r.product_id||'',productName:r.product_name||r.name||'Item',quantity:parseInt(r.quantity)||1,price:parseFloat(r.price)||0,total:parseFloat(r.total!=null?r.total:r.amount)||0,payment:r.payment||'Cash',customer:r.customer||'Walk-in',date:r.date||r.created_at||iso(),deleted:r.deleted||false,synced:true}}));
+DB.set('expenses',mergeDated(DB.get('expenses'),ce,function(r,id){return{id:id,category:r.category||'Other',amount:parseFloat(r.amount!=null?r.amount:r.total)||0,note:r.note||'',date:r.date||r.created_at||iso(),deleted:r.deleted||false,synced:true}}));
+DB.set('products',mergeProducts(DB.get('products'),cp,function(r,id){return{id:id,name:r.name||r.product_name||'Item',barcode:r.barcode||'',category:r.category||'Grocery',price:parseFloat(r.price)||0,stock:parseInt(r.stock)||0,deleted:r.deleted||false,synced:true}}));
+DB.set('credits',mergeDated(DB.get('credits'),cc,function(r,id){return{id:id,customerName:r.customer_name||'',phone:r.phone||'',totalAmount:parseFloat(r.total_amount)||0,paidAmount:parseFloat(r.paid_amount)||0,status:r.status||'open',date:r.date||r.created_at||iso(),deleted:r.deleted||false,synced:true}}));
+DB.set('repayments',mergeDated(DB.get('repayments'),cr,function(r,id){return{id:id,creditLocalId:r.credit_local_id||'',amount:parseFloat(r.amount)||0,notes:r.notes||'',date:r.date||r.created_at||iso(),deleted:r.deleted||false,synced:true}}));
+return true;
+}).catch(function(){return false});
+}
+function logout(){if(!confirm('Log out? Your records stay safe on this phone.'))return;localStorage.removeItem('df_profile');location.reload()}
+function clearAllData(){if(!confirm('DELETE all records on THIS PHONE? (Cloud backup stays safe)'))return;if(!confirm('Final confirmation?'))return;localStorage.clear();location.reload()}
+function startApp(){
+$('authFlow').style.display='none';$('appShell').style.display='flex';
+if(!localStorage.getItem('df_v4_resync')){localStorage.setItem('df_v4_resync','1');['sales','expenses','products'].forEach(function(k){var a=DB.get(k);a.forEach(function(r){r.synced=false});DB.set(k,a)});}
+loadSettings();renderAll();updatePending();syncAll();renderNotifications();
+}
+function applySkin(){
+  var skin = getSkin();
+  var h1 = document.querySelector('.header-left h1');
+  if(h1) h1.innerHTML = skin.name.replace('Flow','<span>Flow</span>');
+  var navProducts = document.querySelector('#nav-products .nav-label');
+  if(navProducts) navProducts.textContent = skin.stock;
+  var navSales = document.querySelector('#nav-sales .nav-label');
+  if(navSales) navSales.textContent = skin.sale + 's';
+  document.querySelectorAll('.btn-group .btn').forEach(function(btn){
+    if(btn.textContent.includes('Record Sale')) btn.innerHTML = '🛒 Record ' + skin.sale;
+    if(btn.textContent.includes('Receive Stock')) btn.innerHTML = '📦 Receive ' + skin.stock;
+  });
+}
+function loadSettings(){var p=DB.getObj('profile'),s=DB.getObj('settings');$('shopNameDisplay').textContent=p.shopName||'My Shop';applySkin();$('settingShopName').value=p.shopName||'';$('settingOwner').value=p.owner||'';$('settingPhone').value=p.phone||'';$('settingCapital').value=s.capital||'';$('settingLowStock').value=s.lowStockThreshold||10}
+function saveSettings(){var p=DB.getObj('profile');p.shopName=$('settingShopName').value;p.owner=$('settingOwner').value;p.phone=$('settingPhone').value;DB.setObj('profile',p);DB.setObj('settings',{capital:parseFloat($('settingCapital').value)||0,lowStockThreshold:parseInt($('settingLowStock').value)||10});$('shopNameDisplay').textContent=p.shopName||'My Shop';showToast('Settings saved ✓');markPending()}
+function addProduct(){
+var name=$('newProductName').value.trim();
+if(!name)return showToast('Enter a product name',true);
+var barcode=$('newProductBarcode').value.trim();
+var category=$('newProductCategory').value;
+var price=parseFloat($('newProductPrice').value)||0;
+var stock=parseInt($('newProductStock').value)||0;
+var ps=DB.get('products');
+ps.push({id:genId(),name:name,barcode:barcode,category:category,price:price,stock:stock,deleted:false,synced:false});
+DB.set('products',ps);
+markPending();
+['newProductName','newProductBarcode','newProductPrice','newProductStock'].forEach(function(i){$(i).value=''});
+closeModal('addProductModal');
+renderProducts();
+showToast('Product added: '+name);
+if(barcode){saveGlobalProduct(barcode,name,category,price)}
+}
+function saveGlobalProduct(barcode,name,category,price){
+if(!barcode)return;
+api('/rest/v1/global_products',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates'},body:JSON.stringify({barcode:barcode,name:name,category:category,default_price:price})}).catch(function(){});
+}
+function deleteProduct(id){
+if(!confirm('Delete this product?'))return;
+var ps=DB.get('products');
+var p=ps.find(function(x){return x.id===id});
+if(p){p.deleted=true;p.synced=false;}
+DB.set('products',ps);
+markPending();renderProducts();showToast('Product deleted')
+}
+function adjustStock(id,d){var ps=DB.get('products');var p=ps.find(function(x){return x.id===id});if(p){p.stock=Math.max(0,p.stock+d);p.synced=false;DB.set('products',ps);markPending();renderProducts()}}
+function recordSale(){var pid=$('saleProduct').value;var qty=parseInt($('saleQty').value)||1;var price=parseFloat($('salePrice').value)||0;if(!pid)return showToast('Select a product',true);var ps=getActive('products');var p=ps.find(function(x){return x.id===pid});if(p.stock<qty)return showToast('Not enough stock! Only '+p.stock+' left.',true);var payment=$('salePayment').value;var customer=$('saleCustomer').value.trim()||'Walk-in';if(payment==='Credit'&&customer==='Walk-in')return showToast('Enter customer name for Credit',true);p.stock-=qty;p.synced=false;DB.set('products',DB.get('products').map(function(x){return x.id===p.id?p:x}));var sales=DB.get('sales');sales.unshift({id:genId(),productId:pid,productName:p.name,quantity:qty,price:price,total:price*qty,payment:payment,customer:customer,date:iso(),deleted:false,synced:false});DB.set('sales',sales);if(payment==='Credit'){var credits=DB.get('credits');credits.unshift({id:genId(),customerName:customer,phone:'',totalAmount:price*qty,paidAmount:0,status:'open',date:iso(),deleted:false,synced:false});DB.set('credits',credits);}markPending();closeModal('saleModal');$('saleCustomer').value='';$('saleQty').value=1;renderAll();renderNotifications();showToast('Sale saved: '+qty+'x '+p.name)}
+function receiveStock(){var pid=$('stockProduct').value;var qty=parseInt($('stockQty').value)||1;var cost=parseFloat($('stockCost').value)||0;if(!pid)return showToast('Select a product',true);var ps=DB.get('products');var p=ps.find(function(x){return x.id===pid});p.stock+=qty;p.synced=false;DB.set('products',ps);var ex=DB.get('expenses');ex.unshift({id:genId(),category:'Stock Purchase',amount:cost*qty,note:qty+'x '+p.name+' from '+($('stockSupplier').value||'supplier'),date:iso(),deleted:false,synced:false});DB.set('expenses',ex);markPending();closeModal('stockModal');renderAll();renderNotifications();showToast('Stock received: +'+qty+' '+p.name)}
+function recordExpense(){var amount=parseFloat($('expenseAmount').value)||0;if(amount<=0)return showToast('Enter an amount',true);var ex=DB.get('expenses');ex.unshift({id:genId(),category:$('expenseCategory').value,amount:amount,note:$('expenseNote').value,date:iso(),deleted:false,synced:false});DB.set('expenses',ex);markPending();closeModal('expenseModal');$('expenseAmount').value='';$('expenseNote').value='';renderAll();renderNotifications();showToast('Expense saved')}
+function populateDropdowns(){var ps=getActive('products');var opts=ps.map(function(p){return '<option value="'+p.id+'">'+p.name+' (Stock: '+p.stock+')</option>'}).join('');$('saleProduct').innerHTML=opts;$('stockProduct').innerHTML=opts;$('saleProduct').onchange=function(){var p=ps.find(function(x){return x.id===this.value}.bind(this));if(p)$('salePrice').value=p.price}}
+function renderProducts(filter){filter=filter||'';var products=getActive('products'),th=DB.getObj('settings').lowStockThreshold||10;$('productCount').textContent=products.length;var totalValue=products.reduce(function(a,p){return a+(p.stock*p.price)},0);var invEl=$('inventoryValue');if(invEl)invEl.textContent='UGX '+fmt(totalValue);var list=filter?products.filter(function(p){return p.name.toLowerCase().indexOf(filter.toLowerCase())>-1||p.barcode===filter}):products;$('productList').innerHTML=list.length?list.map(function(p){return '<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+p.category+' • '+(p.barcode||'No barcode')+'</div><div class="item-meta" style="color:var(--green2)">UGX '+fmt(p.price)+'</div></div><div style="text-align:right"><div class="stock-count '+(p.stock<=th?'stock-low':'stock-ok')+'">'+p.stock+'</div><div style="font-size:10px;color:var(--muted)">in stock</div></div><div class="item-actions"><button class="action-btn" onclick="adjustStock(\''+p.id+'\',1)">+</button><button class="action-btn" onclick="adjustStock(\''+p.id+'\',-1)">−</button><button class="action-btn" onclick="deleteProduct(\''+p.id+'\')">🗑</button></div></div>'}).join(''):'<div class="empty-state">📦<p>No products yet.</p></div>'}
+function renderSales(){var sales=getActive('sales'),f=$('salesDateFilter').value;var list=f?sales.filter(function(s){return String(s.date||'').indexOf(f)===0}):sales;$('salesList').innerHTML=list.length?list.slice(0,60).map(function(s){return '<div class="list-item"><div class="item-info"><div class="item-name">'+s.productName+'</div><div class="item-meta">'+new Date(s.date).toLocaleString()+' • '+s.payment+'</div></div><div style="text-align:right"><div class="amount-green">UGX '+fmt(s.total)+'</div><div class="item-meta">Qty '+s.quantity+'</div></div></div>'}).join(''):'<div class="empty-state">🛒<p>No sales yet.</p></div>'}
+function renderDashboard(){var sales=getActive('sales'),ex=getActive('expenses'),ps=getActive('products'),s=DB.getObj('settings');var t=today();var tSales=sales.filter(function(x){return String(x.date||'').indexOf(t)===0}).reduce(function(a,b){return a+b.total},0);var tExp=ex.filter(function(x){return String(x.date||'').indexOf(t)===0&&x.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);$('todaySales').textContent='UGX '+fmt(tSales);$('todayExpenses').textContent='UGX '+fmt(tExp);$('todayProfit').textContent='UGX '+fmt(tSales-tExp);$('lowStockCount').textContent=ps.filter(function(p){return p.stock<=(s.lowStockThreshold||10)}).length;var stockValue=ps.reduce(function(a,p){return a+(p.stock*p.price)},0);$('stockValue').textContent='UGX '+fmt(stockValue);var act=sales.slice(0,5).map(function(x){return{t:'sale',txt:'Sold '+x.quantity+'x '+x.productName,amt:x.total,d:x.date}}).concat(ex.slice(0,3).map(function(x){return{t:'exp',txt:x.category,amt:x.amount,d:x.date}})).sort(function(a,b){return new Date(b.d)-new Date(a.d)}).slice(0,8);$('recentActivity').innerHTML=act.length?act.map(function(a){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒 ':'')+a.txt+'</div><div class="item-meta">'+new Date(a.d).toLocaleString()+'</div></div><div class="'+(a.t==='sale'?'amount-green':'amount-red')+'">'+(a.t==='sale'?'+':'-')+'UGX '+fmt(a.amt)+'</div></div>'}).join(''):'<div class="empty-state">📭<p>No activity yet. Record your first sale!</p></div>'}
+function renderReports(){var sales=getActive('sales'),ex=getActive('expenses'),ps=getActive('products'),creds=getActive('credits');
+var totalRevenue=sales.reduce(function(a,b){return a+b.total},0);
+var totalExpenses=ex.filter(function(e){return e.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);
+var netProfit=totalRevenue-totalExpenses;
+var totalCreditsOwed=creds.filter(function(c){return c.status!=='paid'}).reduce(function(a,b){return a+(b.totalAmount-b.paidAmount)},0);
+var totalStockValue=ps.reduce(function(a,p){return a+(p.stock*p.price)},0);
+$('perfNetProfit').textContent='UGX '+fmt(netProfit);
+$('perfRevenue').textContent='UGX '+fmt(totalRevenue);
+$('perfExpenses').textContent='UGX '+fmt(totalExpenses);
+$('perfCredits').textContent='UGX '+fmt(totalCreditsOwed);
+$('perfStockValue').textContent='UGX '+fmt(totalStockValue);
+var days=[];for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var ds=d.toISOString().split('T')[0];days.push({label:d.toLocaleDateString('en',{weekday:'short'}),value:sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0)})}var max=Math.max.apply(null,days.map(function(d){return d.value}).concat([1]));$('salesChart').innerHTML=days.map(function(d){return '<div class="report-bar-item" style="height:'+((d.value/max)*100)+'px"><div class="report-bar-label">'+d.label+'</div></div>'}).join('');var agg={};sales.forEach(function(s){agg[s.productName]=agg[s.productName]||{q:0,r:0};agg[s.productName].q+=s.quantity;agg[s.productName].r+=s.total});var top=Object.keys(agg).sort(function(a,b){return agg[b].r-agg[a].r}).slice(0,5);$('topProducts').innerHTML=top.length?top.map(function(k,i){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(i+1)+'. '+k+'</div><div class="item-meta">'+agg[k].q+' units sold</div></div><div class="amount-green">UGX '+fmt(agg[k].r)+'</div></div>'}).join(''):'<div class="empty-state"><p>No data yet</p></div>';$('expenseList').innerHTML=ex.length?ex.slice(0,10).map(function(e){return '<div class="list-item"><div class="item-info"><div class="item-name">UGX '+fmt(e.amount)+'</div><div class="item-meta">'+e.category+(e.note?' • '+e.note:'')+'</div></div></div>'}).join(''):'<div class="empty-state"><p>No expenses yet</p></div>';
+renderBrainComparisons();renderBrainInsights()}
+function renderBrainComparisons(){var sales=getActive('sales'),ex=getActive('expenses');var now=new Date();var thisWeekStart=new Date(now);thisWeekStart.setDate(now.getDate()-now.getDay());var lastWeekStart=new Date(thisWeekStart);lastWeekStart.setDate(lastWeekStart.getDate()-7);var thisMonthStart=new Date(now.getFullYear(),now.getMonth(),1);var lastMonthStart=new Date(now.getFullYear(),now.getMonth()-1,1);var lastMonthEnd=new Date(now.getFullYear(),now.getMonth(),0);function getPeriodTotal(start,end){return sales.filter(function(s){var d=new Date(s.date);return d>=start&&d<=end}).reduce(function(a,b){return a+b.total},0)}var thisWeekSales=getPeriodTotal(thisWeekStart,now);var lastWeekSales=getPeriodTotal(lastWeekStart,thisWeekStart);var thisMonthSales=getPeriodTotal(thisMonthStart,now);var lastMonthSales=getPeriodTotal(lastMonthStart,lastMonthEnd);var weekChange=lastWeekSales>0?((thisWeekSales-lastWeekSales)/lastWeekSales*100):0;var monthChange=lastMonthSales>0?((thisMonthSales-lastMonthSales)/lastMonthSales*100):0;var html='<div class="stats-grid"><div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value stat-blue">UGX '+fmt(thisWeekSales)+'</div><div class="brain-change '+(weekChange>=0?'up':'down')+'">'+(weekChange>=0?'↑':'↓')+' '+Math.abs(weekChange).toFixed(1)+'%</div></div><div class="stat-card"><div class="stat-label">Last Week</div><div class="stat-value stat-blue">UGX '+fmt(lastWeekSales)+'</div></div></div><div class="stats-grid"><div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value stat-blue">UGX '+fmt(thisMonthSales)+'</div><div class="brain-change '+(monthChange>=0?'up':'down')+'">'+(monthChange>=0?'↑':'↓')+' '+Math.abs(monthChange).toFixed(1)+'%</div></div><div class="stat-card"><div class="stat-label">Last Month</div><div class="stat-value stat-blue">UGX '+fmt(lastMonthSales)+'</div></div></div>';$('brainComparisons').innerHTML=html}
+function renderBrainInsights(){var sales=getActive('sales'),ps=getActive('products');var dayTotals=[0,0,0,0,0,0,0];sales.forEach(function(s){var d=new Date(s.date).getDay();dayTotals[d]+=s.total});var bestDay=dayTotals.indexOf(Math.max.apply(null,dayTotals));var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];var productTrends={};sales.forEach(function(s){if(!productTrends[s.productId])productTrends[s.productId]={name:s.productName,recent:0,older:0};var daysAgo=Math.floor((new Date()-new Date(s.date))/86400000);if(daysAgo<=7)productTrends[s.productId].recent+=s.total;else if(daysAgo<=14)productTrends[s.productId].older+=s.total});var rising=[],dying=[];Object.keys(productTrends).forEach(function(pid){var p=productTrends[pid];if(p.older>0&&p.recent>p.older*1.2)rising.push(p);else if(p.recent<p.older*0.8)dying.push(p)});var insights=[];insights.push({icon:'📅',title:'Best Day: '+dayNames[bestDay],desc:'You earn the most on '+dayNames[bestDay]+'s'});if(rising.length>0)insights.push({icon:'🌱',title:rising.length+' Rising Product'+(rising.length>1?'s':''),desc:rising[0].name+' is selling '+(rising[0].recent>rising[0].older?'more':'less')+' this week'});if(dying.length>0)insights.push({icon:'📉',title:dying.length+' Dying Product'+(dying.length>1?'s':''),desc:dying[0].name+' sales are slowing down'});$('brainInsights').innerHTML=insights.map(function(i){return '<div class="insight-row"><div class="insight-icon">'+i.icon+'</div><div class="insight-text"><div class="insight-title">'+i.title+'</div><div class="insight-desc">'+i.desc+'</div></div></div>'}).join('')}
+function renderReconciliation(){$('reconProducts').innerHTML=getActive('products').map(function(p){return '<div class="card" style="background:var(--bg);padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div><b style="font-size:14px">'+p.name+'</b><div style="font-size:12px;color:var(--muted)">System: '+p.stock+'</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--muted)">Physical:</span><input type="number" class="form-input" style="width:80px;padding:10px" id="recon_'+p.id+'" value="'+p.stock+'" oninput="updateReconSummary()"></div></div></div>'}).join('');updateReconSummary()}
+function updateReconSummary(){var ps=getActive('products');var exp=0,phys=0,rev=0;ps.forEach(function(p){exp+=p.stock;rev+=p.stock*p.price;var el=$('recon_'+p.id);phys+=el?(parseInt(el.value)||0):p.stock});$('reconExpected').textContent=exp;$('reconPhysical').textContent=phys;$('reconDiscrepancy').textContent=phys-exp;$('reconExpectedRevenue').textContent='UGX '+fmt(rev)}
+function saveReconciliation(){var rec={id:genId(),date:today(),cash:parseFloat($('reconCash').value)||0,items:getActive('products').map(function(p){var el=$('recon_'+p.id);return{name:p.name,system:p.stock,physical:el?(parseInt(el.value)||0):p.stock}}),savedAt:iso()};var r=DB.get('reconciliations');r.unshift(rec);DB.set('reconciliations',r);markPending();showToast('Reconciliation report saved ✓')}
+function renderAll(){renderDashboard();renderProducts();renderSales();renderReports();renderCredits()}
+function getNotifications(){var notifs=[];var sales=getActive('sales'),ps=getActive('products'),creds=getActive('credits'),s=DB.getObj('settings');var th=s.lowStockThreshold||10;var todaySales=sales.filter(function(x){return String(x.date||'').indexOf(today())===0});if(todaySales.length===0)notifs.push({type:'info',icon:'🌅',title:'No sales today yet',desc:'Record your first sale to start tracking',action:'dashboard'});var totalOwed=creds.filter(function(c){return c.status!=='paid'}).reduce(function(a,b){return a+(b.totalAmount-b.paidAmount)},0);if(totalOwed>0)notifs.push({type:'warning',icon:'💰',title:'Money owed: UGX '+fmt(totalOwed),desc:creds.filter(function(c){return c.status!=='paid'}).length+' customer'+(creds.filter(function(c){return c.status!=='paid'}).length>1?'s':'')+' owe you money',action:'credits'});var overdueCreds=creds.filter(function(c){if(c.status==='paid')return false;var daysAgo=Math.floor((new Date()-new Date(c.date))/86400000);return daysAgo>=7});overdueCreds.forEach(function(c){var daysAgo=Math.floor((new Date()-new Date(c.date))/86400000);notifs.push({type:'urgent',icon:'⏰',title:c.customerName+' overdue',desc:'Has owed UGX '+fmt(c.totalAmount-c.paidAmount)+' for '+daysAgo+' days',action:'credits'})});var lowStock=ps.filter(function(p){return p.stock>0&&p.stock<=th});var outOfStock=ps.filter(function(p){return p.stock===0});if(outOfStock.length>0)notifs.push({type:'urgent',icon:'🚨',title:outOfStock.length+' out of stock',desc:outOfStock[0].name+(outOfStock.length>1?' and '+(outOfStock.length-1)+' more':''),action:'products'});if(lowStock.length>0)notifs.push({type:'warning',icon:'📦',title:lowStock.length+' low stock',desc:lowStock[0].name+(lowStock.length>1?' and '+(lowStock.length-1)+' more':''),action:'products'});var pending=pendingCount();if(pending>0)notifs.push({type:'info',icon:'☁️',title:pending+' records not backed up',desc:'Connect to internet to sync',action:'dashboard'});return notifs}
+function renderNotifications(){var notifs=getNotifications();var badge=$('notifBadge');if(notifs.length>0){badge.textContent=notifs.length;badge.style.display='block'}else{badge.style.display='none'}var list=$('notifList');if(notifs.length===0){list.innerHTML='<div class="empty-state" style="padding:30px"><div style="font-size:48px">✅</div><p style="margin-top:12px">All caught up! No alerts.</p></div>'}else{list.innerHTML=notifs.map(function(n,i){return '<div class="notif-item notif-'+n.type+'" onclick="handleNotifClick('+i+')"><div style="display:flex;align-items:center"><span class="notif-icon">'+n.icon+'</span><div><div class="notif-title">'+n.title+'</div><div class="notif-desc">'+n.desc+'</div></div></div></div>'}).join('')}}
+function toggleNotifications(){var panel=$('notifPanel');if(panel.style.display==='none'){panel.style.display='block'}else{panel.style.display='none'}}
+function handleNotifClick(i){var notifs=getNotifications();var n=notifs[i];if(n&&n.action){switchScreen(n.action)}toggleNotifications()}
+var syncTimer=null;
+function markPending(){updatePending();clearTimeout(syncTimer);syncTimer=setTimeout(syncAll,3000)}
+function pendingCount(){var n=0;['sales','expenses','products','credits','repayments'].forEach(function(k){DB.get(k).forEach(function(r){if(r.synced!==true)n++})});return n}
+function setCloud(m){var el=$('cloudStatus');if(!el)return;el.textContent=m==='on'?'Backed up ✓':(m==='wait'?'Backing up…':'On this phone')}
+function updatePending(){setCloud(pendingCount()===0?'on':'wait');renderNotifications()}
+function ensureShop(){var p=DB.getObj('profile');if(p.cloudId)return Promise.resolve(p.cloudId);var key=p.shopKey||(genId()+genId());return api('/rest/v1/shops',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({shop_key:key,shop_name:p.shopName,owner_name:p.owner,phone:p.phone,location:p.location})}).then(function(r){return r.json()}).then(function(nr){var id=(Array.isArray(nr)&&nr[0]&&nr[0].id)||'';p.cloudId=id;p.shopKey=key;DB.setObj('profile',p);return id})}
+function upsertRow(table,row){
+var q='/rest/v1/'+table+'?shop_id=eq.'+row.shop_id+'&local_id=eq.'+encodeURIComponent(row.local_id);
+return api(q,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify(row)}).then(function(r){
+if(!r.ok)return false;
+return r.json().then(function(d){
+if(Array.isArray(d)&&d.length>0)return true;
+return api('/rest/v1/'+table,{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(row)}).then(function(p){return p.ok});
+});
+});
+}
+function pushPendingToCloud(){
+if(!navigator.onLine){setCloud('wait');return Promise.reject(new Error('offline'))}
+var p=DB.getObj('profile');
+if(!p.shopName){setCloud('off');return Promise.reject(new Error('no-shop'))}
+return ensureShop().then(function(shopId){
+if(!shopId){setCloud('off');return Promise.reject(new Error('no-shop-id'))}
+var sales=DB.get('sales'),exps=DB.get('expenses'),prods=DB.get('products');
+var jobs=[];
+sales.forEach(function(r){if(r.synced!==true)jobs.push({t:'sales',r:r,row:{shop_id:shopId,local_id:r.id,product_id:r.productId||'',product_name:r.productName,quantity:r.quantity,price:r.price,total:r.total,payment:r.payment,customer:r.customer,date:r.date,deleted:r.deleted?true:false}})});
+exps.forEach(function(r){if(r.synced!==true)jobs.push({t:'expenses',r:r,row:{shop_id:shopId,local_id:r.id,category:r.category,amount:r.amount,note:r.note,date:r.date,deleted:r.deleted?true:false}})});
+prods.forEach(function(r){if(r.synced!==true)jobs.push({t:'products',r:r,row:{shop_id:shopId,local_id:r.id,name:r.name,barcode:r.barcode,category:r.category,price:r.price,stock:r.stock,deleted:r.deleted?true:false}})});
+var creds=DB.get('credits');creds.forEach(function(r){if(r.synced!==true)jobs.push({t:'credits',r:r,row:{shop_id:shopId,local_id:r.id,customer_name:r.customerName||'',phone:r.phone||'',total_amount:r.totalAmount,paid_amount:r.paidAmount,status:r.status||'open',date:r.date,deleted:r.deleted?true:false}})});var reps=DB.get('repayments');reps.forEach(function(r){if(r.synced!==true)jobs.push({t:'repayments',r:r,row:{shop_id:shopId,local_id:r.id,credit_local_id:r.creditLocalId||'',amount:r.amount,notes:r.notes||'',date:r.date,deleted:r.deleted?true:false}})});
+var chain=Promise.resolve();
+jobs.forEach(function(j){chain=chain.then(function(){return upsertRow(j.t,j.row).then(function(ok){if(ok)j.r.synced=true;return ok})})});
+return chain.then(function(){DB.set('sales',sales);DB.set('expenses',exps);DB.set('products',prods);DB.set('credits',creds);DB.set('repayments',reps);updatePending();return true});
+});
+}
+function syncAll(){
+return pushPendingToCloud().catch(function(){setCloud('wait')});
+}
+var refreshBusy=false;
+function refreshFromCloud(){
+if(refreshBusy)return;
+if(!navigator.onLine)return showToast('Connect to internet first',true);
+var p=DB.getObj('profile');
+if(!p.shopName)return showToast('Log in first',true);
+refreshBusy=true;
+var btn=$('refreshBtn');
+if(btn){btn.disabled=true;btn.textContent='⏳ Refreshing…'}
+setCloud('wait');
+pushPendingToCloud().then(function(){
+var prof=DB.getObj('profile');
+if(!prof.cloudId){
+return ensureShop().then(function(id){return restore(id)});
+}
+return restore(prof.cloudId);
+}).then(function(ok){
+if(!ok)throw new Error('restore-failed');
+renderAll();
+updatePending();
+renderNotifications();
+showToast('Refresh complete ✓');
+}).catch(function(){
+updatePending();
+showToast('Refresh failed. Check connection.',true);
+}).then(function(){
+refreshBusy=false;
+if(btn){btn.disabled=false;btn.textContent='🔄 Refresh from Cloud'}
+});
+}
+var scannerInstance = null;
+var scannerCallback = null;
+
+function openScanner(cb) {
+  scannerCallback = cb;
+  openModal('scannerModal');
+  
+  setTimeout(function() {
+    scannerInstance = new Html5Qrcode("reader");
+    scannerInstance.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 150 } },
+      function(decodedText) {
+        scannerInstance.stop().then(function() {
+          scannerInstance.clear();
+          closeModal('scannerModal');
+          if (scannerCallback) scannerCallback(decodedText);
+        }).catch(function(err) { console.log(err); });
+      },
+      function(errorMessage) {
+        // ignore
+      }
+    ).catch(function(err) {
+      showToast("Camera error. Check permissions.", true);
+      closeModal('scannerModal');
+    });
+  }, 300);
+}
+
+function stopScanner() {
+  if (scannerInstance) {
+    scannerInstance.stop().then(function() {
+      scannerInstance.clear();
+    }).catch(function(err) { console.log(err); });
+  }
+  closeModal('scannerModal');
+}
+
+function fillNewProductBarcode(code) {
+  $('newProductBarcode').value = code;
+}
+
+function searchProductByBarcode(code) {
+  $('productSearch').value = code;
+  renderProducts(code);
+}
+
+function findProductByBarcode(code) {
+  var products = getActive('products');
+  var found = null;
+  for (var i = 0; i < products.length; i++) {
+    if (products[i].barcode === code) {
+      found = products[i];
+      break;
+    }
+  }
+  
+  if (found) {
+    selectScannedProduct(found);
+    return;
+  }
+  
+  showToast('Checking global network...', false);
+  api('/rest/v1/global_products?barcode=eq.' + encodeURIComponent(code) + '&select=*')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (Array.isArray(data) && data.length > 0) {
+        var gp = data[0];
+        var ps = DB.get('products');
+        var newProd = {
+          id: genId(),
+          name: gp.name || 'Unknown Item',
+          barcode: code,
+          category: gp.category || 'Other',
+          price: parseFloat(gp.default_price) || 0,
+          stock: 0,
+          deleted: false,
+          synced: false
+        };
+        ps.push(newProd);
+        DB.set('products', ps);
+        markPending();
+        renderProducts(); 
+        selectScannedProduct(newProd);
+        showToast('Added ' + newProd.name + ' from global network!');
+      } else {
+        showToast("Product not found. Add it manually!", true);
+      }
+    })
+    .catch(function() {
+      showToast("Network error checking global database.", true);
+    });
+}
+
+function selectScannedProduct(found) {
+  if ($('saleModal').classList.contains('active')) {
+    populateDropdowns(); 
+    $('saleProduct').value = found.id;
+    $('salePrice').value = found.price;
+    if (found.stock <= 0) {
+      showToast("Warning: " + found.name + " has 0 stock! Receive stock first.", true);
+    } else {
+      showToast("Selected: " + found.name);
+    }
+  } else if ($('stockModal').classList.contains('active')) {
+    populateDropdowns();
+    $('stockProduct').value = found.id;
+    showToast("Selected: " + found.name);
+  }
+}
+
+function renderCredits(){var credits=getActive('credits');$('creditList').innerHTML=credits.length?credits.map(function(c){var remaining=c.totalAmount-c.paidAmount;var statusClass=c.status==='paid'?'stat-green':(remaining<c.totalAmount?'stat-yellow':'stat-red');var statusText=c.status==='paid'?'PAID':'OWES UGX '+fmt(remaining);var waLink=c.phone?'<a href="https://wa.me/'+np(c.phone)+'?text=Hi%20'+encodeURIComponent(c.customerName)+',%20your%20outstanding%20balance%20at%20'+encodeURIComponent(DB.getObj('profile').shopName)+'%20is%20UGX%20'+fmt(remaining)+'." target="_blank" class="btn btn-green" style="padding:10px 14px;font-size:13px;width:auto;margin-top:8px">💬 Remind</a>':'';return '<div class="list-item" style="flex-direction:column;align-items:flex-start"><div style="display:flex;justify-content:space-between;width:100%"><div class="item-info"><div class="item-name">'+c.customerName+'</div><div class="item-meta">'+new Date(c.date).toLocaleDateString()+' • Total: UGX '+fmt(c.totalAmount)+'</div></div><div style="text-align:right"><div class="'+statusClass+'" style="font-weight:800">'+statusText+'</div></div></div>'+(c.status!=='paid'?'<div style="display:flex;gap:10px;width:100%;margin-top:12px"><button class="btn btn-dark" style="flex:1;padding:12px" onclick="openRepayment(\''+c.id+'\')">💰 Record Payment</button>'+waLink+'</div>':'')+'</div>'}).join(''):'<div class="empty-state">📖<p>No credit records yet.</p></div>'}
+function openRepayment(creditId){$('repayCreditId').value=creditId;var c=getActive('credits').find(function(x){return x.id===creditId});$('repayMax').textContent=fmt(c.totalAmount-c.paidAmount);$('repayAmount').value='';$('repayNotes').value='';openModal('repaymentModal')}
+function recordRepayment(){var creditId=$('repayCreditId').value;var amount=parseFloat($('repayAmount').value)||0;if(amount<=0)return showToast('Enter a valid amount',true);var credits=DB.get('credits');var c=credits.find(function(x){return x.id===creditId});if(!c)return;var remaining=c.totalAmount-c.paidAmount;if(amount>remaining)return showToast('Amount cannot exceed balance',true);c.paidAmount+=amount;if(c.paidAmount>=c.totalAmount){c.paidAmount=c.totalAmount;c.status='paid';}c.synced=false;DB.set('credits',credits);var reps=DB.get('repayments');reps.unshift({id:genId(),creditLocalId:c.id,amount:amount,notes:$('repayNotes').value||'',date:iso(),deleted:false,synced:false});DB.set('repayments',reps);markPending();closeModal('repaymentModal');renderCredits();renderNotifications();showToast('Payment recorded ✓')}
+
+setTimeout(function(){$('splash').classList.add('hide');var p=DB.getObj('profile');if(p.shopName){startApp()}else{$('authFlow').style.display='block';showAuth('welcome')}},3000);
+window.onload=function(){setTimeout(function(){$('splash').classList.add('hide');var p=DB.getObj('profile');if(p.shopName){startApp()}else{$('authFlow').style.display='block';showAuth('welcome')}},1200)};
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+</script>
+</body>
+</html>
+<!-- DF-V6-END -->
