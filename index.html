@@ -387,7 +387,7 @@ function today(){return iso().split('T')[0]}
 function fmt(n){return (n||0).toLocaleString()}
 function np(p){return String(p).replace(/\D/g,'').slice(-9)}
 function hashPin(p){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
-var toastTimer=null;
+var toastTimer=null; window.addEventListener('unhandledrejection',function(){showToast('Connection problem. Check internet.',true)});
 function showToast(t,err){var el=$('toast');el.textContent=t;el.className='toast show'+(err?' error':'');clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.className='toast'},2500)}
 function j(r){if(!r.ok){showToast('Connection problem. Try again.',true);throw new Error('HTTP '+r.status)}return r.json()} function api(path,opts){opts=opts||{};opts.headers=Object.assign({'apikey':CLOUD_KEY,'Authorization':'Bearer '+CLOUD_KEY,'Content-Type':'application/json'},opts.headers||{});return fetch(CLOUD_URL+path,opts)}
 function showAuth(s){document.querySelectorAll('.auth-screen').forEach(function(x){x.classList.remove('active')});$('screen-'+s).classList.add('active')}
