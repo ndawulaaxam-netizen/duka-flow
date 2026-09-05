@@ -437,6 +437,8 @@ restore(s.id).then(function(){showToast('Welcome back! 👋');startApp()});
 };
 if(!sh){api('/rest/v1/shops?id=eq.'+s.id,{method:'PATCH',body:JSON.stringify({pin_hash:h})}).then(done)}else{done()}
 });
+});
+}
 function restore(shopId){
 if(!shopId)return Promise.resolve(false);
 return Promise.all([
