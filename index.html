@@ -737,6 +737,7 @@ function openRepayment(creditId){$('repayCreditId').value=creditId;var c=getActi
 function recordRepayment(){var creditId=$('repayCreditId').value;var amount=parseFloat($('repayAmount').value)||0;if(amount<=0)return showToast('Enter a valid amount',true);var credits=DB.get('credits');var c=credits.find(function(x){return x.id===creditId});if(!c)return;var remaining=c.totalAmount-c.paidAmount;if(amount>remaining)return showToast('Amount cannot exceed balance',true);c.paidAmount+=amount;if(c.paidAmount>=c.totalAmount){c.paidAmount=c.totalAmount;c.status='paid';}c.synced=false;DB.set('credits',credits);var reps=DB.get('repayments');reps.unshift({id:genId(),creditLocalId:c.id,amount:amount,notes:$('repayNotes').value||'',date:iso(),deleted:false,synced:false});DB.set('repayments',reps);markPending();closeModal('repaymentModal');renderCredits();renderNotifications();showToast('Payment recorded ✓')}
 
 window.onload=function(){setTimeout(function(){$('splash').classList.add('hide');var p=DB.getObj('profile');if(p.shopName){startApp()}else{$('authFlow').style.display='block';showAuth('welcome')}},1200)};
+setTimeout(function(){$('splash').classList.add('hide');var p=DB.getObj('profile');if(p.shopName){startApp()}else{$('authFlow').style.display='block';showAuth('welcome')}},3000);
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
 </body>
