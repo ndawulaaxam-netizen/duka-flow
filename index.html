@@ -4,11 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#09090B">
-<title>DukaFlow — Keep Your Shop Flowing</title>
+<title>DukaFlow v6 — Keep Your Shop Flowing</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="mobile-web-app-capable" content="yes">
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <style>
 :root{--bg:#09090B;--card:#18181B;--border:#27272A;--green:#10B981;--green2:#34D399;--green3:#059669;--text:#F4F4F5;--muted:#A1A1AA;--red:#EF4444;--yellow:#F59E0B;--blue:#3B82F6;--purple:#8B5CF6}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -334,6 +336,26 @@ body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);co
 <div id="reader" style="width:100%;min-height:250px;background:#000;border-radius:12px"></div>
 <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:14px">Point camera at barcode</p>
 </div></div>
+
+<!-- Failsafe Splash Hider -->
+<script>
+setTimeout(function(){
+  var splash = document.getElementById('splash');
+  if(splash && !splash.classList.contains('hide')){
+    splash.classList.add('hide');
+    var p = null;
+    try { p = JSON.parse(localStorage.getItem('df_profile')); } catch(e){}
+    if(p && p.shopName){
+      document.getElementById('appShell').style.display='flex';
+    } else {
+      document.getElementById('authFlow').style.display='block';
+      document.getElementById('screen-welcome').classList.add('active');
+    }
+  }
+}, 3000);
+</script>
+
+<!-- Main App Logic -->
 <script>
 var CLOUD_URL='https://mrkawvyaybphbfpqrvqb.supabase.co';
 const SECTOR_SKINS = {
@@ -476,7 +498,7 @@ return true;
 function logout(){if(!confirm('Log out? Your records stay safe on this phone.'))return;localStorage.removeItem('df_profile');location.reload()}
 function clearAllData(){if(!confirm('DELETE all records on THIS PHONE? (Cloud backup stays safe)'))return;if(!confirm('Final confirmation?'))return;localStorage.clear();location.reload()}
 function startApp(){
-$('authFlow').style.display='none';$('appShell').style.display='flex';
+$('authFlow').style.display='none';$('appShell').style.display='flex';$('splash').classList.add('hide');
 if(!localStorage.getItem('df_v4_resync')){localStorage.setItem('df_v4_resync','1');['sales','expenses','products'].forEach(function(k){var a=DB.get(k);a.forEach(function(r){r.synced=false});DB.set(k,a)});}
 loadSettings();renderAll();updatePending();syncAll();renderNotifications();
 }
@@ -549,7 +571,7 @@ function renderBrainComparisons(){var sales=getActive('sales'),ex=getActive('exp
 function renderBrainInsights(){var sales=getActive('sales'),ps=getActive('products');var dayTotals=[0,0,0,0,0,0,0];sales.forEach(function(s){var d=new Date(s.date).getDay();dayTotals[d]+=s.total});var bestDay=dayTotals.indexOf(Math.max.apply(null,dayTotals));var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];var productTrends={};sales.forEach(function(s){if(!productTrends[s.productId])productTrends[s.productId]={name:s.productName,recent:0,older:0};var daysAgo=Math.floor((new Date()-new Date(s.date))/86400000);if(daysAgo<=7)productTrends[s.productId].recent+=s.total;else if(daysAgo<=14)productTrends[s.productId].older+=s.total});var rising=[],dying=[];Object.keys(productTrends).forEach(function(pid){var p=productTrends[pid];if(p.older>0&&p.recent>p.older*1.2)rising.push(p);else if(p.recent<p.older*0.8)dying.push(p)});var insights=[];insights.push({icon:'📅',title:'Best Day: '+dayNames[bestDay],desc:'You earn the most on '+dayNames[bestDay]+'s'});if(rising.length>0)insights.push({icon:'🌱',title:rising.length+' Rising Product'+(rising.length>1?'s':''),desc:rising[0].name+' is selling '+(rising[0].recent>rising[0].older?'more':'less')+' this week'});if(dying.length>0)insights.push({icon:'📉',title:dying.length+' Dying Product'+(dying.length>1?'s':''),desc:dying[0].name+' sales are slowing down'});$('brainInsights').innerHTML=insights.map(function(i){return '<div class="insight-row"><div class="insight-icon">'+i.icon+'</div><div class="insight-text"><div class="insight-title">'+i.title+'</div><div class="insight-desc">'+i.desc+'</div></div></div>'}).join('')}
 function renderReconciliation(){$('reconProducts').innerHTML=getActive('products').map(function(p){return '<div class="card" style="background:var(--bg);padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div><b style="font-size:14px">'+p.name+'</b><div style="font-size:12px;color:var(--muted)">System: '+p.stock+'</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--muted)">Physical:</span><input type="number" class="form-input" style="width:80px;padding:10px" id="recon_'+p.id+'" value="'+p.stock+'" oninput="updateReconSummary()"></div></div></div>'}).join('');updateReconSummary()}
 function updateReconSummary(){var ps=getActive('products');var exp=0,phys=0,rev=0;ps.forEach(function(p){exp+=p.stock;rev+=p.stock*p.price;var el=$('recon_'+p.id);phys+=el?(parseInt(el.value)||0):p.stock});$('reconExpected').textContent=exp;$('reconPhysical').textContent=phys;$('reconDiscrepancy').textContent=phys-exp;$('reconExpectedRevenue').textContent='UGX '+fmt(rev)}
-function saveReconciliation(){var rec={id:genId(),date:today(),cash:parseFloat($('reconCash').value)||0,items:getActive('products').map(function(p){var el=$('recon_'+p.id);return{name:p.name,system:p.stock,physical:el?(parseInt(el.value)||0):p.stock}}),savedAt:iso()};var r=DB.get('reconciliations');r.unshift(rec);DB.set('reconciliations',r);markPending();showToast('Reconciliation report saved ✓')}
+function saveReconciliation(){var rec={id:genId(),date:today(),cash:parseFloat($('reconCash').value)||0,items:getActive('products').map(function(p){var el=$('recon_'+p.id');return{name:p.name,system:p.stock,physical:el?(parseInt(el.value)||0):p.stock}}),savedAt:iso()};var r=DB.get('reconciliations');r.unshift(rec);DB.set('reconciliations',r);markPending();showToast('Reconciliation report saved ✓')}
 function renderAll(){renderDashboard();renderProducts();renderSales();renderReports();renderCredits()}
 function getNotifications(){var notifs=[];var sales=getActive('sales'),ps=getActive('products'),creds=getActive('credits'),s=DB.getObj('settings');var th=s.lowStockThreshold||10;var todaySales=sales.filter(function(x){return String(x.date||'').indexOf(today())===0});if(todaySales.length===0)notifs.push({type:'info',icon:'🌅',title:'No sales today yet',desc:'Record your first sale to start tracking',action:'dashboard'});var totalOwed=creds.filter(function(c){return c.status!=='paid'}).reduce(function(a,b){return a+(b.totalAmount-b.paidAmount)},0);if(totalOwed>0)notifs.push({type:'warning',icon:'💰',title:'Money owed: UGX '+fmt(totalOwed),desc:creds.filter(function(c){return c.status!=='paid'}).length+' customer'+(creds.filter(function(c){return c.status!=='paid'}).length>1?'s':'')+' owe you money',action:'credits'});var overdueCreds=creds.filter(function(c){if(c.status==='paid')return false;var daysAgo=Math.floor((new Date()-new Date(c.date))/86400000);return daysAgo>=7});overdueCreds.forEach(function(c){var daysAgo=Math.floor((new Date()-new Date(c.date))/86400000);notifs.push({type:'urgent',icon:'⏰',title:c.customerName+' overdue',desc:'Has owed UGX '+fmt(c.totalAmount-c.paidAmount)+' for '+daysAgo+' days',action:'credits'})});var lowStock=ps.filter(function(p){return p.stock>0&&p.stock<=th});var outOfStock=ps.filter(function(p){return p.stock===0});if(outOfStock.length>0)notifs.push({type:'urgent',icon:'🚨',title:outOfStock.length+' out of stock',desc:outOfStock[0].name+(outOfStock.length>1?' and '+(outOfStock.length-1)+' more':''),action:'products'});if(lowStock.length>0)notifs.push({type:'warning',icon:'📦',title:lowStock.length+' low stock',desc:lowStock[0].name+(lowStock.length>1?' and '+(lowStock.length-1)+' more':''),action:'products'});var pending=pendingCount();if(pending>0)notifs.push({type:'info',icon:'☁️',title:pending+' records not backed up',desc:'Connect to internet to sync',action:'dashboard'});return notifs}
 function renderNotifications(){var notifs=getNotifications();var badge=$('notifBadge');if(notifs.length>0){badge.textContent=notifs.length;badge.style.display='block'}else{badge.style.display='none'}var list=$('notifList');if(notifs.length===0){list.innerHTML='<div class="empty-state" style="padding:30px"><div style="font-size:48px">✅</div><p style="margin-top:12px">All caught up! No alerts.</p></div>'}else{list.innerHTML=notifs.map(function(n,i){return '<div class="notif-item notif-'+n.type+'" onclick="handleNotifClick('+i+')"><div style="display:flex;align-items:center"><span class="notif-icon">'+n.icon+'</span><div><div class="notif-title">'+n.title+'</div><div class="notif-desc">'+n.desc+'</div></div></div></div>'}).join('')}}
@@ -736,10 +758,11 @@ function renderCredits(){var credits=getActive('credits');$('creditList').innerH
 function openRepayment(creditId){$('repayCreditId').value=creditId;var c=getActive('credits').find(function(x){return x.id===creditId});$('repayMax').textContent=fmt(c.totalAmount-c.paidAmount);$('repayAmount').value='';$('repayNotes').value='';openModal('repaymentModal')}
 function recordRepayment(){var creditId=$('repayCreditId').value;var amount=parseFloat($('repayAmount').value)||0;if(amount<=0)return showToast('Enter a valid amount',true);var credits=DB.get('credits');var c=credits.find(function(x){return x.id===creditId});if(!c)return;var remaining=c.totalAmount-c.paidAmount;if(amount>remaining)return showToast('Amount cannot exceed balance',true);c.paidAmount+=amount;if(c.paidAmount>=c.totalAmount){c.paidAmount=c.totalAmount;c.status='paid';}c.synced=false;DB.set('credits',credits);var reps=DB.get('repayments');reps.unshift({id:genId(),creditLocalId:c.id,amount:amount,notes:$('repayNotes').value||'',date:iso(),deleted:false,synced:false});DB.set('repayments',reps);markPending();closeModal('repaymentModal');renderCredits();renderNotifications();showToast('Payment recorded ✓')}
 
-setTimeout(function(){$('splash').classList.add('hide');var p=DB.getObj('profile');if(p.shopName){startApp()}else{$('authFlow').style.display='block';showAuth('welcome')}},3000);
-window.onload=function(){setTimeout(function(){$('splash').classList.add('hide');var p=DB.getObj('profile');if(p.shopName){startApp()}else{$('authFlow').style.display='block';showAuth('welcome')}},1200)};
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
+
+<!-- Barcode Scanner Library (Loaded at the very end so it never blocks the splash screen) -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
 </body>
 </html>
-<!-- DF-V6-END -->
