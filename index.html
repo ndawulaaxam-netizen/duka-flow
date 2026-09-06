@@ -425,7 +425,7 @@ var ph=$('logPhone').value.trim(),pin=$('logPin').value.trim();
 if(!ph||!pin)return showToast('Enter phone and PIN',true);
 var p9=np(ph);
 hashPin(pin).then(function(h){
-api('/rest/v1/shops?select=*').then(function(r){return r.json()}).then(function(all){
+api('/rest/v1/rpc/login_lookup',{method:'POST',body:JSON.stringify({p_phone:p9,p_pin_hash:h})}).then(j).then(function(all){
 var s=null;
 if(Array.isArray(all)){for(var i=0;i<all.length;i++){if(np(all[i].phone||'')===p9){s=all[i];break}}}
 if(!s)return showToast('Shop not found. Register first.',true);
