@@ -401,9 +401,9 @@ if(np(ph).length<9)return showToast('Enter a valid phone',true);
 if(!/^\d{4}$/.test(pin))return showToast('PIN must be 4 digits',true);
 if(!$('regConsent').checked)return showToast('Please accept the Terms first',true);
 hashPin(pin).then(function(h){
-api('/rest/v1/shops?select=*').then(j).then(function(all){
+api('/rest/v1/rpc/phone_taken',{method:'POST',body:JSON.stringify({p_phone:np(ph)})}).then(j).then(function(taken){
 var p9=np(ph);
-if(Array.isArray(all)){for(var i=0;i<all.length;i++){if(np(all[i].phone||'')===p9)return showToast('Shop exists. Use Log In.',true)}}
+if(taken===true)return showToast('Shop exists. Use Log In.',true);
 var key=genId()+genId();
 api('/rest/v1/shops',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({shop_key:key,shop_name:nm,owner_name:ow,phone:ph,location:lc,pin_hash:h,sector:sc})}).then(j).then(function(nr){
 var id=(Array.isArray(nr)&&nr[0]&&nr[0].id)||'';
