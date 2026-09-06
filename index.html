@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#09090B">
-<title>DukaFlow v7.2 — Keep Your Shop Flowing</title>
+<title>DukaFlow v7.3 — Keep Your Shop Flowing</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -76,6 +76,7 @@ svg{width:20px;height:20px;vertical-align:-4px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid var(--border);box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
 .card-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sub-title{font-size:13px;font-weight:800;margin:14px 0 8px;color:var(--muted)}
 .hero{background:linear-gradient(135deg,var(--card),#1E293B);border:1px solid var(--green);border-radius:20px;padding:22px;margin-bottom:16px}
 .hero-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
 .hero-money{font-size:34px;font-weight:900;color:var(--green2);margin:6px 0}
@@ -122,7 +123,6 @@ svg{width:20px;height:20px;vertical-align:-4px}
 .consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);text-align:left;margin-bottom:16px}
 .consent input{margin-top:2px;width:18px;height:18px;accent-color:var(--green)}
 .consent a{color:var(--green2);text-decoration:none}
-.brain-card{background:linear-gradient(135deg,var(--card),#1E293B);border:1px solid var(--blue);border-radius:16px;padding:20px;margin-bottom:16px}
 .brain-change{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:700;margin-top:8px}
 .brain-change.up{background:rgba(16,185,129,0.2);color:var(--green2)}
 .brain-change.down{background:rgba(239,68,68,0.2);color:var(--red)}
@@ -130,7 +130,7 @@ svg{width:20px;height:20px;vertical-align:-4px}
 .insight-icon{color:var(--yellow)}
 .insight-text{flex:1}
 .insight-title{font-size:13px;font-weight:700;margin-bottom:4px}
-.insight-desc{font-size:12px;color:var(--muted)}
+.insight-desc{font-size:13px;color:var(--muted);line-height:1.5}
 </style>
 </head>
 <body>
@@ -220,26 +220,32 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <div id="salesList"></div></div>
 </div>
 <div class="screen" id="screen-reports">
-<div class="brain-card">
-<div class="card-title" style="color:var(--blue)"><span data-ic="chart"></span> Business Intelligence</div>
-<div id="brainComparisons"></div>
-</div>
-<div class="card" style="background:linear-gradient(135deg,var(--card),#1E293B);border:1px solid var(--blue)">
-<div class="card-title" style="color:var(--blue)">📈 Overall Performance</div>
-<div style="font-size:12px;color:var(--muted);margin-bottom:4px">Net Profit (Sales - Expenses)</div>
-<div style="font-size:36px;font-weight:900;color:#fff" id="perfNetProfit">UGX 0</div>
-</div>
+<div class="card"><div class="card-title"><span data-ic="chart"></span> Today</div>
 <div class="stats-grid">
-<div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value stat-blue" id="perfRevenue">UGX 0</div></div>
-<div class="stat-card"><div class="stat-label">Total Expenses</div><div class="stat-value stat-red" id="perfExpenses">UGX 0</div></div>
-<div class="stat-card"><div class="stat-label">Money Owed</div><div class="stat-value stat-yellow" id="perfCredits">UGX 0</div></div>
-<div class="stat-card"><div class="stat-label">Stock Value</div><div class="stat-value stat-green" id="perfStockValue">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Sales</div><div class="stat-value stat-green" id="rTodaySales">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="rTodayTx">0</div></div>
+<div class="stat-card"><div class="stat-label">Gross Profit</div><div class="stat-value stat-blue" id="rTodayGross">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Expenses</div><div class="stat-value stat-red" id="rTodayExp">UGX 0</div></div>
+</div></div>
+<div class="card"><div class="card-title">🩺 Business Health</div><div class="insight-desc" id="healthLine"></div></div>
+<div class="card"><div class="card-title">This Week</div>
+<div class="report-bar" id="weekSalesChart"></div>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-label">Week Sales</div><div class="stat-value stat-green" id="rWeekSales">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Week Profit</div><div class="stat-value stat-blue" id="rWeekProfit">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">Week Expenses</div><div class="stat-value stat-red" id="rWeekExp">UGX 0</div></div>
+<div class="stat-card"><div class="stat-label">vs Last Week</div><div id="rWeekChange"></div></div>
+</div></div>
+<div class="card"><div class="card-title"><span data-ic="box"></span> Products</div>
+<div class="sub-title">🏆 Best Sellers</div><div id="bestSellers"></div>
+<div class="sub-title">🐢 Slow Sellers</div><div id="slowSellers"></div>
+<div class="recon-row"><span style="color:var(--muted)">Stock Value</span><b id="rStockValue" class="stat-green">UGX 0</b></div>
 </div>
-<div class="card"><div class="card-title">💡 Smart Insights</div><div id="brainInsights"></div></div>
-<div class="card"><div class="card-title">📊 7-Day Sales Trend</div><div class="report-bar" id="salesChart"></div></div>
-<div class="card"><div class="card-title">🏆 Top Selling Products</div><div id="topProducts"></div></div>
-<div class="card"><div class="card-title">💸 Recent Expenses</div><div id="expenseList"></div></div>
-<button class="btn btn-dark" onclick="switchScreen('sales')"><span data-ic="cart"></span> View Sales History</button>
+<div class="card"><div class="card-title"><span data-ic="users"></span> Customers</div>
+<div class="recon-row"><span style="color:var(--muted)">Outstanding Credit</span><b id="rOutstanding" class="stat-red">UGX 0</b></div>
+<div class="recon-row"><span style="color:var(--muted)">Payments Received</span><b id="rPayments" class="stat-green">UGX 0</b></div>
+<div class="sub-title">⚠️ Top Debtors</div><div id="topDebtors"></div>
+</div>
 </div>
 <div class="screen" id="screen-reconciliation">
 <div class="card"><div class="card-title">📋 Stock Reconciliation</div>
@@ -271,7 +277,7 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <div class="card"><div class="card-title">⚠️ Account</div>
 <button class="btn btn-dark" onclick="logout()">🚪 Log Out / Switch Shop</button>
 <button class="btn btn-red" style="margin-top:12px" onclick="clearAllData()">🗑️ Delete Data on This Phone</button>
-<div style="text-align:center;font-size:12px;color:var(--muted);padding-top:12px;font-weight:600">DukaFlow v7.2.0 (Inventory UX + Credit Ledgers) • Records backed up automatically when online.</div>
+<div style="text-align:center;font-size:12px;color:var(--muted);padding-top:12px;font-weight:600">DukaFlow v7.3.0 (Intelligence) • Records backed up automatically when online.</div>
 </div>
 </div>
 </main>
@@ -404,7 +410,7 @@ const SECTOR_SKINS = {
   'Retail': { name: 'DukaFlow', icon: '🏪', stock: 'Stock', sale: 'Sale', customer: 'Customer', expense: 'Expense' },
   'Agriculture': { name: 'FarmFlow', icon: '🌾', stock: 'Inputs/Harvest', sale: 'Yield Sold', customer: 'Buyer', expense: 'Farm Cost' },
   'Manufacturing': { name: 'CraftFlow', icon: '🧶', stock: 'Materials', sale: 'Product Sold', customer: 'Client', expense: 'Production Cost' },
-  'Services': { name: 'ServiceFlow', icon: '✂️🔧', stock: 'Supplies & Tools', sale: 'Service Provided', customer: 'Client', expense: 'Business Expense' },
+  'Services': { name: 'ServiceFlow', icon: '✂️', stock: 'Supplies & Tools', sale: 'Service Provided', customer: 'Client', expense: 'Business Expense' },
   'Transport': { name: 'TransportFlow', icon: '🚚', stock: 'Fuel/Maintenance', sale: 'Trip/Fare', customer: 'Passenger', expense: 'Running Cost' },
   'Food': { name: 'FoodFlow', icon: '🍲', stock: 'Ingredients', sale: 'Meal/Order', customer: 'Diner', expense: 'Food Cost' },
   'Energy': { name: 'EnergyFlow', icon: '⛽', stock: 'Fuel/Bulk', sale: 'Dispensed', customer: 'Customer', expense: 'Operational Cost' }
@@ -612,24 +618,54 @@ function recordExpense(){var amount=parseFloat($('expenseAmount').value)||0;if(a
 function populateDropdowns(){var ps=getActive('products');var opts=ps.map(function(p){return '<option value="'+p.id+'">'+p.name+' (Stock: '+p.stock+')</option>'}).join('');$('stockProduct').innerHTML=opts}
 function renderProducts(filter){filter=filter||'';var products=getActive('products');$('productCount').textContent=products.length;var totalValue=products.reduce(function(a,p){return a+(p.stock*p.price)},0);var invEl=$('inventoryValue');if(invEl)invEl.textContent='UGX '+fmt(totalValue);var list=products;if(filter)list=list.filter(function(p){return p.name.toLowerCase().indexOf(filter.toLowerCase())>-1||p.barcode===filter});if(prodTab==='low')list=list.filter(isLow);if(prodTab==='out')list=list.filter(isOut);$('productList').innerHTML=list.length?list.map(function(p){return '<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+(isOut(p)?' <span class="stock-low">OUT</span>':isLow(p)?' <span class="stock-low">LOW</span>':'')+'</div><div class="item-meta">'+p.category+' • sell '+fmt(p.price)+' • cost '+fmt(p.cost||0)+(p.supplier?' • '+p.supplier:'')+'</div><div class="item-meta" style="color:var(--green2)">UGX '+fmt(p.price)+'</div></div><div style="text-align:right"><div class="stock-count '+(p.stock<=minFor(p)?'stock-low':'stock-ok')+'">'+p.stock+'</div><div style="font-size:10px;color:var(--muted)">in stock</div></div><div class="item-actions"><button class="action-btn" onclick="adjustStock(\''+p.id+'\',1)">+</button><button class="action-btn" onclick="adjustStock(\''+p.id+'\',-1)">−</button><button class="action-btn" onclick="deleteProduct(\''+p.id+'\')">🗑</button></div></div>'}).join(''):'<div class="empty-state">📦<p>No products here.</p></div>'}
 function renderSales(){var sales=getActive('sales'),f=$('salesDateFilter').value;var list=f?sales.filter(function(s){return String(s.date||'').indexOf(f)===0}):sales;$('salesList').innerHTML=list.length?list.slice(0,60).map(function(s){return '<div class="list-item"><div class="item-info"><div class="item-name">'+s.productName+'</div><div class="item-meta">'+new Date(s.date).toLocaleString()+' • '+s.payment+'</div></div><div style="text-align:right"><div class="amount-green">UGX '+fmt(s.total)+'</div><div class="item-meta">Qty '+s.quantity+'</div></div></div>'}).join(''):'<div class="empty-state">🛒<p>No sales yet.</p></div>'}
+function costOf(pid){var p=getActive('products').find(function(x){return x.id===pid});return p?(p.cost||0):0}
+function saleProfit(s){return (s.price-costOf(s.productId))*s.quantity}
+function dayKey(d){return d.toISOString().split('T')[0]}
+function lastNDays(n){var a=[];for(var i=n;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);a.push(dayKey(d))}return a}
+function renderReports(){var sales=getActive('sales'),ex=getActive('expenses'),ps=getActive('products'),creds=getActive('credits'),reps=getActive('repayments');
+var t=today();
+var tS=sales.filter(function(s){return String(s.date||'').indexOf(t)===0});
+$('rTodaySales').textContent='UGX '+fmt(tS.reduce(function(a,b){return a+b.total},0));
+$('rTodayTx').textContent=tS.length;
+$('rTodayGross').textContent='UGX '+fmt(tS.reduce(function(a,b){return a+saleProfit(b)},0));
+$('rTodayExp').textContent='UGX '+fmt(ex.filter(function(e){return String(e.date||'').indexOf(t)===0&&e.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0));
+var days=lastNDays(6);
+var wS=sales.filter(function(s){return days.indexOf(String(s.date||'').split('T')[0])>-1});
+var wSales=wS.reduce(function(a,b){return a+b.total},0);
+var wProfit=wS.reduce(function(a,b){return a+saleProfit(b)},0);
+var wExp=ex.filter(function(e){return days.indexOf(String(e.date||'').split('T')[0])>-1&&e.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);
+$('rWeekSales').textContent='UGX '+fmt(wSales);
+$('rWeekProfit').textContent='UGX '+fmt(wProfit);
+$('rWeekExp').textContent='UGX '+fmt(wExp);
+var prev=[];for(var i=13;i>=7;i--){var d=new Date();d.setDate(d.getDate()-i);prev.push(dayKey(d))}
+var pS=sales.filter(function(s){return prev.indexOf(String(s.date||'').split('T')[0])>-1});
+var pSales=pS.reduce(function(a,b){return a+b.total},0);
+var pProfit=pS.reduce(function(a,b){return a+saleProfit(b)},0);
+var ch=pSales>0?((wSales-pSales)/pSales*100):0;
+$('rWeekChange').innerHTML='<span class="brain-change '+(ch>=0?'up':'down')+'">'+(ch>=0?'↑':'↓')+' '+Math.abs(ch).toFixed(1)+'%</span>';
+var max=1;var bars=days.map(function(ds){var v=sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0);if(v>max)max=v;return{label:new Date(ds).toLocaleDateString('en',{weekday:'short'}),value:v}});
+$('weekSalesChart').innerHTML=bars.map(function(d){return '<div class="report-bar-item" style="height:'+((d.value/max)*100)+'px"><div class="report-bar-label">'+d.label+'</div></div>'}).join('');
+var hl='';
+if(wSales>=pSales&&wProfit>=pProfit)hl='💪 Sales and profit both grew this week. Keep pushing your best sellers.';
+else if(wSales>=pSales&&wProfit<pProfit)hl='⚠️ Sales grew but profit didn\'t keep up — your costs or expenses rose. Review pricing and supplier costs.';
+else hl='📉 Sales dipped vs last week. Your pulse chart shows your strongest day — plan stock and promos around it.';
+$('healthLine').textContent=hl;
+var agg={};sales.forEach(function(s){agg[s.productName]=agg[s.productName]||{q:0,r:0};agg[s.productName].q+=s.quantity;agg[s.productName].r+=s.total});
+var top=Object.keys(agg).sort(function(a,b){return agg[b].r-agg[a].r}).slice(0,5);
+$('bestSellers').innerHTML=top.length?top.map(function(k,i){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(i+1)+'. '+k+'</div><div class="item-meta">'+agg[k].q+' sold</div></div><div class="amount-green">UGX '+fmt(agg[k].r)+'</div></div>'}).join(''):'<div class="insight-desc">No sales yet.</div>';
+var soldNames={};sales.forEach(function(s){soldNames[s.productName]=true});
+var slow=ps.filter(function(p){return p.stock>0&&!soldNames[p.name]}).slice(0,5);
+$('slowSellers').innerHTML=slow.length?slow.map(function(p){return '<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+p.stock+' in stock, no sales yet</div></div></div>'}).join(''):'<div class="insight-desc">Everything in stock is selling. 👏</div>';
+$('rStockValue').textContent='UGX '+fmt(ps.reduce(function(a,p){return a+(p.stock*p.price)},0));
+var outstanding=creds.filter(function(c){return c.status!=='paid'}).reduce(function(a,b){return a+(b.totalAmount-b.paidAmount)},0);
+$('rOutstanding').textContent='UGX '+fmt(outstanding);
+$('rPayments').textContent='UGX '+fmt(reps.reduce(function(a,b){return a+b.amount},0));
+var debt={};creds.filter(function(c){return c.status!=='paid'}).forEach(function(c){debt[c.customerName]=(debt[c.customerName]||0)+(c.totalAmount-c.paidAmount)});
+var topD=Object.keys(debt).sort(function(a,b){return debt[b]-debt[a]}).slice(0,3);
+$('topDebtors').innerHTML=topD.length?topD.map(function(k){return '<div class="list-item"><div class="item-info"><div class="item-name">'+k+'</div></div><div class="amount-red">UGX '+fmt(debt[k])+'</div></div>'}).join(''):'<div class="insight-desc">Nobody owes you. 🎉</div>'}
 function renderDashboard(){var sales=getActive('sales'),ex=getActive('expenses'),ps=getActive('products'),s=DB.getObj('settings');var t=today();var tSales=sales.filter(function(x){return String(x.date||'').indexOf(t)===0}).reduce(function(a,b){return a+b.total},0);var tExp=ex.filter(function(x){return String(x.date||'').indexOf(t)===0&&x.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);$('todaySales').textContent='UGX '+fmt(tSales);$('todayExpenses').textContent='UGX '+fmt(tExp);$('todayProfit').textContent='UGX '+fmt(tSales-tExp);$('lowStockCount').textContent=ps.filter(function(p){return isLow(p)||isOut(p)}).length;var stockValue=ps.reduce(function(a,p){return a+(p.stock*p.price)},0);$('stockValue').textContent='UGX '+fmt(stockValue);var act=sales.slice(0,5).map(function(x){return{t:'sale',txt:'Sold '+x.quantity+'x '+x.productName,amt:x.total,d:x.date}}).concat(ex.slice(0,3).map(function(x){return{t:'exp',txt:x.category,amt:x.amount,d:x.date}})).sort(function(a,b){return new Date(b.d)-new Date(a.d)}).slice(0,8);$('recentActivity').innerHTML=act.length?act.map(function(a){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒 ':'')+a.txt+'</div><div class="item-meta">'+new Date(a.d).toLocaleString()+'</div></div><div class="'+(a.t==='sale'?'amount-green':'amount-red')+'">'+(a.t==='sale'?'+':'-')+'UGX '+fmt(a.amt)+'</div></div>'}).join(''):'<div class="empty-state">📭<p>No activity yet. Record your first sale!</p></div>'}
 function renderAttention(){var n=getNotifications().slice(0,3);var el=$('attentionList');if(!el)return;el.innerHTML=n.length?n.map(function(a){return '<div class="insight-row" onclick="switchScreen(\''+a.action+'\')"><div class="insight-icon">'+ic(a.type==='info'?'cloud':'alert')+'</div><div class="insight-text"><div class="insight-title">'+a.title+'</div><div class="insight-desc">'+a.desc+'</div></div></div>'}).join(''):'<div class="insight-desc">✅ All clear. Nothing needs your attention.</div>'}
-function renderPulse(){var sales=getActive('sales');var days=[];for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var ds=d.toISOString().split('T')[0];days.push({label:d.toLocaleDateString('en',{weekday:'short'}),value:sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0)})}var max=Math.max.apply(null,days.map(function(d){return d.value}).concat([1]));var pc=$('pulseChart');if(pc)pc.innerHTML=days.map(function(d){return '<div class="report-bar-item" style="height:'+((d.value/max)*100)+'px"><div class="report-bar-label">'+d.label+'</div></div>'}).join('');var dt=[0,0,0,0,0,0,0];sales.forEach(function(s){dt[new Date(s.date).getDay()]+=s.total});var bd=dt.indexOf(Math.max.apply(null,dt));var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];var bl=$('bestDayLine');if(bl)bl.textContent='💡 You earn the most on '+dn[bd]+'s.'}
-function renderReports(){var sales=getActive('sales'),ex=getActive('expenses'),ps=getActive('products'),creds=getActive('credits');
-var totalRevenue=sales.reduce(function(a,b){return a+b.total},0);
-var totalExpenses=ex.filter(function(e){return e.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);
-var netProfit=totalRevenue-totalExpenses;
-var totalCreditsOwed=creds.filter(function(c){return c.status!=='paid'}).reduce(function(a,b){return a+(b.totalAmount-b.paidAmount)},0);
-var totalStockValue=ps.reduce(function(a,p){return a+(p.stock*p.price)},0);
-$('perfNetProfit').textContent='UGX '+fmt(netProfit);
-$('perfRevenue').textContent='UGX '+fmt(totalRevenue);
-$('perfExpenses').textContent='UGX '+fmt(totalExpenses);
-$('perfCredits').textContent='UGX '+fmt(totalCreditsOwed);
-$('perfStockValue').textContent='UGX '+fmt(totalStockValue);
-var days=[];for(var i=6;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);var ds=d.toISOString().split('T')[0];days.push({label:d.toLocaleDateString('en',{weekday:'short'}),value:sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0)})}var max=Math.max.apply(null,days.map(function(d){return d.value}).concat([1]));$('salesChart').innerHTML=days.map(function(d){return '<div class="report-bar-item" style="height:'+((d.value/max)*100)+'px"><div class="report-bar-label">'+d.label+'</div></div>'}).join('');var agg={};sales.forEach(function(s){agg[s.productName]=agg[s.productName]||{q:0,r:0};agg[s.productName].q+=s.quantity;agg[s.productName].r+=s.total});var top=Object.keys(agg).sort(function(a,b){return agg[b].r-agg[a].r}).slice(0,5);$('topProducts').innerHTML=top.length?top.map(function(k,i){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(i+1)+'. '+k+'</div><div class="item-meta">'+agg[k].q+' units sold</div></div><div class="amount-green">UGX '+fmt(agg[k].r)+'</div></div>'}).join(''):'<div class="empty-state"><p>No data yet</p></div>';$('expenseList').innerHTML=ex.length?ex.slice(0,10).map(function(e){return '<div class="list-item"><div class="item-info"><div class="item-name">UGX '+fmt(e.amount)+'</div><div class="item-meta">'+e.category+(e.note?' • '+e.note:'')+'</div></div></div>'}).join(''):'<div class="empty-state"><p>No expenses yet</p></div>';
-renderBrainComparisons();renderBrainInsights()}
-function renderBrainComparisons(){var sales=getActive('sales'),ex=getActive('expenses');var now=new Date();var thisWeekStart=new Date(now);thisWeekStart.setDate(now.getDate()-now.getDay());var lastWeekStart=new Date(thisWeekStart);lastWeekStart.setDate(lastWeekStart.getDate()-7);var thisMonthStart=new Date(now.getFullYear(),now.getMonth(),1);var lastMonthStart=new Date(now.getFullYear(),now.getMonth()-1,1);var lastMonthEnd=new Date(now.getFullYear(),now.getMonth(),0);function getPeriodTotal(start,end){return sales.filter(function(s){var d=new Date(s.date);return d>=start&&d<=end}).reduce(function(a,b){return a+b.total},0)}var thisWeekSales=getPeriodTotal(thisWeekStart,now);var lastWeekSales=getPeriodTotal(lastWeekStart,thisWeekStart);var thisMonthSales=getPeriodTotal(thisMonthStart,now);var lastMonthSales=getPeriodTotal(lastMonthStart,lastMonthEnd);var weekChange=lastWeekSales>0?((thisWeekSales-lastWeekSales)/lastWeekSales*100):0;var monthChange=lastMonthSales>0?((thisMonthSales-lastMonthSales)/lastMonthSales*100):0;var html='<div class="stats-grid"><div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value stat-blue">UGX '+fmt(thisWeekSales)+'</div><div class="brain-change '+(weekChange>=0?'up':'down')+'">'+(weekChange>=0?'↑':'↓')+' '+Math.abs(weekChange).toFixed(1)+'%</div></div><div class="stat-card"><div class="stat-label">Last Week</div><div class="stat-value stat-blue">UGX '+fmt(lastWeekSales)+'</div></div></div><div class="stats-grid"><div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value stat-blue">UGX '+fmt(thisMonthSales)+'</div><div class="brain-change '+(monthChange>=0?'up':'down')+'">'+(monthChange>=0?'↑':'↓')+' '+Math.abs(monthChange).toFixed(1)+'%</div></div><div class="stat-card"><div class="stat-label">Last Month</div><div class="stat-value stat-blue">UGX '+fmt(lastMonthSales)+'</div></div></div>';$('brainComparisons').innerHTML=html}
-function renderBrainInsights(){var sales=getActive('sales'),ps=getActive('products');var dayTotals=[0,0,0,0,0,0,0];sales.forEach(function(s){var d=new Date(s.date).getDay();dayTotals[d]+=s.total});var bestDay=dayTotals.indexOf(Math.max.apply(null,dayTotals));var dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];var productTrends={};sales.forEach(function(s){if(!productTrends[s.productId])productTrends[s.productId]={name:s.productName,recent:0,older:0};var daysAgo=Math.floor((new Date()-new Date(s.date))/86400000);if(daysAgo<=7)productTrends[s.productId].recent+=s.total;else if(daysAgo<=14)productTrends[s.productId].older+=s.total});var rising=[],dying=[];Object.keys(productTrends).forEach(function(pid){var p=productTrends[pid];if(p.older>0&&p.recent>p.older*1.2)rising.push(p);else if(p.recent<p.older*0.8)dying.push(p)});var insights=[];insights.push({icon:'📅',title:'Best Day: '+dayNames[bestDay],desc:'You earn the most on '+dayNames[bestDay]+'s'});if(rising.length>0)insights.push({icon:'🌱',title:rising.length+' Rising Product'+(rising.length>1?'s':''),desc:rising[0].name+' is selling '+(rising[0].recent>rising[0].older?'more':'less')+' this week'});if(dying.length>0)insights.push({icon:'📉',title:dying.length+' Dying Product'+(dying.length>1?'s':''),desc:dying[0].name+' sales are slowing down'});$('brainInsights').innerHTML=insights.map(function(i){return '<div class="insight-row"><div class="insight-icon">'+i.icon+'</div><div class="insight-text"><div class="insight-title">'+i.title+'</div><div class="insight-desc">'+i.desc+'</div></div></div>'}).join('')}
+function renderPulse(){var sales=getActive('sales');var days=lastNDays(6);var max=1;var bars=days.map(function(ds){var v=sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0);if(v>max)max=v;return{label:new Date(ds).toLocaleDateString('en',{weekday:'short'}),value:v}});var pc=$('pulseChart');if(pc)pc.innerHTML=bars.map(function(d){return '<div class="report-bar-item" style="height:'+((d.value/max)*100)+'px"><div class="report-bar-label">'+d.label+'</div></div>'}).join('');var dt=[0,0,0,0,0,0,0];sales.forEach(function(s){dt[new Date(s.date).getDay()]+=s.total});var bd=dt.indexOf(Math.max.apply(null,dt));var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];var bl=$('bestDayLine');if(bl)bl.textContent='💡 You earn the most on '+dn[bd]+'s.'}
 function renderReconciliation(){$('reconProducts').innerHTML=getActive('products').map(function(p){return '<div class="card" style="background:var(--bg);padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div><b style="font-size:14px">'+p.name+'</b><div style="font-size:12px;color:var(--muted)">System: '+p.stock+'</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--muted)">Physical:</span><input type="number" class="form-input" style="width:80px;padding:10px" id="recon_'+p.id+'" value="'+p.stock+'" oninput="updateReconSummary()"></div></div></div>'}).join('');updateReconSummary()}
 function updateReconSummary(){var ps=getActive('products');var exp=0,phys=0,rev=0;ps.forEach(function(p){exp+=p.stock;rev+=p.stock*p.price;var el=$('recon_'+p.id);phys+=el?(parseInt(el.value)||0):p.stock});$('reconExpected').textContent=exp;$('reconPhysical').textContent=phys;$('reconDiscrepancy').textContent=phys-exp;$('reconExpectedRevenue').textContent='UGX '+fmt(rev)}
 function saveReconciliation(){var rec={id:genId(),date:today(),cash:parseFloat($('reconCash').value)||0,items:getActive('products').map(function(p){var el=$('recon_'+p.id);return{name:p.name,system:p.stock,physical:el?(parseInt(el.value)||0):p.stock}}),savedAt:iso()};var r=DB.get('reconciliations');r.unshift(rec);DB.set('reconciliations',r);markPending();showToast('Reconciliation report saved ✓')}
