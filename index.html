@@ -559,7 +559,20 @@ DB.set('repayments',mergeDated(DB.get('repayments'),cr,function(r,id){return{id:
 return true;
 }).catch(function(){return false});
 }
-function logout(){if(!confirm('Log out? Your records stay safe on this phone.'))return;localStorage.removeItem('df_profile');location.reload()}
+function exportData(){ var sales=getActive('sales'),ps=getActive('products'),creds=getActive('credits'),p=DB.getObj('profile'); var csv='DUKAFLOW EXPORT - '+(p.shopName||'My Shop')+' - '+today()+'
+
+SALES
+Date,Product,Qty,Price,Total,Payment,Customer
+'; sales.forEach(function(s){csv+=String(s.date).slice(0,10)+',"'+(s.productName||'').replace(/"/g,'""')+'",'+s.quantity+','+s.price+','+s.total+','+s.payment+',"'+(s.customer||'').replace(/"/g,'""')+'"
+'}); csv+='
+PRODUCTS
+Name,Category,Sell Price,Cost,Stock,Supplier
+'; ps.forEach(function(x){csv+='"'+(x.name||'').replace(/"/g,'""')+'",'+x.category+','+x.price+','+(x.cost||0)+','+x.stock+',"'+(x.supplier||'').replace(/"/g,'""')+'"
+'}); csv+='
+CREDITS
+Customer,Total,Paid,Status,Date
+'; creds.forEach(function(c){csv+='"'+(c.customerName||'').replace(/"/g,'""')+'",'+c.totalAmount+','+c.paidAmount+','+c.status+','+String(c.date).slice(0,10)+'
+'}); var blob=new Blob([csv],{type:'text/csv'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dukaflow-'+(p.shopName||'shop').replace(/[^a-z0-9]/gi,'-').toLowerCase()+'-'+today()+'.csv'; document.body.appendChild(a);a.click();document.body.removeChild(a); showToast('Export downloaded 📤'); } function logout(){if(!confirm('Log out? Your records stay safe on this phone.'))return;localStorage.removeItem('df_profile');location.reload()}
 function clearAllData(){if(!confirm('DELETE all records on THIS PHONE? (Cloud backup stays safe)'))return;if(!confirm('Final confirmation?'))return;localStorage.clear();location.reload()}
 function startApp(){
 $('authFlow').style.display='none';$('appShell').style.display='flex';$('splash').classList.add('hide');
