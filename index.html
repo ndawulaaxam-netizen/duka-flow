@@ -397,7 +397,7 @@ setTimeout(function(){
     var p = null;
     try { p = JSON.parse(localStorage.getItem('df_profile')); } catch(e){}
     if(p && p.shopName){
-      document.getElementById('appShell').style.display='flex';
+      startApp();
     } else {
       document.getElementById('authFlow').style.display='block';
       document.getElementById('screen-welcome').classList.add('active');
