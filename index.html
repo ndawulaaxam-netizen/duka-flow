@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#09090B">
-<title>DukaFlow v7.6 — Keep Your Shop Flowing</title>
+<title>DukaFlow v8 — Vertical Native</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -159,7 +159,7 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <div class="form-group"><label class="form-label">Owner Name *</label><input class="form-input" id="regOwner" placeholder="e.g., John Kato"></div>
 <div class="form-group"><label class="form-label">Phone Number *</label><input type="tel" class="form-input" id="regPhone" placeholder="e.g., 0772 123 456"></div>
 <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="regLocation" placeholder="e.g., Wakiso, Kampala"></div>
-<div class="form-group"><label class="form-label">Business Type *</label><select class="form-input" id="regSector"><option value="Retail">🏪 DukaFlow - Retail Shop</option><option value="Agriculture">🌾 FarmFlow - Agriculture</option><option value="Manufacturing">🧶 CraftFlow - Manufacturing</option><option value="Services">✂️ ServiceFlow - Salons, Mechanics, Services</option><option value="Transport">🚚 TransportFlow - Transport/Logistics</option><option value="Food">🍲 FoodFlow - Restaurant/Food Vendor</option><option value="Energy">⛽ EnergyFlow - Fuel/Energy</option></select></div>
+<div class="form-group"><label class="form-label">Business Type *</label><select class="form-input" id="regSector" onchange="previewSector(this.value)"><option value="Retail">🏪 DukaFlow - Retail Shop</option><option value="Agriculture">🌾 FarmFlow - Agriculture</option><option value="Manufacturing">🧶 CraftFlow - Manufacturing</option><option value="Services">✂️ ServiceFlow - Salons, Mechanics, Services</option><option value="Transport">🚚 TransportFlow - Transport/Logistics</option><option value="Food">🍲 FoodFlow - Restaurant/Food Vendor</option><option value="Energy">⛽ EnergyFlow - Fuel/Energy</option></select></div>
 <div class="form-group"><label class="form-label">Choose 4-Digit PIN *</label><input type="password" class="form-input" id="regPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
 <label class="consent"><input type="checkbox" id="regConsent"><span>I accept the <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>. I am happy to join the DukaFlow family that helps shops like mine get better stock and service. 🤝</span></label>
 <button class="btn btn-green" onclick="doRegister()">✅ Register & Start</button>
@@ -213,7 +213,7 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <button class="btn btn-dark" id="tabOut" onclick="setProdTab('out')">Out</button>
 </div>
 <button class="btn btn-green" style="margin-bottom:16px" onclick="openModal('addProductModal')"><span data-ic="plus"></span> Add New Product</button>
-<div class="card"><div class="card-title"><span data-ic="box"></span> Inventory (<span id="productCount">0</span>) • <span id="inventoryValue" class="stat-green">UGX 0</span></div><div id="productList"></div></div>
+<div class="card"><div class="card-title"><span data-ic="box"></span> <span id="stockTitle">Inventory</span> (<span id="productCount">0</span>) • <span id="inventoryValue" class="stat-green">UGX 0</span></div><div id="productList"></div></div>
 </div>
 <div class="screen" id="screen-sales">
 <div class="card"><div class="card-title"><span data-ic="cart"></span> Sales History</div>
@@ -279,7 +279,7 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <button class="btn btn-dark" onclick="exportData()">📤 Export My Data (CSV)</button>
 <button class="btn btn-dark" style="margin-top:12px" onclick="logout()">🚪 Log Out / Switch Shop</button>
 <button class="btn btn-red" style="margin-top:12px" onclick="clearAllData()">🗑️ Delete Data on This Phone</button>
-<div style="text-align:center;font-size:12px;color:var(--muted);padding-top:12px;font-weight:600">DukaFlow v7.6.0 (Service Mode) • Records backed up automatically when online.</div>
+<div style="text-align:center;font-size:12px;color:var(--muted);padding-top:12px;font-weight:600">DukaFlow v8.0 (Vertical Native) • Records backed up automatically when online.</div>
 </div>
 </div>
 </main>
@@ -294,16 +294,16 @@ svg{width:20px;height:20px;vertical-align:-4px}
 
 <div class="modal-overlay" id="actionSheet"><div class="modal">
 <div class="sheet-title">What do you want to do?</div>
-<button class="btn btn-green" style="margin-bottom:12px" onclick="closeSheet();openSaleFlow()"><span data-ic="cart"></span> Record Sale (goods/stock)</button>
-<button class="btn btn-dark" style="margin-bottom:12px" onclick="closeSheet();openModal('stockModal')"><span data-ic="box"></span> Receive Stock</button>
-<button class="btn btn-yellow" style="margin-bottom:12px" onclick="closeSheet();openModal('expenseModal')"><span data-ic="receipt"></span> Add Expense</button>
-<button class="btn btn-dark" style="margin-bottom:12px" onclick="closeSheet();openServiceFlow()"><span data-ic="receipt"></span> Record Service (no stock)</button>
-<button class="btn btn-purple" style="margin-bottom:12px" onclick="closeSheet();switchScreen('credits')"><span data-ic="users"></span> Record Credit</button>
+<button id="asSale" class="btn btn-green" style="margin-bottom:12px" onclick="closeSheet();openSaleFlow()"><span data-ic="cart"></span> Record Sale (goods/stock)</button>
+<button id="asStock" class="btn btn-dark" style="margin-bottom:12px" onclick="closeSheet();openModal('stockModal')"><span data-ic="box"></span> Receive Stock</button>
+<button id="asExpense" class="btn btn-yellow" style="margin-bottom:12px" onclick="closeSheet();openModal('expenseModal')"><span data-ic="receipt"></span> Add Expense</button>
+<button id="asService" class="btn btn-dark" style="margin-bottom:12px" onclick="closeSheet();openServiceFlow()"><span data-ic="receipt"></span> Record Service (no stock)</button>
+<button id="asCredit" class="btn btn-purple" style="margin-bottom:12px" onclick="closeSheet();switchScreen('credits')"><span data-ic="users"></span> Record Credit</button>
 <button class="btn btn-outline" onclick="closeSheet()">Cancel</button>
 </div></div>
 
 <div class="modal-overlay" id="saleModal"><div class="modal">
-<div class="modal-header"><b>🛒 Record Sale</b><button class="modal-close" onclick="closeModal('saleModal')">✕</button></div>
+<div class="modal-header"><b id="saleModalTitle">🛒 Record Sale</b><button class="modal-close" onclick="closeModal('saleModal')">✕</button></div>
 <div id="saleStep1">
 <div style="display:flex;gap:10px">
 <input class="form-input" id="sfSearch" placeholder="Search product..." oninput="sfRenderList(this.value)" style="flex:1">
@@ -338,7 +338,7 @@ svg{width:20px;height:20px;vertical-align:-4px}
 </div></div>
 
 <div class="modal-overlay" id="stockModal"><div class="modal">
-<div class="modal-header"><b>📦 Receive Stock</b><button class="modal-close" onclick="closeModal('stockModal')">✕</button></div>
+<div class="modal-header"><b id="stockModalTitle">📦 Receive Stock</b><button class="modal-close" onclick="closeModal('stockModal')">✕</button></div>
 <button type="button" class="btn btn-purple" style="margin-bottom:16px" onclick="openScanner(findProductByBarcode)"><span data-ic="scan"></span> Scan Barcode</button>
 <div class="form-group"><label class="form-label">Product</label><select class="form-input" id="stockProduct"></select></div>
 <div class="form-row">
@@ -349,8 +349,8 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <button class="btn btn-dark" onclick="receiveStock()">✅ Save Stock</button>
 </div></div>
 <div class="modal-overlay" id="expenseModal"><div class="modal">
-<div class="modal-header"><b>💸 Record Expense</b><button class="modal-close" onclick="closeModal('expenseModal')">✕</button></div>
-<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="expenseCategory"><option>Transport</option><option>Fuel</option><option>Maintenance</option><option>Supplies</option><option>Rent</option><option>Packaging</option><option>Utilities</option><option>Marketing</option><option>Food</option><option>Stock Purchase</option><option>Other</option></select></div>
+<div class="modal-header"><b id="expenseModalTitle">💸 Record Expense</b><button class="modal-close" onclick="closeModal('expenseModal')">✕</button></div>
+<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="expenseCategory"></select></div>
 <div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="expenseAmount"></div>
 <div class="form-group"><label class="form-label">Note</label><input class="form-input" id="expenseNote"></div>
 <button class="btn btn-yellow" onclick="recordExpense()">✅ Save Expense</button>
@@ -364,7 +364,7 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <input class="form-input" id="newProductBarcode" placeholder="Type or scan" style="flex:1">
 <button type="button" class="btn btn-dark" style="width:auto;padding:14px 18px" onclick="openScanner(fillNewProductBarcode)"><span data-ic="scan"></span></button>
 </div></div>
-<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="newProductCategory"><option>Grocery</option><option>Beverage</option><option>Dairy</option><option>Household</option><option>Bakery</option><option>Electronics</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="newProductCategory"></select></div>
 <div class="form-row">
 <div class="form-group"><label class="form-label">Selling Price</label><input type="number" class="form-input" id="newProductPrice"></div>
 <div class="form-group"><label class="form-label">Cost Price</label><input type="number" class="form-input" id="newProductCost"></div>
@@ -417,20 +417,38 @@ setTimeout(function(){
 </script>
 
 <script>var CLOUD_URL='https://mrkawvyaybphbfpqrvqb.supabase.co';
-const SECTOR_SKINS = {
-  'Retail': { name: 'DukaFlow', icon: '🏪', stock: 'Stock', sale: 'Sale', customer: 'Customer', expense: 'Expense' },
-  'Agriculture': { name: 'FarmFlow', icon: '🌾', stock: 'Inputs/Harvest', sale: 'Yield Sold', customer: 'Buyer', expense: 'Farm Cost' },
-  'Manufacturing': { name: 'CraftFlow', icon: '🧶', stock: 'Materials', sale: 'Product Sold', customer: 'Client', expense: 'Production Cost' },
-  'Services': { name: 'ServiceFlow', icon: '✂️', stock: 'Supplies & Tools', sale: 'Service Provided', customer: 'Client', expense: 'Business Expense' },
-  'Transport': { name: 'TransportFlow', icon: '🚚', stock: 'Fuel/Maintenance', sale: 'Trip/Fare', customer: 'Passenger', expense: 'Running Cost' },
-  'Food': { name: 'FoodFlow', icon: '🍲', stock: 'Ingredients', sale: 'Meal/Order', customer: 'Diner', expense: 'Food Cost' },
-  'Energy': { name: 'EnergyFlow', icon: '⛽', stock: 'Fuel/Bulk', sale: 'Dispensed', customer: 'Customer', expense: 'Operational Cost' }
+var SECTOR_THEMES={
+'Retail':{app:'DukaFlow',tag:'Keep Your Shop Flowing',c1:'#10B981',c2:'#34D399',c3:'#059669',e:'🛒',hero:"Today's Sales",navStock:'Stock',stockTitle:'Inventory',sale:'Record Sale (goods/stock)',stock:'Receive Stock',expense:'Add Expense',service:'Record Service (no stock)',credit:'Record Credit',cats:['Grocery','Beverage','Dairy','Household','Bakery','Electronics','Other'],ecats:['Transport','Fuel','Maintenance','Supplies','Rent','Packaging','Utilities','Marketing','Food','Stock Purchase','Other']},
+'Agriculture':{app:'FarmFlow',tag:'Grow Your Harvest',c1:'#84CC16',c2:'#A3E635',c3:'#65A30D',e:'🌾',hero:"Today's Harvest",navStock:'Inputs & Harvest',stockTitle:'Inputs & Harvest',sale:'Record Yield Sold',stock:'Receive Inputs/Harvest',expense:'Add Farm Cost',service:'Record Service (no stock)',credit:'Record Credit',cats:['Seeds','Fertilizer','Crop','Livestock','Produce','Other'],ecats:['Seeds','Fertilizer','Labor','Transport','Water','Equipment','Rent','Other']},
+'Manufacturing':{app:'CraftFlow',tag:'Make & Sell More',c1:'#8B5CF6',c2:'#A78BFA',c3:'#7C3AED',e:'🧶',hero:"Today's Production",navStock:'Materials',stockTitle:'Materials',sale:'Record Product Sold',stock:'Receive Materials',expense:'Add Production Cost',service:'Record Service (no stock)',credit:'Record Credit',cats:['Raw Material','Work-in-Progress','Finished Goods','Tools','Other'],ecats:['Raw Materials','Labor','Power','Rent','Equipment','Transport','Other']},
+'Services':{app:'ServiceFlow',tag:'Book & Earn More',c1:'#EC4899',c2:'#F472B6',c3:'#DB2777',e:'✂️',hero:"Today's Services",navStock:'Supplies & Products',stockTitle:'Supplies & Products',sale:'Record Service',stock:'Receive Supplies',expense:'Add Business Expense',service:'Record Service (no stock)',credit:'Record Credit',cats:['Hair','Nail','Beauty','Tools','Products','Other'],ecats:['Supplies','Rent','Electricity','Water','Marketing','Salaries','Other']},
+'Transport':{app:'TransportFlow',tag:'Move & Earn More',c1:'#F59E0B',c2:'#FBBF24',c3:'#D97706',e:'🚚',hero:"Today's Fares",navStock:'Parts & Fuel',stockTitle:'Parts & Fuel',sale:'Record Trip/Fare',stock:'Receive Parts',expense:'Add Running Cost',service:'Record Trip (no stock)',credit:'Record Credit',cats:['Spare Parts','Accessories','Fuel','Lubricants','Other'],ecats:['Fuel','Maintenance','Parking','Permits','Insurance','Rent','Other']},
+'Food':{app:'FoodFlow',tag:'Serve & Profit Daily',c1:'#EF4444',c2:'#F87171',c3:'#DC2626',e:'🍲',hero:"Today's Orders",navStock:'Ingredients',stockTitle:'Ingredients',sale:'Record Meal/Order',stock:'Receive Ingredients',expense:'Add Food Cost',service:'Record Order (no stock)',credit:'Record Credit',cats:['Ingredients','Beverages','Packaging','Menu Items','Other'],ecats:['Ingredients','Gas','Rent','Labor','Packaging','Utilities','Other']},
+'Energy':{app:'EnergyFlow',tag:'Fuel Your Profits',c1:'#EAB308',c2:'#FACC15',c3:'#CA8A04',e:'⛽',hero:"Today's Dispensed",navStock:'Fuel & Bulk',stockTitle:'Fuel & Bulk',sale:'Record Dispensed',stock:'Receive Fuel/Bulk',expense:'Add Operational Cost',service:'Record Service (no stock)',credit:'Record Credit',cats:['Petrol','Diesel','Kerosene','Lubricants','Gas','Other'],ecats:['Bulk Purchase','Transport','Rent','Salaries','Maintenance','Other']}
 };
-function getSkin() {
-  var p = DB.getObj('profile');
-  var sector = (p && p.sector) ? p.sector : 'Retail';
-  return SECTOR_SKINS[sector] || SECTOR_SKINS['Retail'];
+var themeOverride='';
+function getTheme(){var s=themeOverride||((DB.getObj('profile').sector)||'Retail');return SECTOR_THEMES[s]||SECTOR_THEMES['Retail'];}
+function fillCategories(){var t=getTheme();var pc=$('newProductCategory');if(pc)pc.innerHTML=t.cats.map(function(c){return '<option>'+c+'</option>'}).join('');var ec=$('expenseCategory');if(ec)ec.innerHTML=t.ecats.map(function(c){return '<option>'+c+'</option>'}).join('');}
+function applyTheme(){
+var t=getTheme();
+var r=document.documentElement.style;
+r.setProperty('--green',t.c1);r.setProperty('--green2',t.c2);r.setProperty('--green3',t.c3);
+document.title=t.app+' — '+t.tag;
+var h1=document.querySelector('.header-left h1');if(h1)h1.innerHTML=t.app.replace('Flow','<span>Flow</span>');
+var hero=document.querySelector('.hero-label');if(hero)hero.textContent=t.hero;
+var ns=document.querySelector('#nav-products .nav-label');if(ns)ns.textContent=t.navStock;
+var st=$('stockTitle');if(st)st.textContent=t.stockTitle;
+if($('asSale'))$('asSale').innerHTML=ic('cart')+' '+t.sale;
+if($('asStock'))$('asStock').innerHTML=ic('box')+' '+t.stock;
+if($('asExpense'))$('asExpense').innerHTML=ic('receipt')+' '+t.expense;
+if($('asService'))$('asService').innerHTML=ic('receipt')+' '+t.service;
+if($('asCredit'))$('asCredit').innerHTML=ic('users')+' '+t.credit;
+var smt=$('saleModalTitle');if(smt)smt.textContent=t.e+' '+t.sale;
+var skt=$('stockModalTitle');if(skt)skt.textContent='📦 '+t.stock;
+var emt=$('expenseModalTitle');if(emt)emt.textContent='💸 '+t.expense;
+fillCategories();
 }
+function previewSector(v){themeOverride=v;applyTheme();}
 var CLOUD_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
 function $(id){return document.getElementById(id)}
 var DB={
@@ -456,7 +474,7 @@ function j(r){if(!r.ok){showToast('Connection problem. Try again.',true);throw n
 function api(path,opts){opts=opts||{};var hk={};try{var pf=JSON.parse(localStorage.getItem('df_profile'));if(pf&&pf.shopKey)hk['x-shop-key']=pf.shopKey}catch(e){}opts.headers=Object.assign({'apikey':CLOUD_KEY,'Authorization':'Bearer '+CLOUD_KEY,'Content-Type':'application/json'},hk,opts.headers||{});return fetch(CLOUD_URL+path,opts)}
 function showAuth(s){document.querySelectorAll('.auth-screen').forEach(function(x){x.classList.remove('active')});$('screen-'+s).classList.add('active')}
 function switchScreen(s){document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')});$('screen-'+s).classList.add('active');document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active')});var n=$('nav-'+s);if(n)n.classList.add('active');if(s==='reconciliation')renderReconciliation();$('notifPanel').style.display='none'}
-function openModal(id){$(id).classList.add('active');if(id==='stockModal')populateDropdowns()}
+function openModal(id){$(id).classList.add('active');if(id==='stockModal')populateDropdowns();if(id==='addProductModal'||id==='expenseModal')fillCategories()}
 function closeModal(id){$(id).classList.remove('active')}
 function openSheet(){$('actionSheet').classList.add('active')}
 function closeSheet(){$('actionSheet').classList.remove('active')}
@@ -493,7 +511,8 @@ if(!localStorage.getItem('df_expenses'))DB.set('expenses',[]);
 if(!localStorage.getItem('df_credits'))DB.set('credits',[]);
 if(!localStorage.getItem('df_repayments'))DB.set('repayments',[]);
 if(!localStorage.getItem('df_settings'))DB.setObj('settings',{capital:0,lowStockThreshold:10});
-showToast('Welcome to DukaFlow! 🎉');
+themeOverride='';
+showToast('Welcome to '+getTheme().app+'! 🎉');
 startApp();
 });
 });
@@ -508,6 +527,7 @@ api('/rest/v1/rpc/login_lookup',{method:'POST',body:JSON.stringify({p_phone:p9,p
 var s=(Array.isArray(all)&&all[0])||null;
 if(!s)return showToast('Wrong phone or PIN',true);
 DB.setObj('profile',{shopName:s.shop_name||s.name||'My Shop',owner:s.owner_name||s.owner||'',phone:ph,location:s.location||'',createdAt:iso(),cloudId:s.id,shopKey:s.shop_key||'',sector:s.sector||'Retail',pinHash:s.pin_hash||''});
+themeOverride='';
 restore(s.id).then(function(){showToast('Welcome back! 👋');startApp()});
 });
 });
@@ -578,14 +598,7 @@ $('authFlow').style.display='none';$('appShell').style.display='flex';$('splash'
 if(!localStorage.getItem('df_v4_resync')){localStorage.setItem('df_v4_resync','1');['sales','expenses','products'].forEach(function(k){var a=DB.get(k);a.forEach(function(r){r.synced=false});DB.set(k,a)});}
 injectIcons();loadSettings();renderAll();updatePending();syncAll();renderNotifications();
 }
-function applySkin(){
-  var skin = getSkin();
-  var h1 = document.querySelector('.header-left h1');
-  if(h1) h1.innerHTML = skin.name.replace('Flow','<span>Flow</span>');
-  var navProducts = document.querySelector('#nav-products .nav-label');
-  if(navProducts) navProducts.textContent = skin.stock;
-}
-function loadSettings(){var p=DB.getObj('profile'),s=DB.getObj('settings');$('shopNameDisplay').textContent=p.shopName||'My Shop';applySkin();$('settingShopName').value=p.shopName||'';$('settingOwner').value=p.owner||'';$('settingPhone').value=p.phone||'';$('settingCapital').value=s.capital||'';$('settingLowStock').value=s.lowStockThreshold||10}
+function loadSettings(){var p=DB.getObj('profile'),s=DB.getObj('settings');applyTheme();$('shopNameDisplay').textContent=p.shopName||'My Shop';$('settingShopName').value=p.shopName||'';$('settingOwner').value=p.owner||'';$('settingPhone').value=p.phone||'';$('settingCapital').value=s.capital||'';$('settingLowStock').value=s.lowStockThreshold||10}
 function saveSettings(){var p=DB.getObj('profile');p.shopName=$('settingShopName').value;p.owner=$('settingOwner').value;p.phone=$('settingPhone').value;DB.setObj('profile',p);DB.setObj('settings',{capital:parseFloat($('settingCapital').value)||0,lowStockThreshold:parseInt($('settingLowStock').value)||10});$('shopNameDisplay').textContent=p.shopName||'My Shop';showToast('Settings saved ✓');markPending()}
 function addProduct(){
 var name=$('newProductName').value.trim();
@@ -651,16 +664,14 @@ $('rWeekExp').textContent='UGX '+fmt(wExp);
 var prev=[];for(var i=13;i>=7;i--){var d=new Date();d.setDate(d.getDate()-i);prev.push(dayKey(d))}
 var pS=sales.filter(function(s){return prev.indexOf(String(s.date||'').split('T')[0])>-1});
 var pSales=pS.reduce(function(a,b){return a+b.total},0);
-var pProfit=pS.reduce(function(a,b){return a+saleProfit(b)},0);
 var ch=pSales>0?((wSales-pSales)/pSales*100):0;
 $('rWeekChange').innerHTML='<span class="brain-change '+(ch>=0?'up':'down')+'">'+(ch>=0?'↑':'↓')+' '+Math.abs(ch).toFixed(1)+'%</span>';
 var bars=days.map(function(ds){return{l:new Date(ds+'T00:00:00').toLocaleDateString('en',{weekday:'short'}),v:sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0)}});
 var mx=Math.max.apply(null,bars.map(function(x){return x.v}).concat([1]));
 $('weekSalesChart').innerHTML=bars.map(function(x){return '<div class="report-bar-item" style="height:'+((x.v/mx)*100)+'px"><div class="report-bar-label">'+x.l+'</div></div>'}).join('');
-var hl='';
-if(wSales>=pSales&&wProfit>=pProfit)hl='💪 Sales and profit both grew this week. Keep pushing your best sellers.';
-else if(wSales>=pSales)hl='⚠️ Sales grew but profit didn\'t keep up — your costs or expenses rose. Review pricing and supplier costs.';
-else hl='📉 Sales dipped vs last week. Your pulse chart shows your strongest day — plan stock and promos around it.';
+var hl='';var t2=getTheme();
+if(wSales>=pSales)hl='💪 Sales grew this week. Keep pushing your best sellers.';
+else hl='📉 Sales dipped vs last week. Check your pulse chart for your strongest day.';
 $('healthLine').textContent=hl;
 var agg={};sales.forEach(function(s){agg[s.productName]=agg[s.productName]||{q:0,r:0};agg[s.productName].q+=s.quantity;agg[s.productName].r+=s.total});
 var top=Object.keys(agg).sort(function(a,b){return agg[b].r-agg[a].r}).slice(0,5);
@@ -741,113 +752,46 @@ refreshBusy=true;
 setCloud('wait');
 pushPendingToCloud().then(function(){
 var prof=DB.getObj('profile');
-if(!prof.cloudId){
-return ensureShop().then(function(id){return restore(id)});
-}
+if(!prof.cloudId){return ensureShop().then(function(id){return restore(id)});}
 return restore(prof.cloudId);
 }).then(function(ok){
 if(!ok)throw new Error('restore-failed');
-renderAll();
-updatePending();
-renderNotifications();
-showToast('Refresh complete ✓');
-}).catch(function(){
-updatePending();
-showToast('Refresh failed. Check connection.',true);
-}).then(function(){
-refreshBusy=false;
-});
+renderAll();updatePending();renderNotifications();showToast('Refresh complete ✓');
+}).catch(function(){updatePending();showToast('Refresh failed. Check connection.',true);
+}).then(function(){refreshBusy=false});
 }
-var scannerInstance = null;
-var scannerCallback = null;
-function openScanner(cb) {
-  scannerCallback = cb;
-  openModal('scannerModal');
-  setTimeout(function() {
-    scannerInstance = new Html5Qrcode("reader");
-    scannerInstance.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 150 } },
-      function(decodedText) {
-        scannerInstance.stop().then(function() {
-          scannerInstance.clear();
-          closeModal('scannerModal');
-          if (scannerCallback) scannerCallback(decodedText);
-        }).catch(function(err) { console.log(err); });
-      },
-      function(errorMessage) {
-      }
-    ).catch(function(err) {
-      showToast("Camera error. Check permissions.", true);
-      closeModal('scannerModal');
-    });
-  }, 300);
+var scannerInstance=null;var scannerCallback=null;
+function openScanner(cb){
+scannerCallback=cb;openModal('scannerModal');
+setTimeout(function(){
+scannerInstance=new Html5Qrcode("reader");
+scannerInstance.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:150}},
+function(decodedText){scannerInstance.stop().then(function(){scannerInstance.clear();closeModal('scannerModal');if(scannerCallback)scannerCallback(decodedText)}).catch(function(err){console.log(err)})},
+function(errorMessage){}
+).catch(function(err){showToast("Camera error. Check permissions.",true);closeModal('scannerModal')});
+},300);
 }
-function stopScanner() {
-  if (scannerInstance) {
-    scannerInstance.stop().then(function() {
-      scannerInstance.clear();
-    }).catch(function(err) { console.log(err); });
-  }
-  closeModal('scannerModal');
+function stopScanner(){if(scannerInstance){scannerInstance.stop().then(function(){scannerInstance.clear()}).catch(function(err){console.log(err)})}closeModal('scannerModal')}
+function fillNewProductBarcode(code){$('newProductBarcode').value=code}
+function searchProductByBarcode(code){$('productSearch').value=code;renderProducts(code)}
+function findProductByBarcode(code){
+var products=getActive('products');var found=null;
+for(var i=0;i<products.length;i++){if(products[i].barcode===code){found=products[i];break}}
+if(found){selectScannedProduct(found);return}
+showToast('Checking global network...',false);
+api('/rest/v1/global_products?barcode=eq.'+encodeURIComponent(code)+'&select=*')
+.then(function(r){return r.json()})
+.then(function(data){
+if(Array.isArray(data)&&data.length>0){
+var gp=data[0];var ps=DB.get('products');
+var newProd={id:genId(),name:gp.name||'Unknown Item',barcode:code,category:gp.category||'Other',price:parseFloat(gp.default_price)||0,stock:0,deleted:false,synced:false};
+ps.push(newProd);DB.set('products',ps);markPending();renderProducts();selectScannedProduct(newProd);
+showToast('Added '+newProd.name+' from global network!');
+}else{showToast("Product not found. Add it manually!",true)}
+}).catch(function(){showToast("Network error checking global database.",true)});
 }
-function fillNewProductBarcode(code) {
-  $('newProductBarcode').value = code;
-}
-function searchProductByBarcode(code) {
-  $('productSearch').value = code;
-  renderProducts(code);
-}
-function findProductByBarcode(code) {
-  var products = getActive('products');
-  var found = null;
-  for (var i = 0; i < products.length; i++) {
-    if (products[i].barcode === code) {
-      found = products[i];
-      break;
-    }
-  }
-  if (found) {
-    selectScannedProduct(found);
-    return;
-  }
-  showToast('Checking global network...', false);
-  api('/rest/v1/global_products?barcode=eq.' + encodeURIComponent(code) + '&select=*')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (Array.isArray(data) && data.length > 0) {
-        var gp = data[0];
-        var ps = DB.get('products');
-        var newProd = {
-          id: genId(),
-          name: gp.name || 'Unknown Item',
-          barcode: code,
-          category: gp.category || 'Other',
-          price: parseFloat(gp.default_price) || 0,
-          stock: 0,
-          deleted: false,
-          synced: false
-        };
-        ps.push(newProd);
-        DB.set('products', ps);
-        markPending();
-        renderProducts();
-        selectScannedProduct(newProd);
-        showToast('Added ' + newProd.name + ' from global network!');
-      } else {
-        showToast("Product not found. Add it manually!", true);
-      }
-    })
-    .catch(function() {
-      showToast("Network error checking global database.", true);
-    });
-}
-function selectScannedProduct(found) {
-  if ($('stockModal').classList.contains('active')) {
-    populateDropdowns();
-    $('stockProduct').value = found.id;
-    showToast("Selected: " + found.name);
-  }
+function selectScannedProduct(found){
+if($('stockModal').classList.contains('active')){populateDropdowns();$('stockProduct').value=found.id;showToast("Selected: "+found.name)}
 }
 function openServiceFlow(){$('svName').value='';$('svAmount').value='';$('svCustomer').value='';$('svPayment').value='Cash';openModal('serviceModal')}
 function completeService(){var name=$('svName').value.trim();var amount=parseFloat($('svAmount').value)||0;if(!name)return showToast('Describe the service',true);if(amount<=0)return showToast('Enter an amount',true);var payment=$('svPayment').value;var customer=$('svCustomer').value.trim()||'Walk-in';if(payment==='Credit'&&customer==='Walk-in'){showToast('Enter customer name for Credit',true);return}
