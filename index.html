@@ -188,6 +188,16 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
 </div>
 </div>
+<div class="auth-screen" id="screen-empLogin"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
+<div class="auth-card">
+<h2>Employee Login</h2>
+<p>Enter your phone and secret PIN.</p>
+<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="empLogPhone" placeholder="e.g., 0772 123 456"></div>
+<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="empLogPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
+<button class="btn btn-green" onclick="doEmployeeLogin()">🔓 Unlock My Access</button>
+<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
+</div>
+</div>
 <div class="auth-screen" id="screen-login"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
 <div class="auth-card">
 <h2>Welcome Back</h2>
