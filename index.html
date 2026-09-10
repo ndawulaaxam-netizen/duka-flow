@@ -145,6 +145,21 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <div id="lockScreen" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#09090B,#1E293B);z-index:5000;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px"><img src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" style="width:80px;height:80px;border-radius:18px;box-shadow:0 10px 25px -5px rgba(16,185,129,0.3)"><div style="font-size:22px;font-weight:900">Duka<span style="color:var(--green)">Flow</span></div><div style="font-size:13px;color:var(--muted);margin-top:8px">Enter your 4-digit PIN to unlock</div><input type="password" id="lockPin" maxlength="4" placeholder="• • • •" onkeydown="if(event.key==='Enter')tryUnlock()" style="width:180px;padding:16px;text-align:center;letter-spacing:12px;font-size:20px;background:var(--card);border:1px solid var(--green);border-radius:14px;color:var(--text);outline:none;margin-top:8px"><button class="btn btn-green" style="width:180px;margin-top:4px" onclick="tryUnlock()">Unlock</button><div id="lockMsg" style="font-size:12px;color:var(--red);min-height:18px"></div></div>
 <div class="toast" id="toast"></div>
 
+<div id="firstProductWizard" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:4500;overflow-y:auto;padding:20px">
+  <div style="max-width:420px;margin:0 auto;text-align:left;padding-bottom:40px">
+    <div style="margin-bottom:24px">
+      <h2 style="font-size:26px;font-weight:900;color:#fff;margin-bottom:6px">Let's stock your shop 🛒</h2>
+      <p style="font-size:14px;color:var(--muted)">Tap the items you sell most. No typing needed!</p>
+    </div>
+    <div id="wizardChips"></div>
+    <div class="form-group" style="margin-top:24px">
+      <label class="form-label">Opening Stock (for selected items)</label>
+      <input type="number" class="form-input" id="wizardStock" value="1" min="0">
+    </div>
+    <button class="btn btn-green" style="margin-top:12px" onclick="completeFirstProductWizard()">✅ Save & Start Selling</button>
+    <button class="btn btn-outline" style="margin-top:12px;font-size:13px;padding:12px" onclick="skipFirstProductWizard()">Skip for now</button>
+  </div>
+</div>
 <div id="authFlow">
 <div class="auth-screen active" id="screen-welcome"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
 <div class="auth-name">Duka<span>Flow</span></div>
