@@ -1,24 +1,65 @@
-var CACHE='dukaflow-v75';
-self.addEventListener('install',function(e){self.skipWaiting()});
-self.addEventListener('activate',function(e){
-  e.waitUntil(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k!==CACHE}).map(function(k){return caches.delete(k)}))}).then(function(){return self.clients.claim()}));
+var CACHE_NAME = 'dukaflow-v12';
+var ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './logo.png',
+  './html5-qrcode.min.js'
+];
+
+self.addEventListener('install', function(e) {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(ASSETS);
+    })
+  );
+  self.skipWaiting();
 });
-self.addEventListener('fetch',function(e){
-  if(e.request.mode==='navigate'){
-    e.respondWith(
-      fetch(e.request).then(function(res){
-        var c=res.clone();caches.open(CACHE).then(function(ca){ca.put(e.request,c)});return res;
-      }).catch(function(){
-        return caches.match(e.request).then(function(m){return m||caches.match('./index.html')});
-      })
-    );
-  } else {
-    e.respondWith(
-      caches.match(e.request).then(function(m){
-        return m||fetch(e.request).then(function(res){
-          var c=res.clone();caches.open(CACHE).then(function(ca){ca.put(e.request,c)});return res;
-        });
-      })
-    );
+
+self.addEventListener('activate', function(e) {
+  e.waitUntil(
+    caches.keys().then(function(names) {
+      return Promise.all(
+        names.filter(function(name) {
+          return name !== CACHE_NAME;
+        }).map(function(name) {
+          return caches.delete(name);
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', function(e) {
+  // Only cache GET requests
+  if (e.request.method !== 'GET') {
+    return;
   }
+
+  // Don't cache Supabase API calls
+  if (e.request.url.includes('supabase.co')) {
+    return;
+  }
+
+  e.respondWith(
+    caches.match(e.request).then(function(cached) {
+      if (cached) {
+        return cached;
+      }
+      return fetch(e.request).then(function(response) {
+        // Only cache successful responses
+        if (!response || response.status !== 200) {
+          return response;
+        }
+        var responseClone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache) {
+          cache.put(e.request, responseClone);
+        });
+        return response;
+      }).catch(function() {
+        return caches.match('./index.html');
+      });
+    })
+  );
 });
