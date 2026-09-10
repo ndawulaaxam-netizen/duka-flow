@@ -1087,6 +1087,19 @@ showToast('Reconciliation failed',true);
 }).catch(function(){showToast('Reconciliation failed',true);});
 }
 </script>
-
+</body>
+<script src="html5-qrcode.min.js"></script>
+<script>
+(function(){
+  var btn = document.createElement('button');
+  btn.className = 'btn btn-purple';
+  btn.style.marginBottom = '12px';
+  btn.innerHTML = '🛡️ Control Center Test';
+  btn.onclick = function(){ alert('V12 Overlay is working!'); };
+  var card = document.querySelector('#screen-settings .card:last-child');
+  if(card) card.prepend(btn);
+  console.log('V12 injection successful');
+})();
+</script>
 </body>
 </html>
