@@ -4,201 +4,142 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#09090B">
-<title>DukaFlow v12 — Control Engine</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="logo.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>DukaFlow</title>
 <style>
-:root{--bg:#09090B;--card:#18181B;--border:#27272A;--green:#10B981;--green2:#34D399;--green3:#059669;--text:#F4F4F5;--muted:#A1A1AA;--red:#EF4444;--yellow:#F59E0B;--blue:#3B82F6;--purple:#8B5CF6}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-img.logo,img.auth-logo{object-fit:contain;border-radius:12px}
-.auth-logo{width:90px;height:90px;margin:0 auto 12px auto;display:block;box-shadow:0 10px 25px -5px rgba(16,185,129,0.3)}
-.header-left{display:flex;align-items:center;gap:12px}
-.header-left .logo{width:40px;height:40px;border-radius:10px}
-.header-right{display:flex;align-items:center;gap:12px}
-body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
-svg{width:20px;height:20px;vertical-align:-4px}
-#splash{position:fixed;inset:0;background:var(--bg);z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .6s ease}
+:root{--bg:#09090B;--card:#18181B;--border:#27272A;--green:#10B981;--green2:#34D399;--text:#F4F4F5;--muted:#A1A1AA;--blue:#3B82F6;--yellow:#F59E0B;--red:#EF4444;--purple:#8B5CF6;--gold:#F59E0B}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s}
 #splash.hide{opacity:0;pointer-events:none}
-#splash .name{font-size:42px;font-weight:900;color:#fff;letter-spacing:-1px}
-#splash .name span{color:var(--green)}
-#splash .tag{font-size:13px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;font-weight:600}
-#authFlow{position:fixed;inset:0;background:var(--bg);z-index:2000;overflow-y:auto;display:none}
-.auth-screen{display:none;padding:40px 20px 60px;text-align:center}
-.auth-screen.active{display:block}
-.auth-name{font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px}
-.auth-name span{color:var(--green)}
-.auth-tag{font-size:12px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin:8px 0 30px;font-weight:600}
-.auth-card{width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:28px;margin:0 auto;text-align:left;box-shadow:0 20px 25px -5px rgba(0,0,0,0.3)}
-.auth-card h2{font-size:22px;margin-bottom:6px;font-weight:800}
-.auth-card p{font-size:14px;color:var(--muted);margin-bottom:20px}
-.value-row{display:flex;gap:12px;align-items:center;margin-bottom:14px;font-size:14px;color:var(--text)}
-.value-row .vicon{width:40px;height:40px;border-radius:12px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
-.form-input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;outline:none;transition:border-color 0.2s}
+#splash img{width:80px;height:80px;border-radius:20px;margin-bottom:16px}
+#splash h1{font-size:28px;font-weight:900}
+#splash h1 span{color:var(--green)}
+#splash p{color:var(--muted);font-size:13px;margin-top:8px}
+.auth-flow{display:none;min-height:100vh;padding:20px;align-items:center;justify-content:center}
+.auth-screen{display:none;width:100%;max-width:400px;margin:0 auto}
+.auth-screen.active{display:block;animation:fadeIn 0.3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.auth-logo{width:64px;height:64px;border-radius:16px;margin:0 auto 20px;display:block}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px}
+.auth-card h2{font-size:22px;font-weight:900;margin-bottom:6px}
+.auth-card p{color:var(--muted);font-size:13px;margin-bottom:20px}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.form-input{width:100%;padding:13px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;outline:none;transition:border-color 0.2s}
 .form-input:focus{border-color:var(--green)}
-.form-row{display:flex;gap:12px}.form-row .form-group{flex:1}
-.btn{border:none;border-radius:12px;padding:15px 20px;font-size:15px;font-weight:700;cursor:pointer;width:100%;transition:all 0.2s;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;gap:8px}
-.btn:active{transform:scale(0.98)}
-.btn-green{background:linear-gradient(135deg,var(--green),var(--green3));color:#fff}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;width:100%}
+.btn-green{background:var(--green);color:#052e22}
+.btn-green:hover{background:var(--green2)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
 .btn-dark{background:var(--card);border:1px solid var(--border);color:var(--text)}
-.btn-yellow{background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff}
-.btn-purple{background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff}
-.btn-red{background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
-.tab-active{border-color:var(--green);color:var(--green2)}
-.btn-row{display:flex;gap:12px}.btn-row .btn{flex:1}
-.btn-group{display:flex;flex-direction:column;gap:12px}
-.app-header{background:rgba(9,9,11,0.8);backdrop-filter:blur(12px);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
-.header-left h1{font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.5px}
-.header-left h1 span{color:var(--green)}
-.header-left .subtitle{font-size:12px;color:var(--muted);margin-top:2px}
-.offline-badge{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);padding:6px 12px;border-radius:20px;font-size:11px;color:var(--green2);font-weight:700}
-.notification-bell{position:relative;cursor:pointer;padding:6px;color:var(--text)}
-.notification-bell svg{width:22px;height:22px}
-.notification-badge{position:absolute;top:0;right:0;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;min-width:18px;text-align:center}
-.notification-panel{position:fixed;top:60px;right:10px;left:10px;background:var(--card);border:1px solid var(--border);border-radius:16px;max-height:70vh;overflow-y:auto;z-index:200;box-shadow:0 20px 25px -5px rgba(0,0,0,0.5)}
-.notif-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:10}
-.notif-close{background:var(--bg);border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
-.notif-item{padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s}
-.notif-item:active{background:var(--bg)}
-.notif-item:last-child{border-bottom:none}
-.notif-icon{font-size:18px;margin-right:12px}
-.notif-title{font-size:14px;font-weight:700;margin-bottom:4px}
-.notif-desc{font-size:12px;color:var(--muted)}
-.notif-urgent{border-left:3px solid var(--red)}
-.notif-warning{border-left:3px solid var(--yellow)}
-.notif-info{border-left:3px solid var(--blue)}
-.app-content{flex:1;overflow-y:auto;padding:20px;padding-bottom:110px}
-.screen{display:none}.screen.active{display:block;animation:fadeIn 0.3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid var(--border);box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
-.card-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.sub-title{font-size:13px;font-weight:800;margin:14px 0 8px;color:var(--muted)}
-.hero{background:linear-gradient(135deg,var(--card),#1E293B);border:1px solid var(--green);border-radius:20px;padding:22px;margin-bottom:16px}
-.hero-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
-.hero-money{font-size:34px;font-weight:900;color:var(--green2);margin:6px 0}
-.hero-sub{font-size:13px;color:var(--muted)}
-.hero-sub b{color:var(--text)}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.stat-card{background:var(--card);border-radius:16px;padding:16px;border:1px solid var(--border);text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}
-.stat-value{font-size:18px;font-weight:800;margin:6px 0}
-.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
-.stat-green{color:var(--green2)}.stat-red{color:var(--red)}.stat-blue{color:var(--blue)}.stat-yellow{color:var(--yellow)}
-.list-item{display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--bg);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);transition:background 0.2s;cursor:pointer}
-.item-info{flex:1}.item-name{font-weight:700;font-size:14px}.item-meta{font-size:12px;color:var(--muted);margin-top:4px}
-.amount-green{font-weight:800;color:var(--green2)}.amount-red{font-weight:800;color:var(--red)}
-.stock-count{font-size:20px;font-weight:800}
-.stock-low{color:var(--red)}.stock-ok{color:var(--green2)}
-.item-actions{display:flex;gap:8px;margin-left:12px}
-.action-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);width:40px;height:40px;border-radius:10px;cursor:pointer;transition:all 0.2s;font-size:18px}
-.action-btn:active{transform:scale(0.95)}
-.stepper{display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0}
-.sf-qty{font-size:28px;font-weight:900;min-width:50px;text-align:center}
-.sf-total-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-top:10px}
-.sf-total{font-size:36px;font-weight:900;color:var(--green2);text-align:center;margin:6px 0 16px}
-.sf-prod{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;text-align:center}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(4px);z-index:1000;align-items:flex-end;justify-content:center}
+.btn-red{background:var(--red);color:#fff}
+.btn-sm{padding:8px 14px;font-size:12px;width:auto}
+.app{display:none;min-height:100vh;padding-bottom:80px}
+.header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+.header h1{font-size:18px;font-weight:900}
+.header .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-left:6px}
+.header .sync-dot.pending{background:var(--yellow)}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:600;transition:color 0.2s}
+.nav-item.active{color:var(--green)}
+.nav-item svg{width:22px;height:22px;margin-bottom:3px}
+.screen{display:none;padding:16px 20px;animation:fadeIn 0.3s}
+.screen.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.kpi-value{font-size:22px;font-weight:900;margin-top:4px}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.list-item:last-child{border-bottom:none}
+.item-info{flex:1}
+.item-name{font-size:14px;font-weight:700}
+.item-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.item-right{text-align:right}
+.item-price{font-size:14px;font-weight:800}
+.item-stock{font-size:11px;color:var(--muted)}
+.stat-green{color:var(--green)}
+.stat-red{color:var(--red)}
+.stat-yellow{color:var(--yellow)}
+.stat-blue{color:var(--blue)}
+.empty-state{text-align:center;padding:30px 20px;color:var(--muted)}
+.empty-state .icon{font-size:36px;margin-bottom:8px}
+.empty-state p{font-size:13px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:flex-end;justify-content:center}
 .modal-overlay.active{display:flex}
-.modal{background:var(--card);border-radius:24px 24px 0 0;padding:24px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto;border-top:1px solid var(--border)}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.modal-close{background:var(--bg);border:1px solid var(--border);color:var(--muted);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px}
-.sheet-title{font-size:15px;font-weight:800;color:var(--muted);text-align:center;margin-bottom:16px}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(24,24,27,0.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:flex-end;padding:10px 0 24px 0;z-index:100}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 14px;border-radius:16px;color:var(--muted);transition:all 0.2s}
-.nav-item.active{color:var(--green2);background:rgba(16,185,129,0.1)}
-.nav-item .nav-label{font-size:10px;font-weight:700}
-.nav-fab{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green3));color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:-30px;box-shadow:0 10px 20px -5px rgba(16,185,129,0.5);border:4px solid var(--bg)}
-.nav-fab svg{width:26px;height:26px}
-.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--green);color:var(--text);padding:14px 24px;border-radius:12px;font-weight:700;font-size:14px;z-index:4000;display:none;max-width:90%;text-align:center;box-shadow:0 10px 15px -3px rgba(0,0,0,0.3)}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;animation:slideUp 0.3s}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal h3{font-size:18px;font-weight:900;margin-bottom:16px}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--green);padding:12px 20px;border-radius:12px;font-weight:700;font-size:13px;z-index:4000;display:none;max-width:90%}
 .toast.error{border-color:var(--red);color:var(--red)}
-.toast.show{display:block;animation:fadeIn 0.3s ease}
-.report-bar{display:flex;align-items:flex-end;gap:8px;height:120px;margin:20px 0 30px;padding:0 4px}
-.report-bar-item{flex:1;background:linear-gradient(to top,var(--green),var(--green2));border-radius:6px 6px 0 0;min-height:4px;position:relative;transition:height 0.5s ease}
-.report-bar-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);font-weight:600}
-.recon-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
-.consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);text-align:left;margin-bottom:16px}
-.consent input{margin-top:2px;width:18px;height:18px;accent-color:var(--green)}
-.consent a{color:var(--green2);text-decoration:none}
-.brain-change{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:700;margin-top:8px}
-.brain-change.up{background:rgba(16,185,129,0.2);color:var(--green2)}
-.brain-change.down{background:rgba(239,68,68,0.2);color:var(--red)}
-.insight-row{display:flex;gap:12px;margin-bottom:12px;padding:14px;background:var(--bg);border-radius:12px;border:1px solid var(--border);cursor:pointer}
-.insight-icon{color:var(--yellow)}
+.toast.show{display:block;animation:fadeIn 0.3s}
+.insight-row{display:flex;gap:10px;padding:10px;background:var(--bg);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--border)}
+.insight-icon{font-size:18px}
 .insight-text{flex:1}
-.insight-title{font-size:13px;font-weight:700;margin-bottom:4px}
-.insight-desc{font-size:13px;color:var(--muted);line-height:1.5}
-.chip-container{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-.chip{background:var(--bg);border:1px solid var(--green);color:var(--green2);padding:8px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap}
-.chip:active{background:var(--green);color:#fff;transform:scale(0.95)}
-.perm-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase}
-.perm-owner{background:rgba(139,92,246,0.2);color:#A78BFA}
-.perm-manager{background:rgba(59,130,246,0.2);color:#93C5FD}
-.perm-cashier{background:rgba(16,185,129,0.2);color:#6EE7B7}
+.insight-title{font-size:13px;font-weight:700}
+.insight-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.health-ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0}
+.health-ring .score{font-size:24px;font-weight:900}
+.health-ring .label{font-size:8px;color:var(--muted)}
+.sector-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:var(--bg);border:1px solid var(--border)}
+.tab-row{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.tab-btn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);white-space:nowrap}
+.tab-btn.active{background:var(--green);color:#052e22;border-color:var(--green)}
+.search-box{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;outline:none;margin-bottom:12px}
+@media(min-width:768px){.kpi-grid{grid-template-columns:repeat(4,1fr)}.modal{border-radius:20px;margin-bottom:40px}}
 </style>
 </head>
 <body>
-<div id="splash"><img class="logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="DukaFlow" style="width:120px;height:120px"><div class="name">Duka<span>Flow</span></div><div class="tag">Keep Your Shop Flowing</div></div>
-<div id="lockScreen" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#09090B,#1E293B);z-index:5000;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px"><img src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" style="width:80px;height:80px;border-radius:18px;box-shadow:0 10px 25px -5px rgba(16,185,129,0.3)"><div style="font-size:22px;font-weight:900">Duka<span style="color:var(--green)">Flow</span></div><div style="font-size:13px;color:var(--muted);margin-top:8px">Enter your 4-digit PIN to unlock</div><input type="password" id="lockPin" maxlength="4" placeholder="• • • •" onkeydown="if(event.key==='Enter')tryUnlock()" style="width:180px;padding:16px;text-align:center;letter-spacing:12px;font-size:20px;background:var(--card);border:1px solid var(--green);border-radius:14px;color:var(--text);outline:none;margin-top:8px"><button class="btn btn-green" style="width:180px;margin-top:4px" onclick="tryUnlock()">Unlock</button><div id="lockMsg" style="font-size:12px;color:var(--red);min-height:18px"></div></div>
-<div class="toast" id="toast"></div>
 
-<div id="firstProductWizard" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:4500;overflow-y:auto;padding:20px">
-  <div style="max-width:420px;margin:0 auto;text-align:left;padding-bottom:40px">
-    <div style="margin-bottom:24px">
-      <h2 style="font-size:26px;font-weight:900;color:#fff;margin-bottom:6px">Let's stock your shop 🛒</h2>
-      <p style="font-size:14px;color:var(--muted)">Tap the items you sell most. No typing needed!</p>
-    </div>
-    <div id="wizardChips"></div>
-    <div class="form-group" style="margin-top:24px">
-      <label class="form-label">Opening Stock (for selected items)</label>
-      <input type="number" class="form-input" id="wizardStock" value="1" min="0">
-    </div>
-    <button class="btn btn-green" style="margin-top:12px" onclick="completeFirstProductWizard()">✅ Save & Start Selling</button>
-    <button class="btn btn-outline" style="margin-top:12px;font-size:13px;padding:12px" onclick="skipFirstProductWizard()">Skip for now</button>
-  </div>
+<div id="splash">
+<img src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="DukaFlow">
+<h1>Duka<span>Flow</span></h1>
+<p>Your business. Your command centre.</p>
 </div>
-<div id="authFlow">
-<div class="auth-screen active" id="screen-welcome"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
-<div class="auth-name">Duka<span>Flow</span></div>
-<div class="auth-tag">Keep Your Shop Flowing</div>
+
+<div class="auth-flow" id="authFlow">
+
+<div class="auth-screen active" id="screen-welcome">
+<img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
 <div class="auth-card">
-<div class="value-row"><div class="vicon">🆓</div><div><b>100% Free</b> for shopkeepers. Forever.</div></div>
-<div class="value-row"><div class="vicon">📴</div><div><b>Works Offline.</b> No internet? No problem.</div></div>
-<div class="value-row"><div class="vicon">💰</div><div><b>Know Your Profit</b> every single day.</div></div>
-<div class="value-row"><div class="vicon">🔐</div><div><b>Your records are safe</b> with your secret PIN.</div></div>
-<button class="btn btn-green" style="margin-top:16px" onclick="showAuth('register')">Get Started →</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('login')">🔑 I have a shop - Log In</button> <button class="btn btn-dark" style="margin-top:12px" onclick="showAuth('empLogin')">👤 I'm an Employee - Log In</button>
+<h2>Welcome to DukaFlow</h2>
+<p>Run your business like a CEO. Track sales, stock, credits, and profit — all in one place.</p>
+<button class="btn btn-green" onclick="showAuth('register')">🚀 Get Started Free</button>
+<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('login')">🔑 I have a shop — Log In</button>
+<button class="btn btn-dark" style="margin-top:12px" onclick="showAuth('empLogin')">👤 I'm an Employee — Log In</button>
 </div>
 </div>
-<div class="auth-screen" id="screen-register"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
+
+<div class="auth-screen" id="screen-register">
+<img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
 <div class="auth-card">
-<h2>Set Up Your Shop</h2>
-<p>Takes less than a minute.</p>
-<div class="form-group"><label class="form-label">Shop Name *</label><input class="form-input" id="regShop" placeholder="e.g., Kato General Merchants"></div>
-<div class="form-group"><label class="form-label">Owner Name *</label><input class="form-input" id="regOwner" placeholder="e.g., John Kato"></div>
-<div class="form-group"><label class="form-label">Phone Number *</label><input type="tel" class="form-input" id="regPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="regLocation" placeholder="e.g., Wakiso, Kampala"></div>
-<div class="form-group"><label class="form-label">Business Type *</label><select class="form-input" id="regSector" onchange="previewSector(this.value)"><option value="Retail">🏪 DukaFlow - Retail Shop</option><option value="Agriculture">🌾 FarmFlow - Agriculture</option><option value="Manufacturing">🧶 CraftFlow - Manufacturing</option><option value="Services">✂️ ServiceFlow - Salons, Mechanics, Services</option><option value="Transport">🚚 TransportFlow - Transport/Logistics</option><option value="Food">🍲 FoodFlow - Restaurant/Food Vendor</option><option value="Energy">⛽ EnergyFlow - Fuel/Energy</option></select></div>
-<div class="form-group"><label class="form-label">Choose 4-Digit PIN *</label><input type="password" class="form-input" id="regPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
-<label class="consent"><input type="checkbox" id="regConsent"><span>I accept the <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>. I am happy to join the DukaFlow family that helps shops like mine get better stock and service. 🤝</span></label>
-<button class="btn btn-green" onclick="doRegister()">✅ Register & Start</button>
+<h2>Create Your Shop</h2>
+<p>Set up your business in 60 seconds.</p>
+<div class="form-group"><label class="form-label">Shop Name</label><input class="form-input" id="regShop" placeholder="e.g., Mama's Store"></div>
+<div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="regName" placeholder="e.g., Sarah"></div>
+<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="regPhone" placeholder="e.g., 0772 123 456"></div>
+<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="regLocation" placeholder="e.g., Owino Market"></div>
+<div class="form-group"><label class="form-label">Business Type</label>
+<select class="form-input" id="regSector">
+<option value="Retail">🏪 Retail / Shop</option>
+<option value="Agriculture">🌾 Agriculture / Farming</option>
+<option value="Transport">🚚 Transport / Fleet</option>
+<option value="Food">🍲 Food / Restaurant</option>
+<option value="Services">✂️ Services</option>
+<option value="Manufacturing">🏭 Manufacturing</option>
+<option value="Energy">⛽ Energy / Fuel</option>
+</select></div>
+<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="regPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
+<button class="btn btn-green" onclick="doRegister()">Create My Shop →</button>
 <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
 </div>
 </div>
-<div class="auth-screen" id="screen-empLogin"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
-<div class="auth-card">
-<h2>Employee Login</h2>
-<p>Enter your phone and secret PIN.</p>
-<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="empLogPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="empLogPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="doEmployeeLogin()">🔓 Unlock My Access</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
-</div>
-</div>
-<div class="auth-screen" id="screen-login"><img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
+
+<div class="auth-screen" id="screen-login">
+<img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
 <div class="auth-card">
 <h2>Welcome Back</h2>
 <p>Enter your phone and secret PIN.</p>
@@ -208,703 +149,281 @@ svg{width:20px;height:20px;vertical-align:-4px}
 <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
 </div>
 </div>
+
+<div class="auth-screen" id="screen-empLogin">
+<img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
+<div class="auth-card">
+<h2>Employee Login</h2>
+<p>Enter your phone and secret PIN.</p>
+<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="empLogPhone" placeholder="e.g., 0772 123 456"></div>
+<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="empLogPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
+<button class="btn btn-green" onclick="doEmployeeLogin()">🔓 Unlock My Access</button>
+<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
+</div>
 </div>
 
-<div id="appShell" style="display:none;flex-direction:column;height:100vh">
-<header class="app-header">
-<div class="header-left"><img class="logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt=""><div><h1>Duka<span>Flow</span></h1><div class="subtitle" id="shopNameDisplay">My Shop</div></div></div>
-<div class="header-right">
-<div class="offline-badge" id="cloudStatus">On this phone</div>
-<div class="notification-bell" onclick="toggleNotifications()"><span data-ic="bell"></span><span class="notification-badge" id="notifBadge" style="display:none">0</span></div>
 </div>
-</header>
-<div class="notification-panel" id="notifPanel" style="display:none">
-<div class="notif-header"><b>🔔 Notifications</b><button class="notif-close" onclick="toggleNotifications()">✕</button></div>
-<div id="notifList"></div>
+
+<div class="app" id="app">
+<div class="header">
+<h1 id="shopNameDisplay">My Shop</h1>
+<div style="display:flex;align-items:center;gap:8px">
+<span class="sector-badge" id="sectorBadge">Retail</span>
+<span class="sync-dot" id="syncDot"></span>
 </div>
-<main class="app-content">
+</div>
+
 <div class="screen active" id="screen-dashboard">
-<div class="hero">
-<div class="hero-label">Today's Sales</div>
-<div class="hero-money" id="todaySales">UGX 0</div>
-<div class="hero-sub">Profit <b class="stat-green" id="todayProfit">UGX 0</b> • Expenses <b class="stat-red" id="todayExpenses">UGX 0</b></div>
-</div>
-<div class="card"><div class="card-title">🧠 Business Health</div><div id="healthScoreCard"><div class="insight-desc">Calculating...</div></div></div> <div class="card"><div class="card-title"><span data-ic="alert"></span> Needs Attention</div><div id="attentionList"></div></div>
-<div class="card"><div class="card-title"><span data-ic="chart"></span> Business Pulse</div><div class="report-bar" id="pulseChart"></div><div class="insight-desc" id="bestDayLine"></div></div>
-<div class="card"><div class="card-title"><span data-ic="clock"></span> Recent Activity</div><div id="recentActivity"></div></div>
-<div style="display:none"><span id="lowStockCount">0</span><span id="stockValue">UGX 0</span></div>
-</div>
-<div class="screen" id="screen-products">
-<div style="display:flex;gap:10px;margin-bottom:16px">
-<input class="form-input" id="productSearch" placeholder="Search products..." oninput="renderProducts(this.value)" style="flex:1">
-<button type="button" class="btn btn-dark" style="width:auto;padding:14px 18px" onclick="openScanner(searchProductByBarcode)"><span data-ic="scan"></span></button>
-</div>
-<div class="btn-row" style="margin-bottom:12px">
-<button class="btn btn-dark tab-active" id="tabAll" onclick="setProdTab('all')">All</button>
-<button class="btn btn-dark" id="tabLow" onclick="setProdTab('low')">Low</button>
-<button class="btn btn-dark" id="tabOut" onclick="setProdTab('out')">Out</button>
-</div>
-<button class="btn btn-green" style="margin-bottom:16px" onclick="openModal('addProductModal')"><span data-ic="plus"></span> Add New Product</button>
-<div class="card"><div class="card-title"><span data-ic="box"></span> <span id="stockTitle">Inventory</span> (<span id="productCount">0</span>) • <span id="inventoryValue" class="stat-green">UGX 0</span></div><div id="productList"></div></div>
-</div>
-<div class="screen" id="screen-sales">
-<div class="card"><div class="card-title"><span data-ic="cart"></span> Sales History</div>
-<div class="form-group"><input type="date" class="form-input" id="salesDateFilter" onchange="renderSales()"></div>
-<div id="salesList"></div></div>
-</div><div class="screen" id="screen-reports">
-<button class="btn btn-dark" style="margin-bottom:16px" onclick="switchScreen('finance')">💰 Financial Engine</button>
-<div class="card"><div class="card-title"><span data-ic="chart"></span> Today</div>
-<div class="stats-grid">
-<div class="stat-card"><div class="stat-label">Sales</div><div class="stat-value stat-green" id="rTodaySales">UGX 0</div></div>
-<div class="stat-card"><div class="stat-label">Transactions</div><div class="stat-value" id="rTodayTx">0</div></div>
-<div class="stat-card"><div class="stat-label">Gross Profit</div><div class="stat-value stat-blue" id="rTodayGross">UGX 0</div></div>
-<div class="stat-card"><div class="stat-label">Expenses</div><div class="stat-value stat-red" id="rTodayExp">UGX 0</div></div>
-</div></div>
-<div class="card"><div class="card-title">🩺 Business Health</div><div class="insight-desc" id="healthLine"></div></div>
-<div class="card"><div class="card-title">This Week</div>
-<div class="report-bar" id="weekSalesChart"></div>
-<div class="stats-grid">
-<div class="stat-card"><div class="stat-label">Week Sales</div><div class="stat-value stat-green" id="rWeekSales">UGX 0</div></div>
-<div class="stat-card"><div class="stat-label">Week Profit</div><div class="stat-value stat-blue" id="rWeekProfit">UGX 0</div></div>
-<div class="stat-card"><div class="stat-label">Week Expenses</div><div class="stat-value stat-red" id="rWeekExp">UGX 0</div></div>
-<div class="stat-card"><div class="stat-label">vs Last Week</div><div id="rWeekChange"></div></div>
-</div></div>
-<div class="card"><div class="card-title"><span data-ic="box"></span> Products</div>
-<div class="sub-title">🏆 Best Sellers</div><div id="bestSellers"></div>
-<div class="sub-title">🐢 Slow Sellers</div><div id="slowSellers"></div>
-<div class="recon-row"><span style="color:var(--muted)">Stock Value</span><b id="rStockValue" class="stat-green">UGX 0</b></div>
-</div>
-<div class="card"><div class="card-title"><span data-ic="users"></span> Customers</div>
-<div class="recon-row"><span style="color:var(--muted)">Outstanding Credit</span><b id="rOutstanding" class="stat-red">UGX 0</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Payments Received</span><b id="rPayments" class="stat-green">UGX 0</b></div>
-<div class="sub-title">⚠️ Top Debtors</div><div id="topDebtors"></div>
-</div>
-</div>
-<div class="screen" id="screen-reconciliation">
-<div class="card"><div class="card-title">📋 Stock Reconciliation</div>
-<p style="font-size:13px;color:var(--muted);margin-bottom:16px">Count your physical stock and compare with the system.</p>
-<div id="reconProducts"></div>
-<div class="card" style="background:var(--bg);margin-top:16px">
-<div class="recon-row"><span style="color:var(--muted)">System Stock</span><b id="reconExpected">0</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Physical Count</span><b id="reconPhysical">0</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Discrepancy</span><b id="reconDiscrepancy" class="stat-red">0</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Expected Revenue</span><b id="reconExpectedRevenue">UGX 0</b></div>
-<div class="form-group" style="margin-top:14px"><label class="form-label">Actual Cash in Drawer (UGX)</label><input type="number" class="form-input" id="reconCash" oninput="updateReconSummary()"></div>
-</div>
-<button class="btn btn-purple" style="margin-top:14px" onclick="saveReconciliation()">💾 Save Reconciliation Report</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="switchScreen('dashboard')">← Back to Home</button>
-</div>
-</div>
-<div class="screen" id="screen-credits">
-<div class="card"><div class="card-title"><span data-ic="users"></span> Credits Book</div>
-<div id="creditList"></div></div>
-</div>
-<div class="screen" id="screen-settings">
-<div class="card"><div class="card-title"><span data-ic="gear"></span> My Shop</div>
-<div class="form-group"><label class="form-label">Shop Name</label><input class="form-input" id="settingShopName" onchange="saveSettings()"></div>
-<div class="form-group"><label class="form-label">Owner Name</label><input class="form-input" id="settingOwner" onchange="saveSettings()"></div>
-<div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="settingPhone" onchange="saveSettings()"></div>
-<div class="form-group"><label class="form-label">Starting Capital (UGX)</label><input type="number" class="form-input" id="settingCapital" onchange="saveSettings()"></div>
-<div class="form-group"><label class="form-label">Low Stock Alert Threshold</label><input type="number" class="form-input" id="settingLowStock" onchange="saveSettings()"></div>
-</div>
-<div class="card"><div class="card-title">⚠️ Account</div>
-<button class="btn btn-purple" onclick="switchScreen('control')">🛡️ Control Center</button>
-<button class="btn btn-dark" style="margin-top:12px" onclick="switchScreen('syncHealth')">🧠 Sync Health</button>
-<button class="btn btn-dark" style="margin-top:12px" onclick="exportData()">📤 Export My Data (CSV)</button>
-<button class="btn btn-dark" style="margin-top:12px" onclick="logout()">🚪 Log Out / Switch Shop</button>
-<button class="btn btn-red" style="margin-top:12px" onclick="clearAllData()">🗑️ Delete Data on This Phone</button>
-<div style="text-align:center;font-size:12px;color:var(--muted);padding-top:12px;font-weight:600">DukaFlow v12.0 (Control Engine) • Records backed up automatically when online.</div>
-</div>
-</div>
-<div class="screen" id="screen-syncHealth">
-<div class="card"><div class="card-title">🧠 Memory Engine — Sync Health</div>
-<div class="recon-row"><span style="color:var(--muted)">Cloud Status</span><b id="shCloud">Checking...</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Last Sync</span><b id="shLast">Never</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Pending Operations</span><b id="shPending" class="stat-yellow">0</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Failed Operations</span><b id="shFailed" class="stat-red">0</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Local Records</span><b id="shLocal" class="stat-blue">0</b></div>
-<div class="recon-row"><span style="color:var(--muted)">Cloud Records</span><b id="shCloudRecords" class="stat-green">0</b></div>
-</div>
-<button class="btn btn-green" onclick="manualSync()">🔁 Sync Now</button>
-<button class="btn btn-dark" style="margin-top:12px" onclick="retryFailed()">♻️ Retry Failed</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="switchScreen('settings')">← Back to Settings</button>
-</div>
-<div class="screen" id="screen-finance">
-<div class="card"><div class="card-title">💰 Financial Engine</div><div id="financeData"><div class="empty-state">Loading...</div></div></div>
-<div class="card"><div class="card-title">🧾 Daily Cash Reconciliation</div>
-<div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="finReconDate"></div>
-<div class="form-group"><label class="form-label">Actual Cash in Drawer (UGX)</label><input type="number" class="form-input" id="finActualCash" placeholder="e.g., 472000"></div>
-<button class="btn btn-green" onclick="runCashRecon()">✅ Reconcile Day</button>
-<div id="finReconResult" style="margin-top:14px"></div>
-</div>
-<button class="btn btn-outline" onclick="switchScreen('reports')">← Back to Reports</button>
-</div>
-<div class="screen" id="screen-control">
-<div class="card"><div class="card-title">🛡️ Control Center</div>
-<div class="btn-group">
-<button class="btn btn-dark" onclick="switchScreen('employees')">👥 Employees</button>
-<button class="btn btn-dark" onclick="openModal('approvalModal')">✅ Expense Approvals</button>
-<button class="btn btn-dark" onclick="openModal('payReconModal')">💳 Payment Reconciliation</button>
-<button class="btn btn-dark" onclick="switchScreen('audit')">🧾 Audit Trail</button>
-<button class="btn btn-yellow" onclick="openModal('refundModal')">↩️ Refund</button>
-<button class="btn btn-red" onclick="openModal('writeoffModal')">🗑️ Stock Write-off</button>
-<button class="btn btn-purple" onclick="openModal('drawdownModal')">💸 Owner Drawdown</button>
-</div></div>
-<button class="btn btn-outline" onclick="switchScreen('settings')">← Back to Settings</button>
-</div>
-<div class="screen" id="screen-employees">
-<div class="card"><div class="card-title">👥 Employee Management</div>
-<button class="btn btn-green" style="margin-bottom:16px" onclick="openModal('addEmployeeModal')">➕ Add Employee</button>
-<div id="employeeList"></div>
-</div>
-<button class="btn btn-outline" onclick="switchScreen('control')">← Back to Control Center</button>
-</div>
-<div class="screen" id="screen-audit">
-<div class="card"><div class="card-title">🧾 Audit Trail</div>
-<div id="auditList"></div>
-</div>
-<button class="btn btn-outline" onclick="switchScreen('control')">← Back to Control Center</button>
-</div>
-</main>
-<nav class="bottom-nav">
-<div class="nav-item active" id="nav-dashboard" onclick="switchScreen('dashboard')"><span data-ic="home"></span><span class="nav-label">Home</span></div>
-<div class="nav-item" id="nav-products" onclick="switchScreen('products')"><span data-ic="box"></span><span class="nav-label">Stock</span></div>
-<div class="nav-fab" onclick="openSheet()"><span data-ic="plus"></span></div>
-<div class="nav-item" id="nav-reports" onclick="switchScreen('reports')"><span data-ic="chart"></span><span class="nav-label">Reports</span></div>
-<div class="nav-item" id="nav-settings" onclick="switchScreen('settings')"><span data-ic="gear"></span><span class="nav-label">More</span></div>
-</nav>
+<div class="card" id="healthScoreCard"><div style="color:var(--muted);font-size:13px">Calculating...</div></div>
+<div class="kpi-grid" id="sectorKPIs"></div>
+<div class="card"><div class="card-title">⚡ Smart Alerts</div><div id="sectorAlerts"><div style="color:var(--muted);font-size:13px">Loading...</div></div></div>
+<div class="card"><div class="card-title">🔔 Needs Attention</div><div id="attentionList"></div></div>
 </div>
 
-<div class="modal-overlay" id="actionSheet"><div class="modal">
-<div class="sheet-title">What do you want to do?</div>
-<button id="asSale" class="btn btn-green" style="margin-bottom:12px" onclick="closeSheet();openSaleFlow()"><span data-ic="cart"></span> Record Sale (goods/stock)</button>
-<button id="asStock" class="btn btn-dark" style="margin-bottom:12px" onclick="closeSheet();openModal('stockModal')"><span data-ic="box"></span> Receive Stock</button>
-<button id="asExpense" class="btn btn-yellow" style="margin-bottom:12px" onclick="closeSheet();openModal('expenseModal')"><span data-ic="receipt"></span> Add Expense</button>
-<button id="asService" class="btn btn-dark" style="margin-bottom:12px" onclick="closeSheet();openServiceFlow()"><span data-ic="receipt"></span> Record Service (no stock)</button>
-<button id="asCredit" class="btn btn-purple" style="margin-bottom:12px" onclick="closeSheet();switchScreen('credits')"><span data-ic="users"></span> Record Credit</button>
-<button class="btn btn-outline" onclick="closeSheet()">Cancel</button>
+<div class="screen" id="screen-products">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h2 id="prodTitle" style="font-size:20px;font-weight:900">Products</h2>
+<button class="btn btn-green btn-sm" onclick="openModal('productModal')">+ Add</button>
+</div>
+<input class="search-box" id="prodSearch" placeholder="Search..." oninput="renderProducts()">
+<div id="productList"></div>
+</div>
+
+<div class="screen" id="screen-sales">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h2 style="font-size:20px;font-weight:900">Sales</h2>
+<button class="btn btn-green btn-sm" id="saleBtn" onclick="openModal('saleModal')">+ New Sale</button>
+</div>
+<div id="salesList"></div>
+</div>
+
+<div class="screen" id="screen-reports">
+<h2 style="font-size:20px;font-weight:900;margin-bottom:12px">Reports</h2>
+<div class="tab-row" id="reportTabs">
+<div class="tab-btn active" onclick="switchReportTab('overview')">Overview</div>
+<div class="tab-btn" onclick="switchReportTab('expenses')">Expenses</div>
+<div class="tab-btn" onclick="switchReportTab('reconciliation')">Reconciliation</div>
+</div>
+<div id="reportContent"></div>
+</div>
+
+<div class="screen" id="screen-credits">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h2 style="font-size:20px;font-weight:900">Credits</h2>
+<button class="btn btn-green btn-sm" onclick="openModal('creditModal')">+ Add Credit</button>
+</div>
+<div id="creditList"></div>
+</div>
+
+<div class="screen" id="screen-settings">
+<h2 style="font-size:20px;font-weight:900;margin-bottom:16px">Settings</h2>
+<div class="card"><div class="card-title">👤 Shop Info</div><div id="shopInfoDisplay"></div></div>
+<div class="card"><div class="card-title">👥 Employees</div><div id="employeeList"></div>
+<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="openModal('employeeModal')">+ Add Employee</button></div>
+<div class="card"><div class="card-title">☁️ Cloud Sync</div>
+<button class="btn btn-outline btn-sm" onclick="syncAll()">Sync Now</button>
+<button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="restore()">Restore from Cloud</button></div>
+<div class="card"><div class="card-title">⚙️ Data</div>
+<button class="btn btn-red btn-sm" onclick="if(confirm('Delete ALL data? This cannot be undone.')){localStorage.clear();location.reload()}">Reset All Data</button></div>
+<button class="btn btn-outline" style="margin-top:12px" onclick="logout()">🚪 Log Out</button>
+</div>
+
+<div class="nav">
+<div class="nav-item active" onclick="switchScreen('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home</div>
+<div class="nav-item" onclick="switchScreen('products')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span id="stockTab">Stock</span></div>
+<div class="nav-item" onclick="switchScreen('sales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>Sales</div>
+<div class="nav-item" onclick="switchScreen('reports')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Reports</div>
+<div class="nav-item" onclick="switchScreen('credits')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Credits</div>
+<div class="nav-item" onclick="switchScreen('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</div>
+</div>
+</div>
+
+<div class="modal-overlay" id="productModal"><div class="modal">
+<h3 id="prodModalTitle">Add Product</h3>
+<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="prodName"></div>
+<div class="form-group"><label class="form-label">Cost Price (UGX)</label><input type="number" class="form-input" id="prodCost"></div>
+<div class="form-group"><label class="form-label">Selling Price (UGX)</label><input type="number" class="form-input" id="prodPrice"></div>
+<div class="form-group"><label class="form-label">Stock Quantity</label><input type="number" class="form-input" id="prodStock"></div>
+<button class="btn btn-green" onclick="saveProduct()">Save</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('productModal')">Cancel</button>
 </div></div>
 
 <div class="modal-overlay" id="saleModal"><div class="modal">
-<div class="modal-header"><b id="saleModalTitle">🛒 Record Sale</b><button class="modal-close" onclick="closeModal('saleModal')">✕</button></div>
-<div id="saleStep1">
-<div style="display:flex;gap:10px">
-<input class="form-input" id="sfSearch" placeholder="Search product..." oninput="sfRenderList(this.value)" style="flex:1">
-<button type="button" class="btn btn-dark" style="width:auto;padding:14px 18px" onclick="openScanner(sfScan)"><span data-ic="scan"></span></button>
-</div>
-<div id="sfList" style="margin-top:14px;max-height:40vh;overflow-y:auto"></div>
-</div>
-<div id="saleStep2" style="display:none">
-<div class="sf-prod"><div class="item-name" id="sfName"></div><div class="item-meta" id="sfMeta"></div></div>
-<div class="stepper"><button class="action-btn" onclick="sfQty(-1)">−</button><div class="sf-qty" id="sfQty">1</div><button class="action-btn" onclick="sfQty(1)">+</button></div>
-<div class="form-group"><label class="form-label">Price (UGX)</label><input type="number" class="form-input" id="sfPrice" oninput="sfTotal()"></div>
-<div class="form-group"><label class="form-label">Payment</label><select class="form-input" id="sfPayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Credit</option></select></div>
-<div class="form-group"><label class="form-label">Customer (Optional)</label><input class="form-input" id="sfCustomer" placeholder="Walk-in customer"></div>
-<button class="btn btn-green" onclick="sfNext()">Next →</button>
-<button class="btn btn-outline" style="margin-top:10px" onclick="sfShow(1)">← Back</button>
-</div>
-<div id="saleStep3" style="display:none">
-<div class="sf-total-label">Total</div>
-<div class="sf-total" id="sfTotal">UGX 0</div>
-<button class="btn btn-green" onclick="sfComplete()">✅ COMPLETE SALE</button>
-<button class="btn btn-outline" style="margin-top:10px" onclick="sfShow(2)">← Back</button>
-</div>
-</div></div>
-
-<div class="modal-overlay" id="serviceModal"><div class="modal">
-<div class="modal-header"><b>💵 Record Service / Money In</b><button class="modal-close" onclick="closeModal('serviceModal')">✕</button></div>
-<div class="sub-title" style="margin-top:0">⚡ Quick Pick</div>
-<div class="chip-container" id="serviceChips"></div>
-<div class="form-group"><label class="form-label">What was it?</label><input class="form-input" id="svName" placeholder="e.g., Trip to Kampala, Haircut, Braids"></div>
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="svAmount"></div>
-<div class="form-group"><label class="form-label">Payment</label><select class="form-input" id="svPayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Credit</option></select></div>
-<div class="form-group"><label class="form-label">Customer (Optional)</label><input class="form-input" id="svCustomer" placeholder="Walk-in customer"></div>
-<button class="btn btn-green" onclick="completeService()">✅ COMPLETE</button>
-</div></div>
-
-<div class="modal-overlay" id="stockModal"><div class="modal">
-<div class="modal-header"><b id="stockModalTitle">📦 Receive Stock</b><button class="modal-close" onclick="closeModal('stockModal')">✕</button></div>
-<button type="button" class="btn btn-purple" style="margin-bottom:16px" onclick="openScanner(findProductByBarcode)"><span data-ic="scan"></span> Scan Barcode</button>
-<div class="form-group"><label class="form-label">Product</label><select class="form-input" id="stockProduct"></select></div>
-<div class="form-row">
-<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="stockQty" value="1" min="1"></div>
-<div class="form-group"><label class="form-label">Cost Price (UGX)</label><input type="number" class="form-input" id="stockCost"></div>
-</div>
-<div class="form-group"><label class="form-label">Supplier</label><input class="form-input" id="stockSupplier" placeholder="e.g., Mukwano Ltd"></div>
-<button class="btn btn-dark" onclick="receiveStock()">✅ Save Stock</button>
+<h3 id="saleModalTitle">New Sale</h3>
+<div class="form-group"><label class="form-label" id="saleProdLabel">Product</label>
+<select class="form-input" id="saleProduct"></select></div>
+<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="saleQty" value="1"></div>
+<div class="form-group"><label class="form-label">Payment</label>
+<select class="form-input" id="salePayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Credit</option></select></div>
+<button class="btn btn-green" onclick="recordSale()">Record Sale</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('saleModal')">Cancel</button>
 </div></div>
 
 <div class="modal-overlay" id="expenseModal"><div class="modal">
-<div class="modal-header"><b id="expenseModalTitle">💸 Record Expense</b><button class="modal-close" onclick="closeModal('expenseModal')">✕</button></div>
-<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="expenseCategory"></select></div>
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="expenseAmount"></div>
-<div class="form-group"><label class="form-label">Note</label><input class="form-input" id="expenseNote"></div>
-<button class="btn btn-yellow" onclick="recordExpense()">✅ Save Expense</button>
+<h3>Record Expense</h3>
+<div class="form-group"><label class="form-label">Category</label>
+<select class="form-input" id="expCategory"><option>Rent</option><option>Transport</option><option>Utilities</option><option>Supplies</option><option>Labour</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="expAmount"></div>
+<div class="form-group"><label class="form-label">Note</label><input class="form-input" id="expNote"></div>
+<button class="btn btn-green" onclick="recordExpense()">Save Expense</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('expenseModal')">Cancel</button>
 </div></div>
 
-<div class="modal-overlay" id="addProductModal"><div class="modal">
-<div class="modal-header"><b>📦 Add New Product</b><button class="modal-close" onclick="closeModal('addProductModal')">✕</button></div>
-<div class="sub-title" style="margin-top:0">⚡ Quick Add (Tap don't type)</div>
-<div class="chip-container" id="productChips"></div>
-<div class="form-group"><label class="form-label">Product Name *</label><input class="form-input" id="newProductName" placeholder="e.g., Kakira Sugar 1kg"></div>
-<div class="form-group"><label class="form-label">Barcode</label>
-<div style="display:flex;gap:10px">
-<input class="form-input" id="newProductBarcode" placeholder="Type or scan" style="flex:1">
-<button type="button" class="btn btn-dark" style="width:auto;padding:14px 18px" onclick="openScanner(fillNewProductBarcode)"><span data-ic="scan"></span></button>
-</div></div>
-<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="newProductCategory"></select></div>
-<div class="form-row">
-<div class="form-group"><label class="form-label">Selling Price</label><input type="number" class="form-input" id="newProductPrice"></div>
-<div class="form-group"><label class="form-label">Cost Price</label><input type="number" class="form-input" id="newProductCost"></div>
-</div>
-<div class="form-row">
-<div class="form-group"><label class="form-label">Opening Stock</label><input type="number" class="form-input" id="newProductStock"></div>
-<div class="form-group"><label class="form-label">Min Stock</label><input type="number" class="form-input" id="newProductMin"></div>
-</div>
-<div class="form-group"><label class="form-label">Supplier</label><input class="form-input" id="newProductSupplier" placeholder="e.g., Mukwano Ltd"></div>
-<button class="btn btn-green" onclick="addProduct()">✅ Save Product</button>
+<div class="modal-overlay" id="creditModal"><div class="modal">
+<h3>Add Credit Sale</h3>
+<div class="form-group"><label class="form-label">Customer Name</label><input class="form-input" id="credName"></div>
+<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="credAmount"></div>
+<div class="form-group"><label class="form-label">Note</label><input class="form-input" id="credNote"></div>
+<button class="btn btn-green" onclick="addCredit()">Save Credit</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('creditModal')">Cancel</button>
 </div></div>
 
-<div class="modal-overlay" id="repaymentModal"><div class="modal">
-<div class="modal-header"><b>💰 Record Payment</b><button class="modal-close" onclick="closeModal('repaymentModal')">✕</button></div>
-<input type="hidden" id="repayCreditId">
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="repayAmount" placeholder="Enter amount"></div>
-<div class="form-group" style="font-size:13px;color:var(--muted)">Remaining: <b id="repayMax" class="stat-red">0</b></div>
-<div class="form-group"><label class="form-label">Notes (Optional)</label><input class="form-input" id="repayNotes" placeholder="e.g., Cash received"></div>
-<button class="btn btn-green" onclick="recordRepayment()">✅ Save Payment</button>
+<div class="modal-overlay" id="employeeModal"><div class="modal">
+<h3>Add Employee</h3>
+<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="empName"></div>
+<div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="empPhone"></div>
+<div class="form-group"><label class="form-label">Role</label>
+<select class="form-input" id="empRole"><option value="cashier">Cashier</option><option value="manager">Manager</option></select></div>
+<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="empPin" maxlength="4" style="text-align:center;letter-spacing:8px"></div>
+<button class="btn btn-green" onclick="addEmployee()">Add Employee</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('employeeModal')">Cancel</button>
 </div></div>
 
-<div class="modal-overlay" id="ledgerModal"><div class="modal">
-<div class="modal-header"><b>📖 <span id="ledgerName"></span></b><button class="modal-close" onclick="closeModal('ledgerModal')">✕</button></div>
-<div id="ledgerRows"></div>
-<div class="recon-row" style="margin-top:10px"><span style="color:var(--muted)">Balance Owed</span><b id="ledgerBalance" class="stat-red">UGX 0</b></div>
-<div id="ledgerPay"></div>
-</div></div>
+<div class="toast" id="toast"></div>
 
-<div class="modal-overlay" id="scannerModal"><div class="modal">
-<div class="modal-header"><b>📷 Scan Barcode</b><button class="modal-close" onclick="stopScanner()">✕</button></div>
-<div id="reader" style="width:100%;min-height:250px;background:#000;border-radius:12px"></div>
-<p style="text-align:center;color:var(--muted);font-size:13px;margin-top:14px">Point camera at barcode</p>
-</div></div>
-
-<div class="modal-overlay" id="refundModal"><div class="modal">
-<div class="modal-header"><b>↩️ Record Refund</b><button class="modal-close" onclick="closeModal('refundModal')">✕</button></div>
-<div class="form-group"><label class="form-label">Product</label><select class="form-input" id="refundProduct"></select></div>
-<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="refundQty" value="1"></div>
-<div class="form-group"><label class="form-label">Refund Amount (UGX)</label><input type="number" class="form-input" id="refundAmount"></div>
-<div class="form-group"><label class="form-label">Payment Method</label><select class="form-input" id="refundPayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option></select></div>
-<div class="form-group"><label class="form-label">Reason</label><input class="form-input" id="refundReason" placeholder="e.g., Customer return"></div>
-<button class="btn btn-yellow" onclick="recordRefund()">↩️ Record Refund</button>
-</div></div>
-
-<div class="modal-overlay" id="writeoffModal"><div class="modal">
-<div class="modal-header"><b>🗑️ Stock Write-off</b><button class="modal-close" onclick="closeModal('writeoffModal')">✕</button></div>
-<div class="form-group"><label class="form-label">Product</label><select class="form-input" id="writeoffProduct"></select></div>
-<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="writeoffQty" value="1"></div>
-<div class="form-group"><label class="form-label">Reason</label><select class="form-input" id="writeoffReason"><option>Damaged</option><option>Expired</option><option>Lost/Stolen</option><option>Other</option></select></div>
-<button class="btn btn-red" onclick="recordWriteoff()">🗑️ Write Off Stock</button>
-</div></div>
-
-<div class="modal-overlay" id="drawdownModal"><div class="modal">
-<div class="modal-header"><b>💸 Owner Drawdown</b><button class="modal-close" onclick="closeModal('drawdownModal')">✕</button></div>
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="drawdownAmount"></div>
-<div class="form-group"><label class="form-label">From</label><select class="form-input" id="drawdownSource"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option></select></div>
-<div class="form-group"><label class="form-label">Note</label><input class="form-input" id="drawdownNote" placeholder="e.g., Personal withdrawal"></div>
-<button class="btn btn-purple" onclick="recordDrawdown()">💸 Record Drawdown</button>
-</div></div>
-
-<div class="modal-overlay" id="addEmployeeModal"><div class="modal">
-<div class="modal-header"><b>👤 Add Employee</b><button class="modal-close" onclick="closeModal('addEmployeeModal')">✕</button></div>
-<div class="form-group"><label class="form-label">Employee Name *</label><input class="form-input" id="empName" placeholder="e.g., Sarah Nakato"></div>
-<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="empPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">Role *</label><select class="form-input" id="empRole"><option value="manager">Manager</option><option value="cashier">Cashier</option></select></div>
-<div class="form-group"><label class="form-label">Branch</label><input class="form-input" id="empBranch" placeholder="e.g., Main Shop"></div>
-<div class="form-group"><label class="form-label">4-Digit PIN *</label><input type="password" class="form-input" id="empPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="addEmployee()">✅ Add Employee</button>
-</div></div>
-
-<div class="modal-overlay" id="approvalModal"><div class="modal">
-<div class="modal-header"><b>✅ Expense Approvals</b><button class="modal-close" onclick="closeModal('approvalModal')">✕</button></div>
-<div id="approvalList"></div>
-</div></div>
-
-<div class="modal-overlay" id="payReconModal"><div class="modal">
-<div class="modal-header"><b>💳 Payment Reconciliation</b><button class="modal-close" onclick="closeModal('payReconModal')">✕</button></div>
-<div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="payReconDate"></div>
-<div class="form-group"><label class="form-label">Payment Method</label><select class="form-input" id="payReconMethod"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Other</option></select></div>
-<div class="form-group"><label class="form-label">Actual Amount (UGX)</label><input type="number" class="form-input" id="payReconActual"></div>
-<button class="btn btn-green" onclick="reconcilePayment()">✅ Reconcile</button>
-<div id="payReconResult" style="margin-top:14px"></div>
-</div></div><script>
-setTimeout(function(){
-  var splash=document.getElementById('splash');
-  if(splash&&!splash.classList.contains('hide')){
-    splash.classList.add('hide');
-    var boot=function(){
-      var p=null;
-      try{p=JSON.parse(localStorage.getItem('df_profile'));}catch(e){}
-      if(p&&p.shopName){startApp();}
-      else{document.getElementById('authFlow').style.display='block';document.getElementById('screen-welcome').classList.add('active');}
-    };
-    if(window.Memory&&Memory.init){Memory.init().then(boot).catch(boot);}else{boot();}
-  }
-},3000);
-</script>
 <script>
 var CLOUD_URL='https://mrkawvyaybphbfpqrvqb.supabase.co';
-var APP_VERSION='12.0';
+var API_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
 var SESSION={role:'owner',user:null};
-var SECTOR_THEMES={
-'Retail':{app:'DukaFlow',tag:'Keep Your Shop Flowing',c1:'#10B981',c2:'#34D399',c3:'#059669',e:'🛒',hero:"Today's Sales",navStock:'Stock',stockTitle:'Inventory',sale:'Record Sale (goods/stock)',stock:'Receive Stock',expense:'Add Expense',service:'Record Service (no stock)',credit:'Record Credit',cats:['Grocery','Beverage','Dairy','Household','Bakery','Electronics','Other'],ecats:['Transport','Fuel','Maintenance','Supplies','Rent','Packaging','Utilities','Marketing','Food','Stock Purchase','Other']},
-'Agriculture':{app:'FarmFlow',tag:'Grow Your Harvest',c1:'#84CC16',c2:'#A3E635',c3:'#65A30D',e:'🌾',hero:"Today's Harvest",navStock:'Inputs & Harvest',stockTitle:'Inputs & Harvest',sale:'Record Yield Sold',stock:'Receive Inputs/Harvest',expense:'Add Farm Cost',service:'Record Service (no stock)',credit:'Record Credit',cats:['Seeds','Fertilizer','Crop','Livestock','Produce','Other'],ecats:['Seeds','Fertilizer','Labor','Transport','Water','Equipment','Rent','Other']},
-'Manufacturing':{app:'CraftFlow',tag:'Make & Sell More',c1:'#8B5CF6',c2:'#A78BFA',c3:'#7C3AED',e:'🧶',hero:"Today's Production",navStock:'Materials',stockTitle:'Materials',sale:'Record Product Sold',stock:'Receive Materials',expense:'Add Production Cost',service:'Record Service (no stock)',credit:'Record Credit',cats:['Raw Material','Work-in-Progress','Finished Goods','Tools','Other'],ecats:['Raw Materials','Labor','Power','Rent','Equipment','Transport','Other']},
-'Services':{app:'ServiceFlow',tag:'Book & Earn More',c1:'#EC4899',c2:'#F472B6',c3:'#DB2777',e:'✂️',hero:"Today's Services",navStock:'Supplies & Products',stockTitle:'Supplies & Products',sale:'Record Service',stock:'Receive Supplies',expense:'Add Business Expense',service:'Record Service (no stock)',credit:'Record Credit',cats:['Hair','Nail','Beauty','Tools','Products','Other'],ecats:['Supplies','Rent','Electricity','Water','Marketing','Salaries','Other']},
-'Transport':{app:'TransportFlow',tag:'Move & Earn More',c1:'#F59E0B',c2:'#FBBF24',c3:'#D97706',e:'🚚',hero:"Today's Fares",navStock:'Parts & Fuel',stockTitle:'Parts & Fuel',sale:'Record Trip/Fare',stock:'Receive Parts',expense:'Add Running Cost',service:'Record Trip (no stock)',credit:'Record Credit',cats:['Spare Parts','Accessories','Fuel','Lubricants','Other'],ecats:['Fuel','Maintenance','Parking','Permits','Insurance','Rent','Other']},
-'Food':{app:'FoodFlow',tag:'Serve & Profit Daily',c1:'#EF4444',c2:'#F87171',c3:'#DC2626',e:'🍲',hero:"Today's Orders",navStock:'Ingredients',stockTitle:'Ingredients',sale:'Record Meal/Order',stock:'Receive Ingredients',expense:'Add Food Cost',service:'Record Order (no stock)',credit:'Record Credit',cats:['Ingredients','Beverages','Packaging','Menu Items','Other'],ecats:['Ingredients','Gas','Rent','Labor','Packaging','Utilities','Other']},
-'Energy':{app:'EnergyFlow',tag:'Fuel Your Profits',c1:'#EAB308',c2:'#FACC15',c3:'#CA8A04',e:'⛽',hero:"Today's Dispensed",navStock:'Fuel & Bulk',stockTitle:'Fuel & Bulk',sale:'Record Dispensed',stock:'Receive Fuel/Bulk',expense:'Add Operational Cost',service:'Record Service (no stock)',credit:'Record Credit',cats:['Petrol','Diesel','Kerosene','Lubricants','Gas','Other'],ecats:['Bulk Purchase','Transport','Rent','Salaries','Maintenance','Other']}
-};
-var SECTOR_TEMPLATES={
-'Retail':[{name:'Kakira Sugar 1kg',category:'Grocery',price:4000,cost:3500},{name:'Coca-Cola 500ml',category:'Beverage',price:2500,cost:2000},{name:'Dettol Soap',category:'Household',price:3500,cost:2800},{name:'Indomie Noodles',category:'Grocery',price:1500,cost:1200}],
-'Agriculture':[{name:'NPK Fertilizer 50kg',category:'Fertilizer',price:180000,cost:150000},{name:'Maize Seeds 1kg',category:'Seeds',price:25000,cost:20000},{name:'Chicken Feed 10kg',category:'Livestock',price:45000,cost:38000}],
-'Manufacturing':[{name:'Cotton Yarn 1kg',category:'Raw Material',price:30000,cost:25000},{name:'Dye Pack',category:'Raw Material',price:15000,cost:12000}],
-'Services':[{name:'Hair Braiding',category:'Hair',price:50000,cost:0},{name:'Manicure',category:'Nail',price:20000,cost:0},{name:'Hair Relaxer',category:'Products',price:15000,cost:10000}],
-'Transport':[{name:'Trip to Kampala',category:'Fares',price:15000,cost:0},{name:'Boda Boda Fare - Local',category:'Fares',price:3000,cost:0},{name:'Motorcycle Oil 1L',category:'Lubricants',price:15000,cost:12000}],
-'Food':[{name:'Rolex (Egg & Chapati)',category:'Menu Items',price:3000,cost:1500},{name:'Chai / Tea',category:'Beverages',price:1000,cost:300},{name:'Chapati',category:'Menu Items',price:1000,cost:400}],
-'Energy':[{name:'Super Petrol 1L',category:'Petrol',price:5800,cost:5500},{name:'Regular Petrol 1L',category:'Petrol',price:5600,cost:5300},{name:'Diesel 1L',category:'Diesel',price:5500,cost:5200},{name:'Kerosene 1L',category:'Kerosene',price:4500,cost:4200}]
-};
-var themeOverride='';
-function getTheme(){var s=themeOverride||((DB.getObj('profile').sector)||'Retail');return SECTOR_THEMES[s]||SECTOR_THEMES['Retail'];}
-function fillCategories(){var t=getTheme();var pc=$('newProductCategory');if(pc)pc.innerHTML=t.cats.map(function(c){return '<option>'+c+'</option>'}).join('');var ec=$('expenseCategory');if(ec)ec.innerHTML=t.ecats.map(function(c){return '<option>'+c+'</option>'}).join('');}
-function applyTheme(){
-var t=getTheme();var r=document.documentElement.style;
-r.setProperty('--green',t.c1);r.setProperty('--green2',t.c2);r.setProperty('--green3',t.c3);
-document.title=t.app+' v'+APP_VERSION+' — '+t.tag;
-var h1=document.querySelector('.header-left h1');if(h1)h1.innerHTML=t.app.replace('Flow','<span>Flow</span>');
-var hero=document.querySelector('.hero-label');if(hero)hero.textContent=t.hero;
-var ns=document.querySelector('#nav-products .nav-label');if(ns)ns.textContent=t.navStock;
-var st=$('stockTitle');if(st)st.textContent=t.stockTitle;
-if($('asSale'))$('asSale').innerHTML=ic('cart')+' '+t.sale;
-if($('asStock'))$('asStock').innerHTML=ic('box')+' '+t.stock;
-if($('asExpense'))$('asExpense').innerHTML=ic('receipt')+' '+t.expense;
-if($('asService'))$('asService').innerHTML=ic('receipt')+' '+t.service;
-if($('asCredit'))$('asCredit').innerHTML=ic('users')+' '+t.credit;
-var smt=$('saleModalTitle');if(smt)smt.textContent=t.e+' '+t.sale;
-var skt=$('stockModalTitle');if(skt)skt.textContent='📦 '+t.stock;
-var emt=$('expenseModalTitle');if(emt)emt.textContent='💸 '+t.expense;
-fillCategories();
-}
-function previewSector(v){themeOverride=v;applyTheme();}
-function renderSmartChips(cid,type){var sn=themeOverride||((DB.getObj('profile').sector)||'Retail');var t=SECTOR_TEMPLATES[sn]||SECTOR_TEMPLATES['Retail'];$(cid).innerHTML=t.map(function(x,i){return '<button type="button" class="chip" onclick="applyChip(\''+cid+'\',\''+type+'\','+i+')">'+x.name+'</button>'}).join('');}
-function applyChip(cid,type,i){var sn=themeOverride||((DB.getObj('profile').sector)||'Retail');var t=(SECTOR_TEMPLATES[sn]||SECTOR_TEMPLATES['Retail'])[i];if(!t)return;if(type==='product'){$('newProductName').value=t.name;$('newProductCategory').value=t.category;$('newProductPrice').value=t.price;$('newProductCost').value=t.cost;$('newProductStock').focus();}else if(type==='service'){$('svName').value=t.name;$('svAmount').value=t.price;$('svCustomer').focus();}showToast('Template applied: '+t.name);}
-var CLOUD_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
-function $(id){return document.getElementById(id)}
-  var Memory={
-db:null,
-init:function(){
-return new Promise(function(res){
-if(!('indexedDB' in window)){res(false);return;}
-var rq=indexedDB.open('DukaFlowMemory',1);
-rq.onupgradeneeded=function(e){var d=e.target.result;if(!d.objectStoreNames.contains('kv'))d.createObjectStore('kv');};
-rq.onsuccess=function(e){Memory.db=e.target.result;Memory.hydrate().then(function(){res(true);});};
-rq.onerror=function(){res(false);};
-rq.onblocked=function(){res(false);};
-});
-},
-hydrate:function(){
-var ks=['profile','settings','sales','products','expenses','credits','repayments','syncQueue','employees','activityLog','expenseApprovals'];
-return Promise.all(ks.map(function(k){
-return Memory.get(k).then(function(v){
-if(v!=null&&!localStorage.getItem('df_'+k))localStorage.setItem('df_'+k,JSON.stringify(v));
-});
-}));
-},
-save:function(k,v){
-if(!Memory.db)return;
-try{var tx=Memory.db.transaction(['kv'],'readwrite');tx.objectStore('kv').put(v,k);}catch(e){}
-},
-get:function(k){
-return new Promise(function(res){
-if(!Memory.db){res(null);return;}
-try{
-var tx=Memory.db.transaction(['kv'],'readonly');
-var rq=tx.objectStore('kv').get(k);
-rq.onsuccess=function(){res(rq.result==null?null:rq.result);};
-rq.onerror=function(){res(null);};
-}catch(e){res(null);}
-});
-}
-};
-var DB={get:function(k){try{return JSON.parse(localStorage.getItem('df_'+k))||[]}catch(e){return[]}},set:function(k,v){localStorage.setItem('df_'+k,JSON.stringify(v));if(window.Memory)Memory.save(k,v);},getObj:function(k){try{return JSON.parse(localStorage.getItem('df_'+k))||{}}catch(e){return{}}},setObj:function(k,v){localStorage.setItem('df_'+k,JSON.stringify(v));if(window.Memory)Memory.save(k,v);}};
-var ICONS={home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>',box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5V8"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/>',cart:'<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>',chart:'<path d="M3 3v18h18"/><path d="M7 13v5"/><path d="M12 9v9"/><path d="M17 5v13"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',plus:'<path d="M12 5v14M5 12h14"/>',scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/>',cloud:'<path d="M17.5 19a4.5 4.5 0 1 0-.4-9A7 7 0 1 0 7 19h10.5"/>',bell:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',receipt:'<path d="M4 2h16v20l-2-1-2 1-2-1-2 1-2-1-2 1V2"/><path d="M8 7h8M8 11h8"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>'};
-function ic(n){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[n]||'')+'</svg>'}
-function injectIcons(){var els=document.querySelectorAll('[data-ic]');for(var i=0;i<els.length;i++)els[i].innerHTML=ic(els[i].getAttribute('data-ic'));}
-function getActive(t){return DB.get(t).filter(function(r){return !r.deleted})}
-function genId(){return Date.now().toString(36)+Math.random().toString(36).substr(2)}
-function iso(){return new Date().toISOString()}
-function today(){return iso().split('T')[0]}
-function fmt(n){return (n||0).toLocaleString()}
-function np(p){return String(p).replace(/\D/g,'').slice(-9)}
-function hashPin(p){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)).then(function(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')})}
-var toastTimer=null;
-window.addEventListener('unhandledrejection',function(){showToast('Connection problem. Check internet.',true)});
-function showToast(t,err){var el=$('toast');el.textContent=t;el.className='toast show'+(err?' error':'');clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.className='toast'},2500)}
-function j(r){if(!r.ok){showToast('Connection problem. Try again.',true);throw new Error('HTTP '+r.status)}return r.json()}
-function api(path,opts){opts=opts||{};var hk={};try{var pf=JSON.parse(localStorage.getItem('df_profile'));if(pf&&pf.shopKey)hk['x-shop-key']=pf.shopKey}catch(e){}opts.headers=Object.assign({'apikey':CLOUD_KEY,'Authorization':'Bearer '+CLOUD_KEY,'Content-Type':'application/json'},hk,opts.headers||{});return fetch(CLOUD_URL+path,opts)}
-function logActivity(action,entity,entityId,payload){try{var log=DB.get('activityLog');log.unshift({id:genId(),action:action,entity:entity||'',entityId:entityId||'',payload:payload||{},user:SESSION.user?SESSION.user.name:'Owner',role:SESSION.role,at:iso()});if(log.length>300)log=log.slice(0,300);DB.set('activityLog',log);var p=DB.getObj('profile');if(navigator.onLine&&p&&p.shopKey){api('/rest/v1/rpc/log_business_activity',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_action:action,p_entity:entity||null,p_entity_id:entityId||null,p_payload:payload||{}})}).catch(function(){});}}catch(e){}}
-function showAuth(s){document.querySelectorAll('.auth-screen').forEach(function(x){x.classList.remove('active')});$('screen-'+s).classList.add('active')}
-var PERMS={owner:['*'],manager:['dashboard','products','sales','reports','finance','credits','reconciliation','syncHealth','control','sale','service','stock','expense','credit','refund','writeoff','audit'],cashier:['dashboard','sales','credits','sale','service','credit']};
-function can(perm){if(!SESSION.role)return false;var p=PERMS[SESSION.role];if(!p)return false;return p.indexOf('*')>-1||p.indexOf(perm)>-1;}
-function switchScreen(s){
-var permMap={dashboard:'dashboard',products:'products',sales:'sales',reports:'reports',finance:'finance',credits:'credits',reconciliation:'reconciliation',settings:'owner',control:'control',syncHealth:'syncHealth',employees:'owner',audit:'audit'};
-var needed=permMap[s];
-if(needed&&!can(needed)){showToast('No permission for this area',true);return;}
-document.querySelectorAll('.screen').forEach(function(x){x.classList.remove('active')});
-$('screen-'+s).classList.add('active');
-document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active')});
-var n=$('nav-'+s);if(n)n.classList.add('active');
-if(s==='reconciliation')renderReconciliation();
-if(s==='syncHealth')renderSyncHealth();
-if(s==='finance')renderFinance();
-if(s==='employees')renderEmployees();
-if(s==='audit')renderAudit();
-$('notifPanel').style.display='none';
-applyNavPermissions();
-}
-function applyNavPermissions(){
-if($('nav-settings'))$('nav-settings').style.display=can('owner')?'':'none';
-if($('nav-products'))$('nav-products').style.display=can('products')?'':'none';
-if($('nav-reports'))$('nav-reports').style.display=can('reports')?'':'none';
-}
-function openModal(id){$(id).classList.add('active');if(id==='stockModal')populateDropdowns();if(id==='addProductModal'||id==='expenseModal')fillCategories();if(id==='addProductModal')renderSmartChips('productChips','product');if(id==='serviceModal')renderSmartChips('serviceChips','service');if(id==='refundModal')populateRefundProducts();if(id==='writeoffModal')populateWriteoffProducts();if(id==='approvalModal')renderApprovals();}
-function closeModal(id){$(id).classList.remove('active')}
-function openSheet(){
-$('actionSheet').classList.add('active');
-var isMgr=can('stock');
-if($('asStock'))$('asStock').style.display=isMgr?'':'none';
-if($('asExpense'))$('asExpense').style.display=isMgr?'':'none';
-}
-function closeSheet(){$('actionSheet').classList.remove('active')}
-var sfSel=null,sfQ=1;
-function openSaleFlow(){sfSel=null;sfQ=1;$('sfSearch').value='';$('sfCustomer').value='';$('sfPayment').value='Cash';sfShow(1);sfRenderList('');openModal('saleModal')}
-function sfShow(n){$('saleStep1').style.display=n===1?'block':'none';$('saleStep2').style.display=n===2?'block':'none';$('saleStep3').style.display=n===3?'block':'none'}
-function sfRenderList(f){f=(f||'').toLowerCase();var ps=getActive('products').filter(function(p){return !f||p.name.toLowerCase().indexOf(f)>-1||p.barcode===f});$('sfList').innerHTML=ps.length?ps.slice(0,30).map(function(p){return '<div class="list-item" onclick="sfPick(\''+p.id+'\')"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">UGX '+fmt(p.price)+' • '+p.stock+' in stock</div></div></div>'}).join(''):'<div class="empty-state">No products. Receive stock first.</div>'}
-function sfPick(id){var p=getActive('products').find(function(x){return x.id===id});if(!p)return;if(p.stock<=0){showToast('Out of stock. Receive stock first.',true);return}sfSel=p;sfQ=1;$('sfName').textContent=p.name;$('sfMeta').textContent=p.stock+' in stock';$('sfQty').textContent='1';$('sfPrice').value=p.price;sfShow(2)}
-function sfScan(code){var p=getActive('products').find(function(x){return x.barcode===code});if(p)sfPick(p.id);else showToast('Not found. Add it manually.',true)}
-function sfQty(d){if(!sfSel)return;sfQ=Math.max(1,sfQ+d);if(sfQ>sfSel.stock){sfQ=sfSel.stock;showToast('Only '+sfSel.stock+' in stock.',true)}$('sfQty').textContent=sfQ}
-function sfTotal(){var pr=parseFloat($('sfPrice').value)||0;$('sfTotal').textContent='UGX '+fmt(pr*sfQ)}
-function sfNext(){sfTotal();sfShow(3)}
-function sfComplete(){if(!sfSel)return;var pid=sfSel.id,qty=sfQ,price=parseFloat($('sfPrice').value)||0;var payment=$('sfPayment').value;var customer=$('sfCustomer').value.trim()||'Walk-in';if(payment==='Credit'&&customer==='Walk-in'){showToast('Enter customer name for Credit',true);sfShow(2);return}
-var ps=DB.get('products');var p=ps.find(function(x){return x.id===pid});p.stock-=qty;p.synced=false;DB.set('products',ps);
-var sales=DB.get('sales');var saleId=genId();sales.unshift({id:saleId,productId:pid,productName:p.name,quantity:qty,price:price,total:price*qty,payment:payment,customer:customer,date:iso(),deleted:false,synced:false});DB.set('sales',sales);
-SyncQueue.add('sales',saleId,'sale',{total:price*qty});
-if(payment==='Credit'){var credits=DB.get('credits');var creditId=genId();credits.unshift({id:creditId,customerName:customer,phone:'',totalAmount:price*qty,paidAmount:0,status:'open',date:iso(),deleted:false,synced:false});DB.set('credits',credits);SyncQueue.add('credits',creditId,'credit',{totalAmount:price*qty});}
-var cogs=(p.cost||0)*qty;
-queueFinancialEvent(saleId,'sale',{amount:price*qty,cost:cogs,payment_method:payment,occurred_at:iso()});
-logActivity('sale_recorded','sale',saleId,{amount:price*qty,product:p.name,qty:qty});
-markPending();closeModal('saleModal');renderAll();renderNotifications();showToast('Sale saved: '+qty+'x '+p.name);markFirstSaleIfFirst();queueStockMovement(pid,'sale',-qty,'sale');}
-function doRegister(){
-var nm=$('regShop').value.trim(),ow=$('regOwner').value.trim(),ph=$('regPhone').value.trim(),lc=$('regLocation').value.trim(),pin=$('regPin').value.trim(),sc=$('regSector').value;
-if(!nm||!ow||!ph)return showToast('Fill shop, owner and phone',true);
-if(np(ph).length<9)return showToast('Enter a valid phone',true);
-if(!/^\d{4}$/.test(pin))return showToast('PIN must be 4 digits',true);
-if(!$('regConsent').checked)return showToast('Please accept the Terms first',true);
-hashPin(pin).then(function(h){
-api('/rest/v1/rpc/phone_taken',{method:'POST',body:JSON.stringify({p_phone:np(ph)})}).then(j).then(function(taken){
-if(taken===true)return showToast('Shop exists. Use Log In.',true);
-var key=genId()+genId();
-api('/rest/v1/rpc/register_shop',{method:'POST',body:JSON.stringify({p_shop_key:key,p_shop_name:nm,p_owner_name:ow,p_phone:ph,p_location:lc,p_pin_hash:h,p_sector:sc})}).then(j).then(function(nr){
-var id=nr&&nr.id||'';
-DB.setObj('profile',{shopName:nm,owner:ow,phone:ph,location:lc,createdAt:iso(),cloudId:id,shopKey:key,sector:sc,pinHash:h});
-if(!localStorage.getItem('df_sales'))DB.set('sales',[]);
-if(!localStorage.getItem('df_products'))DB.set('products',[]);
-if(!localStorage.getItem('df_expenses'))DB.set('expenses',[]);
-if(!localStorage.getItem('df_credits'))DB.set('credits',[]);
-if(!localStorage.getItem('df_repayments'))DB.set('repayments',[]);
-if(!localStorage.getItem('df_settings'))DB.setObj('settings',{capital:0,lowStockThreshold:10});
-themeOverride='';SESSION={role:'owner',user:null};
-showToast('Welcome to '+getTheme().app+'! 🎉');startApp();
-});});});}
-function doEmployeeLogin(){var phone=$('empLogPhone').value.trim();var pin=$('empLogPin').value.trim();if(!phone||!pin)return showToast('Enter phone and PIN',true);showToast('Verifying...');hashPin(pin).then(function(h){api('/rest/v1/rpc/employee_login',{method:'POST',body:JSON.stringify({p_phone:phone,p_pin_hash:h})}).then(j).then(function(res){if(!res||!res.ok)return showToast(res.error==='invalid_credentials'?'Wrong phone or PIN':'Login failed',true);DB.setObj('profile',{shopName:res.shop_name,owner:'',phone:phone,location:'',createdAt:iso(),cloudId:res.shop_id,shopKey:res.shop_key,sector:'Retail',pinHash:h});SESSION={role:res.role,user:{id:res.user_id,name:res.name,employeeCode:res.employee_code||''}};restore(res.shop_id).then(function(){showToast('Welcome, '+res.name+'!');startApp();});}).catch(function(){showToast('Connection error. Try again.',true);});});}
-function doLogin(){
-var ph=$('logPhone').value.trim(),pin=$('logPin').value.trim();
-if(!ph||!pin)return showToast('Enter phone and PIN',true);
-var p9=np(ph);
-hashPin(pin).then(function(h){
-api('/rest/v1/rpc/login_lookup',{method:'POST',body:JSON.stringify({p_phone:p9,p_pin_hash:h})}).then(j).then(function(all){
-var s=(Array.isArray(all)&&all[0])||null;
-if(!s)return showToast('Wrong phone or PIN',true);
-DB.setObj('profile',{shopName:s.shop_name||s.name||'My Shop',owner:s.owner_name||s.owner||'',phone:ph,location:s.location||'',createdAt:iso(),cloudId:s.id,shopKey:s.shop_key||'',sector:s.sector||'Retail',pinHash:s.pin_hash||''});
-themeOverride='';SESSION={role:'owner',user:null};
-restore(s.id).then(function(){showToast('Welcome back! 👋');startApp()});
-});});}
-function restore(shopId){
-if(!shopId)return Promise.resolve(false);
-return Promise.all([api('/rest/v1/sales?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),api('/rest/v1/expenses?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),api('/rest/v1/products?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),api('/rest/v1/credits?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()}),api('/rest/v1/repayments?shop_id=eq.'+shopId+'&select=*').then(function(r){return r.json()})]).then(function(res){
-var cs=Array.isArray(res[0])?res[0]:[],ce=Array.isArray(res[1])?res[1]:[],cp=Array.isArray(res[2])?res[2]:[],cc=Array.isArray(res[3])?res[3]:[],cr=Array.isArray(res[4])?res[4]:[];
-function mergeDated(local,cloud,map){var byId={};var out=local.slice();out.forEach(function(r){byId[r.id]=r});cloud.forEach(function(c){var id=c.local_id;if(!id)return;var mapped=map(c,id);if(byId[id]){if(byId[id].synced===true){if(mapped.deleted)byId[id].deleted=true;else Object.keys(mapped).forEach(function(k){byId[id][k]=mapped[k]});byId[id].synced=true;}}else{if(!mapped.deleted){byId[id]=mapped;out.push(mapped);}}});out.sort(function(a,b){return new Date(b.date||0)-new Date(a.date||0)});return out;}
-function mergeProducts(local,cloud,map){var byId={};var out=local.slice();out.forEach(function(r){byId[r.id]=r});cloud.forEach(function(c){var id=c.local_id;if(!id)return;var mapped=map(c,id);if(byId[id]){if(byId[id].synced===true){if(mapped.deleted)byId[id].deleted=true;else Object.keys(mapped).forEach(function(k){byId[id][k]=mapped[k]});byId[id].synced=true;}}else{if(!mapped.deleted){byId[id]=mapped;out.push(mapped);}}});return out;}
-DB.set('sales',mergeDated(DB.get('sales'),cs,function(r,id){return{id:id,productId:r.product_id||'',productName:r.product_name||r.name||'Item',quantity:parseInt(r.quantity)||1,price:parseFloat(r.price)||0,total:parseFloat(r.total!=null?r.total:r.amount)||0,payment:r.payment||'Cash',customer:r.customer||'Walk-in',date:r.date||r.created_at||iso(),deleted:r.deleted||false,synced:true}}));
-DB.set('expenses',mergeDated(DB.get('expenses'),ce,function(r,id){return{id:id,category:r.category||'Other',amount:parseFloat(r.amount!=null?r.amount:r.total)||0,note:r.note||'',date:r.date||r.created_at||iso(),deleted:r.deleted||false,synced:true}}));
-DB.set('products',mergeProducts(DB.get('products'),cp,function(r,id){return{id:id,name:r.name||r.product_name||'Item',barcode:r.barcode||'',category:r.category||'Grocery',price:parseFloat(r.price)||0,cost:parseFloat(r.cost)||0,stock:parseInt(r.stock)||0,deleted:r.deleted||false,synced:true}}));
-DB.set('credits',mergeDated(DB.get('credits'),cc,function(r,id){return{id:id,customerName:r.customer_name||'',phone:r.phone||'',totalAmount:parseFloat(r.total_amount)||0,paidAmount:parseFloat(r.paid_amount)||0,status:r.status||'open',date:r.date||r.created_at||iso(),deleted:r.deleted||false,synced:true}}));
-DB.set('repayments',mergeDated(DB.get('repayments'),cr,function(r,id){return{id:id,creditLocalId:r.credit_local_id||'',amount:parseFloat(r.amount)||0,notes:r.notes||'',date:r.date||r.created_at||iso(),deleted:r.deleted||false,synced:true}}));
-return true;}).catch(function(){return false});}
-function exportData(){var sales=getActive('sales'),ps=getActive('products'),creds=getActive('credits'),p=DB.getObj('profile');var q=function(s){return '"'+String(s==null?'':s).replace(/"/g,'""')+'"'};var csv='DUKAFLOW EXPORT - '+q(p.shopName)+' - '+today()+'\n\nSALES\nDate,Product,Qty,Price,Total,Payment,Customer\n';sales.forEach(function(s){csv+=String(s.date).slice(0,10)+','+q(s.productName)+','+s.quantity+','+s.price+','+s.total+','+q(s.payment)+','+q(s.customer)+'\n'});csv+='\nPRODUCTS\nName,Category,SellPrice,Cost,Stock,Supplier\n';ps.forEach(function(x){csv+=q(x.name)+','+q(x.category)+','+x.price+','+(x.cost||0)+','+x.stock+','+q(x.supplier)+'\n'});csv+='\nCREDITS\nCustomer,Total,Paid,Status,Date\n';creds.forEach(function(c){csv+=q(c.customerName)+','+c.totalAmount+','+c.paidAmount+','+q(c.status)+','+String(c.date).slice(0,10)+'\n'});var blob=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='dukaflow-'+today()+'.csv';document.body.appendChild(a);a.click();document.body.removeChild(a);showToast('Export downloaded 📤')}
-function logout(){if(!confirm('Log out? Your records stay safe on this phone.'))return;localStorage.removeItem('df_profile');location.reload()}
-function clearAllData(){if(!confirm('DELETE all records on THIS PHONE? (Cloud backup stays safe)'))return;if(!confirm('Final confirmation?'))return;localStorage.clear();location.reload()}
-function startApp(){
-$('authFlow').style.display='none';$('appShell').style.display='flex';$('splash').classList.add('hide');
-if(!localStorage.getItem('df_v4_resync')){localStorage.setItem('df_v4_resync','1');['sales','expenses','products'].forEach(function(k){var a=DB.get(k);a.forEach(function(r){r.synced=false});DB.set(k,a)});}
-injectIcons();loadSettings();renderAll();updatePending();syncAll();renderNotifications();memorySnapshot();applyNavPermissions();
-var p=DB.getObj('profile');
-var hasProducts=getActive('products').length>0;var hasSales=getActive('sales').length>0;var wizardDone=localStorage.getItem('df_wizard_done');
-if(p&&p.shopName&&!hasProducts&&!hasSales&&!wizardDone)initFirstProductWizard();
-}
-function loadSettings(){var p=DB.getObj('profile'),s=DB.getObj('settings');applyTheme();$('shopNameDisplay').textContent=p.shopName||'My Shop';$('settingShopName').value=p.shopName||'';$('settingOwner').value=p.owner||'';$('settingPhone').value=p.phone||'';$('settingCapital').value=s.capital||'';$('settingLowStock').value=s.lowStockThreshold||10}
-function saveSettings(){var p=DB.getObj('profile');p.shopName=$('settingShopName').value;p.owner=$('settingOwner').value;p.phone=$('settingPhone').value;DB.setObj('profile',p);DB.setObj('settings',{capital:parseFloat($('settingCapital').value)||0,lowStockThreshold:parseInt($('settingLowStock').value)||10});$('shopNameDisplay').textContent=p.shopName||'My Shop';showToast('Settings saved ✓');markPending()}
-function addProduct(){
-var name=$('newProductName').value.trim();if(!name)return showToast('Enter a product name',true);
-var barcode=$('newProductBarcode').value.trim();var category=$('newProductCategory').value;var price=parseFloat($('newProductPrice').value)||0;var cost=parseFloat($('newProductCost').value)||0;var stock=parseInt($('newProductStock').value)||0;var min=parseInt($('newProductMin').value);var supplier=$('newProductSupplier').value.trim();
-var ps=DB.get('products');var newId=genId();
-ps.push({id:newId,name:name,barcode:barcode,category:category,price:price,cost:cost,stock:stock,minStock:isNaN(min)?null:min,supplier:supplier,deleted:false,synced:false});
-DB.set('products',ps);SyncQueue.add('products',newId,'create',{name:name});queueOpeningStock(newId,stock,cost);
-logActivity('product_added','product',newId,{name:name});
-markPending();['newProductName','newProductBarcode','newProductPrice','newProductCost','newProductStock','newProductMin','newProductSupplier'].forEach(function(i){$(i).value=''});
-closeModal('addProductModal');renderProducts();showToast('Product added: '+name);
-if(barcode)saveGlobalProduct(barcode,name,category,price);
-markFirstProductIfFirst();}
-function saveGlobalProduct(barcode,name,category,price){if(!barcode)return;api('/rest/v1/global_products',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates'},body:JSON.stringify({barcode:barcode,name:name,category:category,default_price:price})}).catch(function(){});}
-function deleteProduct(id){if(!confirm('Delete this product?'))return;var ps=DB.get('products');var p=ps.find(function(x){return x.id===id});if(p){p.deleted=true;p.synced=false;}DB.set('products',ps);SyncQueue.add('products',id,'delete',{});logActivity('product_deleted','product',id,{});markPending();renderProducts();showToast('Product deleted')}
-function adjustStock(id,d){var ps=DB.get('products');var p=ps.find(function(x){return x.id===id});if(p){p.stock=Math.max(0,p.stock+d);p.synced=false;DB.set('products',ps);SyncQueue.add('products',id,'stock_adjust',{delta:d});markPending();renderProducts();queueStockMovement(id,'adjust',d,'manual_adjust');}}
-function minFor(p){return p.minStock!=null&&p.minStock!==''?parseInt(p.minStock):(DB.getObj('settings').lowStockThreshold||10)}
-function isLow(p){return p.stock>0&&p.stock<=minFor(p)}
-function isOut(p){return p.stock===0}
-var prodTab='all';
-function setProdTab(t){prodTab=t;$('tabAll').className='btn btn-dark'+(t==='all'?' tab-active':'');$('tabLow').className='btn btn-dark'+(t==='low'?' tab-active':'');$('tabOut').className='btn btn-dark'+(t==='out'?' tab-active':'');renderProducts($('productSearch').value)}
-function receiveStock(){var pid=$('stockProduct').value;var qty=parseInt($('stockQty').value)||1;var cost=parseFloat($('stockCost').value)||0;if(!pid)return showToast('Select a product',true);var ps=DB.get('products');var p=ps.find(function(x){return x.id===pid});p.stock+=qty;if(cost>0)p.cost=cost;if($('stockSupplier').value.trim())p.supplier=$('stockSupplier').value.trim();p.synced=false;DB.set('products',ps);var ex=DB.get('expenses');var expenseId=genId();ex.unshift({id:expenseId,category:'Stock Purchase',amount:cost*qty,note:qty+'x '+p.name+' from '+(p.supplier||'supplier'),date:iso(),deleted:false,synced:false});DB.set('expenses',ex);SyncQueue.add('expenses',expenseId,'expense',{amount:cost*qty});SyncQueue.add('products',pid,'stock_receive',{qty:qty});if(cost>0)queueFinancialEvent('purchase_'+expenseId,'purchase',{amount:cost*qty,payment_method:'cash',category:'stock',occurred_at:iso()});logActivity('stock_received','product',pid,{qty:qty,cost:cost});markPending();closeModal('stockModal');renderAll();renderNotifications();showToast('Stock received: +'+qty+' '+p.name);queueStockMovement(pid,'receive',qty,'stock_receive');}
-function recordExpense(){var amount=parseFloat($('expenseAmount').value)||0;if(amount<=0)return showToast('Enter an amount',true);var ex=DB.get('expenses');var expenseId=genId();ex.unshift({id:expenseId,category:$('expenseCategory').value,amount:amount,note:$('expenseNote').value,date:iso(),deleted:false,synced:false});DB.set('expenses',ex);SyncQueue.add('expenses',expenseId,'expense',{amount:amount});queueFinancialEvent(expenseId,'expense',{amount:amount,category:$('expenseCategory').value,payment_method:'cash',occurred_at:iso()});logActivity('expense_recorded','expense',expenseId,{amount:amount,category:$('expenseCategory').value});markPending();closeModal('expenseModal');$('expenseAmount').value='';$('expenseNote').value='';renderAll();renderNotifications();showToast('Expense saved')}
-function populateDropdowns(){var ps=getActive('products');$('stockProduct').innerHTML=ps.map(function(p){return '<option value="'+p.id+'">'+p.name+' (Stock: '+p.stock+')</option>'}).join('')}
-function populateRefundProducts(){var ps=getActive('products');$('refundProduct').innerHTML='<option value="">No product</option>'+ps.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>'}).join('')}
-function populateWriteoffProducts(){var ps=getActive('products');$('writeoffProduct').innerHTML='<option value="">Select product</option>'+ps.map(function(p){return '<option value="'+p.id+'">'+p.name+' (Stock: '+p.stock+')</option>'}).join('')}
-function renderProducts(filter){filter=filter||'';var products=getActive('products');$('productCount').textContent=products.length;var totalValue=products.reduce(function(a,p){return a+(p.stock*p.price)},0);var invEl=$('inventoryValue');if(invEl)invEl.textContent='UGX '+fmt(totalValue);var list=products;if(filter)list=list.filter(function(p){return p.name.toLowerCase().indexOf(filter.toLowerCase())>-1||p.barcode===filter});if(prodTab==='low')list=list.filter(isLow);if(prodTab==='out')list=list.filter(isOut);$('productList').innerHTML=list.length?list.map(function(p){return '<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+(isOut(p)?' <span class="stock-low">OUT</span>':isLow(p)?' <span class="stock-low">LOW</span>':'')+'</div><div class="item-meta">'+p.category+' • sell '+fmt(p.price)+' • cost '+fmt(p.cost||0)+(p.supplier?' • '+p.supplier:'')+'</div><div class="item-meta" style="color:var(--green2)">UGX '+fmt(p.price)+'</div></div><div style="text-align:right"><div class="stock-count '+(p.stock<=minFor(p)?'stock-low':'stock-ok')+'">'+p.stock+'</div><div style="font-size:10px;color:var(--muted)">in stock</div></div><div class="item-actions"><button class="action-btn" onclick="adjustStock(\''+p.id+'\',1)">+</button><button class="action-btn" onclick="adjustStock(\''+p.id+'\',-1)">−</button><button class="action-btn" onclick="deleteProduct(\''+p.id+'\')">🗑</button></div></div>'}).join(''):'<div class="empty-state">📦<p>No products here.</p></div>'}
-function renderSales(){var sales=getActive('sales'),f=$('salesDateFilter').value;var list=f?sales.filter(function(s){return String(s.date||'').indexOf(f)===0}):sales;$('salesList').innerHTML=list.length?list.slice(0,60).map(function(s){return '<div class="list-item"><div class="item-info"><div class="item-name">'+s.productName+'</div><div class="item-meta">'+new Date(s.date).toLocaleString()+' • '+s.payment+'</div></div><div style="text-align:right"><div class="amount-green">UGX '+fmt(s.total)+'</div><div class="item-meta">Qty '+s.quantity+'</div></div></div>'}).join(''):'<div class="empty-state">🛒<p>No sales yet.</p></div>'}
-function costOf(pid){var p=getActive('products').find(function(x){return x.id===pid});return p?(p.cost||0):0}
-function saleProfit(s){return (s.price-costOf(s.productId))*s.quantity}
-function dayKey(d){return d.toISOString().split('T')[0]}
-function lastNDays(n){var a=[];for(var i=n-1;i>=0;i--){var d=new Date();d.setDate(d.getDate()-i);a.push(d.toISOString().slice(0,10))}return a}
-function renderReports(){var sales=getActive('sales'),ex=getActive('expenses'),ps=getActive('products'),creds=getActive('credits'),reps=getActive('repayments');var t=today();var tS=sales.filter(function(s){return String(s.date||'').indexOf(t)===0});$('rTodaySales').textContent='UGX '+fmt(tS.reduce(function(a,b){return a+b.total},0));$('rTodayTx').textContent=tS.length;$('rTodayGross').textContent='UGX '+fmt(tS.reduce(function(a,b){return a+saleProfit(b)},0));$('rTodayExp').textContent='UGX '+fmt(ex.filter(function(e){return String(e.date||'').indexOf(t)===0&&e.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0));var days=lastNDays(6);var wS=sales.filter(function(s){return days.indexOf(String(s.date||'').split('T')[0])>-1});var wSales=wS.reduce(function(a,b){return a+b.total},0);var wProfit=wS.reduce(function(a,b){return a+saleProfit(b)},0);var wExp=ex.filter(function(e){return days.indexOf(String(e.date||'').split('T')[0])>-1&&e.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);$('rWeekSales').textContent='UGX '+fmt(wSales);$('rWeekProfit').textContent='UGX '+fmt(wProfit);$('rWeekExp').textContent='UGX '+fmt(wExp);var prev=[];for(var i=13;i>=7;i--){var d=new Date();d.setDate(d.getDate()-i);prev.push(dayKey(d))}var pS=sales.filter(function(s){return prev.indexOf(String(s.date||'').split('T')[0])>-1});var pSales=pS.reduce(function(a,b){return a+b.total},0);var ch=pSales>0?((wSales-pSales)/pSales*100):0;$('rWeekChange').innerHTML='<span class="brain-change '+(ch>=0?'up':'down')+'">'+(ch>=0?'↑':'↓')+' '+Math.abs(ch).toFixed(1)+'%</span>';var bars=days.map(function(ds){return{l:new Date(ds+'T00:00:00').toLocaleDateString('en',{weekday:'short'}),v:sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0)}});var mx=Math.max.apply(null,bars.map(function(x){return x.v}).concat([1]));$('weekSalesChart').innerHTML=bars.map(function(x){return '<div class="report-bar-item" style="height:'+((x.v/mx)*100)+'px"><div class="report-bar-label">'+x.l+'</div></div>'}).join('');var hl='';if(wSales>=pSales)hl='💪 Sales grew this week. Keep pushing your best sellers.';else hl='📉 Sales dipped vs last week. Check your pulse chart for your strongest day.';$('healthLine').textContent=hl;var agg={};sales.forEach(function(s){agg[s.productName]=agg[s.productName]||{q:0,r:0};agg[s.productName].q+=s.quantity;agg[s.productName].r+=s.total});var top=Object.keys(agg).sort(function(a,b){return agg[b].r-agg[a].r}).slice(0,5);$('bestSellers').innerHTML=top.length?top.map(function(k,i){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(i+1)+'. '+k+'</div><div class="item-meta">'+agg[k].q+' sold</div></div><div class="amount-green">UGX '+fmt(agg[k].r)+'</div></div>'}).join(''):'<div class="insight-desc">No sales yet.</div>';var soldNames={};sales.forEach(function(s){soldNames[s.productName]=true});var slow=ps.filter(function(p){return p.stock>0&&!soldNames[p.name]}).slice(0,5);$('slowSellers').innerHTML=slow.length?slow.map(function(p){return '<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+p.stock+' in stock, no sales yet</div></div></div>'}).join(''):'<div class="insight-desc">Everything in stock is selling. 👏</div>';$('rStockValue').textContent='UGX '+fmt(ps.reduce(function(a,p){return a+(p.stock*p.price)},0));var outstanding=creds.filter(function(c){return c.status!=='paid'}).reduce(function(a,b){return a+(b.totalAmount-b.paidAmount)},0);$('rOutstanding').textContent='UGX '+fmt(outstanding);$('rPayments').textContent='UGX '+fmt(reps.reduce(function(a,b){return a+b.amount},0));var debt={};creds.filter(function(c){return c.status!=='paid'}).forEach(function(c){debt[c.customerName]=(debt[c.customerName]||0)+(c.totalAmount-c.paidAmount)});var topD=Object.keys(debt).sort(function(a,b){return debt[b]-debt[a]}).slice(0,3);$('topDebtors').innerHTML=topD.length?topD.map(function(k){return '<div class="list-item"><div class="item-info"><div class="item-name">'+k+'</div></div><div class="amount-red">UGX '+fmt(debt[k])+'</div></div>'}).join(''):'<div class="insight-desc">Nobody owes you. 🎉</div>'}
-function renderDashboard(){var sales=getActive('sales'),ex=getActive('expenses'),ps=getActive('products');var t=today();var tSales=sales.filter(function(x){return String(x.date||'').indexOf(t)===0}).reduce(function(a,b){return a+b.total},0);var tExp=ex.filter(function(x){return String(x.date||'').indexOf(t)===0&&x.category!=='Stock Purchase'}).reduce(function(a,b){return a+b.amount},0);$('todaySales').textContent='UGX '+fmt(tSales);$('todayExpenses').textContent='UGX '+fmt(tExp);$('todayProfit').textContent='UGX '+fmt(tSales-tExp);$('lowStockCount').textContent=ps.filter(function(p){return isLow(p)||isOut(p)}).length;$('stockValue').textContent='UGX '+fmt(ps.reduce(function(a,p){return a+(p.stock*p.price)},0));var act=sales.slice(0,5).map(function(x){return{t:'sale',txt:'Sold '+x.quantity+'x '+x.productName,amt:x.total,d:x.date}}).concat(ex.slice(0,3).map(function(x){return{t:'exp',txt:x.category,amt:x.amount,d:x.date}})).sort(function(a,b){return new Date(b.d)-new Date(a.d)}).slice(0,8);$('recentActivity').innerHTML=act.length?act.map(function(a){return '<div class="list-item"><div class="item-info"><div class="item-name">'+(a.t==='sale'?'🛒 ':'')+a.txt+'</div><div class="item-meta">'+new Date(a.d).toLocaleString()+'</div></div><div class="'+(a.t==='sale'?'amount-green':'amount-red')+'">'+(a.t==='sale'?'+':'-')+'UGX '+fmt(a.amt)+'</div></div>'}).join(''):'<div class="empty-state">📭<p>No activity yet. Record your first sale!</p></div>'}
-function renderAttention(){var n=getNotifications().slice(0,3);var el=$('attentionList');if(!el)return;el.innerHTML=n.length?n.map(function(a){return '<div class="insight-row" onclick="switchScreen(\''+a.action+'\')"><div class="insight-icon">'+ic(a.type==='info'?'cloud':'alert')+'</div><div class="insight-text"><div class="insight-title">'+a.title+'</div><div class="insight-desc">'+a.desc+'</div></div></div>'}).join(''):'<div class="insight-desc">✅ All clear. Nothing needs your attention.</div>'}
-function renderPulse(){var sales=getActive('sales');var days=lastNDays(6);var max=1;var bars=days.map(function(ds){var v=sales.filter(function(s){return String(s.date||'').indexOf(ds)===0}).reduce(function(a,b){return a+b.total},0);if(v>max)max=v;return{label:new Date(ds).toLocaleDateString('en',{weekday:'short'}),value:v}});var pc=$('pulseChart');if(pc)pc.innerHTML=bars.map(function(d){return '<div class="report-bar-item" style="height:'+((d.value/max)*100)+'px"><div class="report-bar-label">'+d.label+'</div></div>'}).join('');var dt=[0,0,0,0,0,0,0];sales.forEach(function(s){dt[new Date(s.date).getDay()]+=s.total});var bd=dt.indexOf(Math.max.apply(null,dt));var dn=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];var bl=$('bestDayLine');if(bl)bl.textContent='💡 You earn the most on '+dn[bd]+'s.'}
-function renderReconciliation(){$('reconProducts').innerHTML=getActive('products').map(function(p){return '<div class="card" style="background:var(--bg);padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center"><div><b style="font-size:14px">'+p.name+'</b><div style="font-size:12px;color:var(--muted)">System: '+p.stock+'</div></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--muted)">Physical:</span><input type="number" class="form-input" style="width:80px;padding:10px" id="recon_'+p.id+'" value="'+p.stock+'" oninput="updateReconSummary()"></div></div></div>'}).join('');updateReconSummary()}
-function updateReconSummary(){var ps=getActive('products');var exp=0,phys=0,rev=0;ps.forEach(function(p){exp+=p.stock;rev+=p.stock*p.price;var el=$('recon_'+p.id);phys+=el?(parseInt(el.value)||0):p.stock});$('reconExpected').textContent=exp;$('reconPhysical').textContent=phys;$('reconDiscrepancy').textContent=phys-exp;$('reconExpectedRevenue').textContent='UGX '+fmt(rev)}
-function saveReconciliation(){var rec={id:genId(),date:today(),cash:parseFloat($('reconCash').value)||0,items:getActive('products').map(function(p){var el=$('recon_'+p.id);return{name:p.name,system:p.stock,physical:el?(parseInt(el.value)||0):p.stock}}),savedAt:iso()};var r=DB.get('reconciliations');r.unshift(rec);DB.set('reconciliations',r);markPending();logActivity('reconciliation_saved','reconciliation',rec.id,{});showToast('Reconciliation report saved ✓')}
+var PERMS={owner:['*'],manager:['dashboard','products','sales','reports','credits','settings'],cashier:['dashboard','sales','credits']};
 
-function renderAll(){renderDashboard();renderProducts();renderSales();renderReports();renderCredits();renderAttention();renderPulse();setTimeout(renderHealthScore,500)}
-var ledgerGroups=[];
-function renderCredits(){var credits=getActive('credits');ledgerGroups=[];var groups={};credits.forEach(function(c){var n=c.customerName||'Walk-in';if(!groups[n]){groups[n]={name:n,phone:'',total:0,paid:0,items:[]};ledgerGroups.push(groups[n])}var g=groups[n];g.total+=c.totalAmount;g.paid+=c.paidAmount;if(c.phone)g.phone=c.phone;g.items.push(c)});
-$('creditList').innerHTML=ledgerGroups.length?ledgerGroups.map(function(g,i){var rem=g.total-g.paid;var cls=rem<=0?'stat-green':'stat-red';var st=rem<=0?'PAID':'OWES UGX '+fmt(rem);return '<div class="list-item" style="flex-direction:column;align-items:flex-start"><div style="display:flex;justify-content:space-between;width:100%"><div class="item-info"><div class="item-name">'+g.name+'</div><div class="item-meta">'+g.items.length+' transaction'+(g.items.length>1?'s':'')+' • Total UGX '+fmt(g.total)+'</div></div><div style="text-align:right"><div class="'+cls+'" style="font-weight:800">'+st+'</div></div></div><div style="display:flex;gap:10px;width:100%;margin-top:12px"><button class="btn btn-dark" style="flex:1;padding:12px" onclick="openLedger('+i+')">📖 View Ledger</button></div></div>'}).join(''):'<div class="empty-state">📖<p>No credit records yet.</p></div>'}
-function openLedger(i){var g=ledgerGroups[i];if(!g)return;var reps=getActive('repayments');var rows=[];g.items.forEach(function(c){rows.push({d:c.date,txt:'Sale on credit',amt:c.totalAmount,sign:1});reps.forEach(function(r){if(r.creditLocalId===c.id)rows.push({d:r.date,txt:'Payment'+(r.notes?' • '+r.notes:''),amt:r.amount,sign:-1})})});rows.sort(function(a,b){return new Date(a.d)-new Date(b.d)});
-$('ledgerName').textContent=g.name;
-$('ledgerRows').innerHTML=rows.length?rows.map(function(r){return '<div class="recon-row"><span style="color:var(--muted)">'+new Date(r.d).toLocaleDateString()+' • '+r.txt+'</span><b class="'+(r.sign===1?'stat-red':'stat-green')+'">'+(r.sign===1?'+':'-')+'UGX '+fmt(r.amt)+'</b></div>'}).join(''):'<div class="empty-state">No transactions.</div>';
-$('ledgerBalance').textContent='UGX '+fmt(g.total-g.paid);
-$('ledgerPay').innerHTML=g.items.filter(function(c){return c.status!=='paid'}).map(function(c){return '<button class="btn btn-dark" style="margin-top:10px" onclick="closeModal(\'ledgerModal\');openRepayment(\''+c.id+'\')">💰 Pay for UGX '+fmt(c.totalAmount)+' sale</button>'}).join('');
-openModal('ledgerModal')}
-function getNotifications(){var notifs=[];var sales=getActive('sales'),ps=getActive('products'),creds=getActive('credits');var todaySales=sales.filter(function(x){return String(x.date||'').indexOf(today())===0});if(todaySales.length===0)notifs.push({type:'info',icon:'🌅',title:'No sales today yet',desc:'Record your first sale to start tracking',action:'dashboard'});var totalOwed=creds.filter(function(c){return c.status!=='paid'}).reduce(function(a,b){return a+(b.totalAmount-b.paidAmount)},0);if(totalOwed>0)notifs.push({type:'warning',icon:'💰',title:'Money owed: UGX '+fmt(totalOwed),desc:creds.filter(function(c){return c.status!=='paid'}).length+' customer(s) owe you money',action:'credits'});var overdueCreds=creds.filter(function(c){if(c.status==='paid')return false;var daysAgo=Math.floor((new Date()-new Date(c.date))/86400000);return daysAgo>=7});overdueCreds.forEach(function(c){var daysAgo=Math.floor((new Date()-new Date(c.date))/86400000);notifs.push({type:'urgent',icon:'⏰',title:c.customerName+' overdue',desc:'Has owed UGX '+fmt(c.totalAmount-c.paidAmount)+' for '+daysAgo+' days',action:'credits'})});var lowStock=ps.filter(isLow);var outOfStock=ps.filter(isOut);if(outOfStock.length>0)notifs.push({type:'urgent',icon:'🚨',title:outOfStock.length+' out of stock',desc:outOfStock[0].name+(outOfStock.length>1?' and '+(outOfStock.length-1)+' more':''),action:'products'});if(lowStock.length>0)notifs.push({type:'warning',icon:'📦',title:lowStock.length+' low stock',desc:lowStock[0].name+(lowStock.length>1?' and '+(lowStock.length-1)+' more':''),action:'products'});var pending=pendingCount();if(pending>0)notifs.push({type:'info',icon:'☁️',title:pending+' records not backed up',desc:'Connect to internet to sync',action:'dashboard'});return notifs}
-function renderNotifications(){var notifs=getNotifications();var badge=$('notifBadge');if(notifs.length>0){badge.textContent=notifs.length;badge.style.display='block'}else badge.style.display='none';var list=$('notifList');if(notifs.length===0)list.innerHTML='<div class="empty-state" style="padding:30px"><div style="font-size:48px">✅</div><p style="margin-top:12px">All caught up! No alerts.</p></div>';else list.innerHTML=notifs.map(function(n,i){return '<div class="notif-item notif-'+n.type+'" onclick="handleNotifClick('+i+')"><div style="display:flex;align-items:center"><span class="notif-icon">'+n.icon+'</span><div><div class="notif-title">'+n.title+'</div><div class="notif-desc">'+n.desc+'</div></div></div></div>'}).join('')}
-function toggleNotifications(){var panel=$('notifPanel');panel.style.display=panel.style.display==='none'?'block':'none'}
-function handleNotifClick(i){var notifs=getNotifications();var n=notifs[i];if(n&&n.action)switchScreen(n.action);toggleNotifications()}
-var syncTimer=null;
-function markPending(){updatePending();clearTimeout(syncTimer);syncTimer=setTimeout(syncAll,3000)}
-function pendingCount(){var n=0;['sales','expenses','products','credits','repayments'].forEach(function(k){DB.get(k).forEach(function(r){if(r.synced!==true)n++})});return n}
-function setCloud(m){var el=$('cloudStatus');if(!el)return;el.textContent=m==='on'?'Backed up ✓':(m==='wait'?'Backing up…':'On this phone')}
-function updatePending(){setCloud(pendingCount()===0?'on':'wait');renderNotifications()}
-function ensureShop(){var p=DB.getObj('profile');if(p.cloudId)return Promise.resolve(p.cloudId);var key=p.shopKey||(genId()+genId());return api('/rest/v1/rpc/ensure_shop',{method:'POST',body:JSON.stringify({p_shop_key:key,p_shop_name:p.shopName,p_owner_name:p.owner,p_phone:p.phone,p_location:p.location})}).then(function(r){return r.json()}).then(function(d){var id=(d&&d.id)||'';p.cloudId=id;p.shopKey=key;DB.setObj('profile',p);return id})}
-var SyncQueue={all:function(){try{return JSON.parse(localStorage.getItem('df_syncQueue'))||[]}catch(e){return[]}},save:function(q){try{q=q.filter(function(x){return x&&x.id});q=q.slice(0,1000);localStorage.setItem('df_syncQueue',JSON.stringify(q));if(window.Memory)Memory.save('syncQueue',q);renderSyncHealthIfVisible();}catch(e){}},add:function(entity,entityId,operation,payload){var q=this.all();var op={id:genId(),entity:entity,entityId:entityId,operation:operation,payload:payload||{},status:'pending',retry:0,createdAt:iso()};q.unshift(op);this.save(q);return op},findById:function(id){var q=this.all();for(var i=0;i<q.length;i++)if(q[i].id===id)return q[i];return null},update:function(id,changes){var q=this.all();for(var i=0;i<q.length;i++){if(q[i].id===id){for(var k in changes)q[i][k]=changes[k];break;}}this.save(q)},markEntitySynced:function(entity,entityId){var q=this.all();var changed=false;for(var i=0;i<q.length;i++){var op=q[i];if(op.entity===entity&&op.entityId===entityId&&op.status!=='synced'&&op.entity!=='stock_movement'&&op.entity!=='ledger_event'){op.status='synced';op.syncedAt=iso();changed=true;}}if(changed)this.save(q)}};
-function renderSyncHealthIfVisible(){var s=$('screen-syncHealth');if(s&&s.classList.contains('active'))renderSyncHealth();}
-function upsertRow(table,row,patchRow){var patch=patchRow||row;var q='/rest/v1/'+table+'?shop_id=eq.'+patch.shop_id+'&local_id=eq.'+encodeURIComponent(patch.local_id);return api(q,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify(patch)}).then(function(r){if(!r.ok)return false;return r.json().then(function(d){if(Array.isArray(d)&&d.length>0)return true;return api('/rest/v1/'+table,{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(row)}).then(function(p){return p.ok});});});}
-function pushPendingToCloud(){
-if(!navigator.onLine){setCloud('wait');return Promise.reject(new Error('offline'))}
-var p=DB.getObj('profile');if(!p.shopName){setCloud('off');return Promise.reject(new Error('no-shop'))}
-return ensureShop().then(function(shopId){
-if(!shopId){setCloud('off');return Promise.reject(new Error('no-shop-id'))}
-var sales=DB.get('sales'),exps=DB.get('expenses'),prods=DB.get('products');var jobs=[];
-sales.forEach(function(r){if(r.synced!==true)jobs.push({t:'sales',r:r,row:{shop_id:shopId,local_id:r.id,product_id:r.productId||'',product_name:r.productName,quantity:r.quantity,price:r.price,total:r.total,payment:r.payment,customer:r.customer,date:r.date,deleted:r.deleted?true:false}})});
-exps.forEach(function(r){if(r.synced!==true)jobs.push({t:'expenses',r:r,row:{shop_id:shopId,local_id:r.id,category:r.category,amount:r.amount,note:r.note,date:r.date,deleted:r.deleted?true:false}})});
-prods.forEach(function(r){if(r.synced!==true){var base={shop_id:shopId,local_id:r.id,name:r.name,barcode:r.barcode,category:r.category,price:r.price,cost:r.cost||0,deleted:r.deleted?true:false};jobs.push({t:'products',r:r,row:Object.assign({stock:r.stock},base),patchRow:base});}});
-var creds=DB.get('credits');creds.forEach(function(r){if(r.synced!==true)jobs.push({t:'credits',r:r,row:{shop_id:shopId,local_id:r.id,customer_name:r.customerName||'',phone:r.phone||'',total_amount:r.totalAmount,paid_amount:r.paidAmount,status:r.status||'open',date:r.date,deleted:r.deleted?true:false}})});
-var reps=DB.get('repayments');reps.forEach(function(r){if(r.synced!==true)jobs.push({t:'repayments',r:r,row:{shop_id:shopId,local_id:r.id,credit_local_id:r.creditLocalId||'',amount:r.amount,notes:r.notes||'',date:r.date,deleted:r.deleted?true:false}})});
-var chain=Promise.resolve();
-jobs.forEach(function(job){chain=chain.then(function(){return upsertRow(job.t,job.row,job.patchRow).then(function(ok){if(ok){job.r.synced=true;SyncQueue.markEntitySynced(job.t,job.r.id);}return ok;})})});
-return chain.then(function(){DB.set('sales',sales);DB.set('expenses',exps);DB.set('products',prods);DB.set('credits',creds);DB.set('repayments',reps);updatePending();return true});
-});}
-function queueStockMovement(productId,movementType,delta,reason){var op=SyncQueue.add('stock_movement',productId,movementType,{movementType:movementType,delta:delta,reason:reason});processStockMovement(op.id);}
-function processStockMovement(opId){var op=SyncQueue.findById(opId);if(!op||op.status==='synced')return Promise.resolve(false);if(!navigator.onLine)return Promise.resolve(false);var p=DB.getObj('profile');if(!p.shopKey)return Promise.resolve(false);return api('/rest/v1/rpc/apply_stock_movement',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_product_local_id:op.entityId,p_movement_type:op.payload.movementType,p_quantity_delta:op.payload.delta,p_client_op_id:op.id,p_reason:op.payload.reason||null})}).then(j).then(function(res){if(res&&res.ok){SyncQueue.update(opId,{status:'synced',syncedAt:iso()});return true;}SyncQueue.update(opId,{status:'failed',retry:(op.retry||0)+1,last_error:(res&&res.error)||'rpc_failed'});return false;}).catch(function(err){SyncQueue.update(opId,{status:'failed',retry:(op.retry||0)+1,last_error:String(err)});return false;});}
-function processStockMovements(){if(!navigator.onLine)return Promise.resolve(false);var q=SyncQueue.all();var list=q.filter(function(op){return op.entity==='stock_movement'&&op.status!=='synced'&&(op.retry||0)<5});var chain=Promise.resolve();list.forEach(function(op){chain=chain.then(function(){return processStockMovement(op.id);});});return chain.then(function(){return true;});}
-function queueFinancialEvent(entityId,eventType,payload){var op=SyncQueue.add('ledger_event',entityId,eventType,payload);processFinancialEvent(op.id);}
-function queueOpeningStock(productId,qty,cost){if(qty>0&&cost>0)queueFinancialEvent(productId,'adjustment',{amount:qty*cost,debit_account:'1200',credit_account:'3000',reason:'opening_stock',occurred_at:iso()});}
-function processFinancialEvent(opId){var op=SyncQueue.findById(opId);if(!op||op.status==='synced')return Promise.resolve(false);if(!navigator.onLine)return Promise.resolve(false);var p=DB.getObj('profile');if(!p.shopKey)return Promise.resolve(false);return api('/rest/v1/rpc/post_financial_event',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_event_type:op.operation,p_payload:op.payload,p_client_event_id:op.id,p_occurred_at:op.payload.occurred_at||null})}).then(j).then(function(res){if(res&&res.ok){SyncQueue.update(opId,{status:'synced',syncedAt:iso()});return true;}SyncQueue.update(opId,{status:'failed',retry:(op.retry||0)+1,last_error:(res&&res.error)||'rpc_failed'});return false;}).catch(function(err){SyncQueue.update(opId,{status:'failed',retry:(op.retry||0)+1,last_error:String(err)});return false;});}
-function processFinancialEvents(){if(!navigator.onLine)return Promise.resolve(false);var q=SyncQueue.all();var list=q.filter(function(op){return op.entity==='ledger_event'&&op.status!=='synced'&&(op.retry||0)<5});var chain=Promise.resolve();list.forEach(function(op){chain=chain.then(function(){return processFinancialEvent(op.id);});});return chain.then(function(){return true;});}
-function syncAll(){return pushPendingToCloud().then(function(){return processStockMovements();}).then(function(){return processFinancialEvents();}).then(function(){localStorage.setItem('df_last_sync',iso());updatePending();return true;}).catch(function(){setCloud('wait');return false;});}
-var refreshBusy=false;
-function refreshFromCloud(){if(refreshBusy)return;if(!navigator.onLine)return showToast('Connect to internet first',true);var p=DB.getObj('profile');if(!p.shopName)return showToast('Log in first',true);refreshBusy=true;setCloud('wait');pushPendingToCloud().then(function(){var prof=DB.getObj('profile');if(!prof.cloudId)return ensureShop().then(function(id){return restore(id)});return restore(prof.cloudId);}).then(function(ok){if(!ok)throw new Error('restore-failed');renderAll();updatePending();renderNotifications();showToast('Refresh complete ✓');}).catch(function(){updatePending();showToast('Refresh failed. Check connection.',true);}).then(function(){refreshBusy=false});}
-var scannerInstance=null;var scannerCallback=null;
-function openScanner(cb){scannerCallback=cb;openModal('scannerModal');setTimeout(function(){scannerInstance=new Html5Qrcode("reader");scannerInstance.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:150}},function(decodedText){scannerInstance.stop().then(function(){scannerInstance.clear();closeModal('scannerModal');if(scannerCallback)scannerCallback(decodedText)}).catch(function(err){console.log(err)})},function(errorMessage){}).catch(function(err){showToast("Camera error. Check permissions.",true);closeModal('scannerModal')});},300);}
-function stopScanner(){if(scannerInstance)scannerInstance.stop().then(function(){scannerInstance.clear()}).catch(function(err){console.log(err)});closeModal('scannerModal')}
-function fillNewProductBarcode(code){$('newProductBarcode').value=code}
-function searchProductByBarcode(code){$('productSearch').value=code;renderProducts(code)}
-function findProductByBarcode(code){var products=getActive('products');var found=null;for(var i=0;i<products.length;i++){if(products[i].barcode===code){found=products[i];break}}if(found){selectScannedProduct(found);return}showToast('Checking global network...',false);api('/rest/v1/global_products?barcode=eq.'+encodeURIComponent(code)+'&select=*').then(function(r){return r.json()}).then(function(data){if(Array.isArray(data)&&data.length>0){var gp=data[0];var ps=DB.get('products');var newProd={id:genId(),name:gp.name||'Unknown Item',barcode:code,category:gp.category||'Other',price:parseFloat(gp.default_price)||0,stock:0,deleted:false,synced:false};ps.push(newProd);DB.set('products',ps);markPending();renderProducts();selectScannedProduct(newProd);showToast('Added '+newProd.name+' from global network!');}else showToast("Product not found. Add it manually!",true)}).catch(function(){showToast("Network error checking global database.",true)});}
-function selectScannedProduct(found){if($('stockModal').classList.contains('active')){populateDropdowns();$('stockProduct').value=found.id;showToast("Selected: "+found.name)}}
-function openServiceFlow(){$('svName').value='';$('svAmount').value='';$('svCustomer').value='';$('svPayment').value='Cash';openModal('serviceModal')}
-function completeService(){var name=$('svName').value.trim();var amount=parseFloat($('svAmount').value)||0;if(!name)return showToast('Describe the service',true);if(amount<=0)return showToast('Enter an amount',true);var payment=$('svPayment').value;var customer=$('svCustomer').value.trim()||'Walk-in';if(payment==='Credit'&&customer==='Walk-in'){showToast('Enter customer name for Credit',true);return}
-var sales=DB.get('sales');var saleId=genId();sales.unshift({id:saleId,productId:'',productName:name,quantity:1,price:amount,total:amount,payment:payment,customer:customer,date:iso(),deleted:false,synced:false});DB.set('sales',sales);
-SyncQueue.add('sales',saleId,'service',{total:amount});
-if(payment==='Credit'){var credits=DB.get('credits');var creditId=genId();credits.unshift({id:creditId,customerName:customer,phone:'',totalAmount:amount,paidAmount:0,status:'open',date:iso(),deleted:false,synced:false});DB.set('credits',credits);SyncQueue.add('credits',creditId,'credit',{totalAmount:amount});}
-queueFinancialEvent(saleId,'sale',{amount:amount,cost:0,payment_method:payment,occurred_at:iso()});
-logActivity('service_recorded','service',saleId,{amount:amount,name:name});
-markPending();closeModal('serviceModal');renderAll();renderNotifications();showToast('Service saved: '+name);markFirstSaleIfFirst()}
-function openRepayment(creditId){$('repayCreditId').value=creditId;var c=getActive('credits').find(function(x){return x.id===creditId});$('repayMax').textContent=fmt(c.totalAmount-c.paidAmount);$('repayAmount').value='';$('repayNotes').value='';openModal('repaymentModal')}
-function recordRepayment(){var creditId=$('repayCreditId').value;var amount=parseFloat($('repayAmount').value)||0;if(amount<=0)return showToast('Enter a valid amount',true);var credits=DB.get('credits');var c=credits.find(function(x){return x.id===creditId});if(!c)return;var remaining=c.totalAmount-c.paidAmount;if(amount>remaining)return showToast('Amount cannot exceed balance',true);c.paidAmount+=amount;if(c.paidAmount>=c.totalAmount){c.paidAmount=c.totalAmount;c.status='paid';}c.synced=false;DB.set('credits',credits);var reps=DB.get('repayments');var repayId=genId();reps.unshift({id:repayId,creditLocalId:c.id,amount:amount,notes:$('repayNotes').value||'',date:iso(),deleted:false,synced:false});DB.set('repayments',reps);SyncQueue.add('repayments',repayId,'repayment',{amount:amount});SyncQueue.add('credits',creditId,'update',{paidAmount:c.paidAmount});queueFinancialEvent(repayId,'repayment',{amount:amount,occurred_at:iso()});logActivity('repayment_recorded','repayment',repayId,{amount:amount});markPending();closeModal('repaymentModal');closeModal('ledgerModal');renderCredits();renderNotifications();showToast('Payment recorded ✓')}
-var hiddenAt=0;
-function showLock(){var p=DB.getObj('profile');if(p&&p.pinHash){var l=$('lockScreen');l.style.display='flex';$('lockPin').value='';$('lockMsg').textContent='';setTimeout(function(){$('lockPin').focus()},50)}}
-function tryUnlock(){var p=DB.getObj('profile');var pin=$('lockPin').value.trim();hashPin(pin).then(function(hh){
-if(hh===(p.pinHash||'')){SESSION={role:'owner',user:null};$('lockScreen').style.display='none';applyNavPermissions();return;}
-var emp=DB.get('employees').find(function(e){return e.pinHash===hh&&e.status==='active'});
-if(emp){SESSION={role:emp.role,user:emp};$('lockScreen').style.display='none';applyNavPermissions();logActivity('employee_unlock','employee',emp.id,{name:emp.name,role:emp.role});showToast('Welcome, '+emp.name);return;}
-$('lockMsg').textContent='Wrong PIN';});}
-document.addEventListener('visibilitychange',function(){if(document.hidden){hiddenAt=Date.now()}else{if(hiddenAt&&Date.now()-hiddenAt>60000)showLock();hiddenAt=0}});
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
-injectIcons();
-var wizardSelected=[];
-function initFirstProductWizard(){wizardSelected=[];var sectorName=themeOverride||((DB.getObj('profile').sector)||'Retail');var templates=SECTOR_TEMPLATES[sectorName]||SECTOR_TEMPLATES['Retail'];var html=templates.map(function(t,i){return '<div class="list-item wizard-item" id="wizItem_'+i+'" onclick="toggleWizardItem('+i+')"><div class="item-info"><div class="item-name">'+t.name+'</div><div class="item-meta">UGX '+fmt(t.price)+' • '+t.category+'</div></div><div class="wizard-check">○</div></div>'}).join('');$('wizardChips').innerHTML=html;$('firstProductWizard').style.display='block';}
-function toggleWizardItem(i){var idx=wizardSelected.indexOf(i);var el=$('wizItem_'+i);if(idx>-1){wizardSelected.splice(idx,1);el.classList.remove('selected');el.querySelector('.wizard-check').textContent='○'}else{wizardSelected.push(i);el.classList.add('selected');el.querySelector('.wizard-check').textContent='●'}}
-function completeFirstProductWizard(){if(wizardSelected.length===0)return showToast('Select at least one item to continue',true);var stock=parseInt($('wizardStock').value)||0;var sectorName=themeOverride||((DB.getObj('profile').sector)||'Retail');var templates=SECTOR_TEMPLATES[sectorName]||SECTOR_TEMPLATES['Retail'];var ps=DB.get('products');wizardSelected.forEach(function(idx){var t=templates[idx];var newId=genId();ps.push({id:newId,name:t.name,barcode:'',category:t.category,price:t.price,cost:t.cost,stock:stock,minStock:null,supplier:'',deleted:false,synced:false});SyncQueue.add('products',newId,'create',{name:t.name});queueOpeningStock(newId,stock,t.cost);});DB.set('products',ps);markPending();localStorage.setItem('df_wizard_done','1');var p=DB.getObj('profile');if(p&&p.shopKey){var rpcName=(sectorName==='Services'||sectorName==='Transport')?'v9_mark_first_service':'v9_mark_first_product';api('/rest/v1/rpc/'+rpcName,{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey})}).catch(function(){});}
-$('firstProductWizard').style.display='none';renderAll();showToast('Items added! Now record your first sale 🎉');}
-function skipFirstProductWizard(){$('firstProductWizard').style.display='none'}
-function markFirstProductIfFirst(){if(getActive('products').length===1){var p=DB.getObj('profile');if(p&&p.shopKey)api('/rest/v1/rpc/v9_mark_first_product',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey})}).catch(function(){})}}
-function markFirstSaleIfFirst(){if(getActive('sales').length===1){var p=DB.getObj('profile');if(p&&p.shopKey)api('/rest/v1/rpc/v9_mark_first_sale',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey})}).catch(function(){})}}
-function renderSyncHealth(){var q=SyncQueue.all();var opPending=q.filter(function(x){return (x.entity==='stock_movement'||x.entity==='ledger_event')&&x.status==='pending'}).length;var opFailed=q.filter(function(x){return (x.entity==='stock_movement'||x.entity==='ledger_event')&&x.status==='failed'}).length;var localCount=getActive('sales').length+getActive('products').length+getActive('expenses').length+getActive('credits').length+getActive('repayments').length;var lastSync=localStorage.getItem('df_last_sync');$('shCloud').textContent=navigator.onLine?'✓ Connected':'Offline';$('shLast').textContent=lastSync?new Date(lastSync).toLocaleString():'Never';$('shPending').textContent=pendingCount()+opPending;$('shFailed').textContent=opFailed;$('shLocal').textContent=localCount;$('shCloudRecords').textContent='...';var p=DB.getObj('profile');if(navigator.onLine&&p.shopKey){api('/rest/v1/rpc/shop_sync_health',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey})}).then(j).then(function(res){if(res&&res.ok){var total=(res.cloud_products||0)+(res.cloud_sales||0)+(res.cloud_expenses||0)+(res.cloud_credits||0)+(res.cloud_repayments||0);$('shCloudRecords').textContent=total;}else $('shCloudRecords').textContent='?';}).catch(function(){$('shCloudRecords').textContent='?';});}else $('shCloudRecords').textContent='Offline';}
-function manualSync(){showToast('Syncing...');syncAll().then(function(ok){renderSyncHealth();showToast(ok?'Sync complete':'Sync pending offline');});}
-function retryFailed(){var q=SyncQueue.all();q.forEach(function(op){if((op.entity==='stock_movement'||op.entity==='ledger_event')&&op.status==='failed'){op.status='pending';op.retry=0;}});SyncQueue.save(q);processStockMovements().then(function(){return processFinancialEvents();}).then(function(){renderSyncHealth();showToast('Retry complete');});}
-function finStat(label,val,cls){return '<div class="stat-card"><div class="stat-label">'+label+'</div><div class="stat-value '+cls+'">UGX '+fmt(val||0)+'</div></div>'}
-function renderFinance(){var p=DB.getObj('profile');if(!p||!p.shopKey){$('financeData').innerHTML='<div class="empty-state">Log in first.</div>';return;}if(!navigator.onLine){$('financeData').innerHTML='<div class="empty-state">📴 Connect to internet to load financial engine.</div>';return;}$('financeData').innerHTML='<div class="insight-desc">Loading financial engine...</div>';var start=today().slice(0,8)+'01';var end=today();Promise.all([api('/rest/v1/rpc/financial_summary',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_start_date:start,p_end_date:end})}).then(j),api('/rest/v1/rpc/inventory_financial_summary',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey})}).then(j)]).then(function(res){var f=res[0]||{};var inv=res[1]||{};var html='<div class="insight-desc" style="margin-bottom:12px">This month: '+start+' to '+end+'</div>';html+='<div class="sub-title">Money Split</div><div class="stats-grid">';html+=finStat('Cash',f.cash_physical,'stat-green');html+=finStat('MTN MoMo',f.mtn_momo,'stat-yellow');html+=finStat('Airtel Money',f.airtel_money,'stat-red');html+=finStat('Mobile Total',f.mobile_money,'stat-blue');html+='</div>';html+=finStat('Total Money',f.total_money,'stat-green');html+='<div class="sub-title">Profit & Loss</div><div class="stats-grid">';html+=finStat('Revenue',f.revenue,'stat-green');html+=finStat('COGS',f.cogs,'stat-red');html+=finStat('Gross Profit',f.gross_profit,'stat-blue');html+=finStat('Expenses',f.operating_expenses,'stat-yellow');html+=finStat('Net Profit',f.net_profit,f.net_profit>=0?'stat-green':'stat-red');html+='</div><div class="sub-title">Balance Snapshot</div><div class="stats-grid">';html+=finStat('Receivables',f.receivables,'stat-blue');html+=finStat('Inventory',f.inventory,'stat-yellow');html+=finStat('Payables',f.payables,'stat-red');html+=finStat('Drawings',f.drawings,'stat-red');html+='</div><div class="sub-title">Inventory Intelligence</div><div class="stats-grid">';html+='<div class="stat-card"><div class="stat-label">Products</div><div class="stat-value">'+(inv.products||0)+'</div></div>';html+='<div class="stat-card"><div class="stat-label">Units</div><div class="stat-value">'+fmt(inv.units||0)+'</div></div>';html+=finStat('Cost Value',inv.cost_value,'stat-yellow');html+=finStat('Retail Value',inv.retail_value,'stat-green');html+='</div>';html+=finStat('Potential Margin',inv.potential_margin,'stat-blue');$('financeData').innerHTML=html;}).catch(function(){$('financeData').innerHTML='<div class="empty-state">Could not load financial data.</div>';});var reconDate=$('finReconDate');if(reconDate&&!reconDate.value)reconDate.value=today();}
-function runCashRecon(){var p=DB.getObj('profile');if(!p||!p.shopKey)return showToast('Log in first',true);if(!navigator.onLine)return showToast('Connect to internet first',true);var d=$('finReconDate').value||today();var actual=parseFloat($('finActualCash').value)||0;api('/rest/v1/rpc/daily_cash_reconciliation',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_date:d,p_actual_cash:actual})}).then(j).then(function(res){if(res&&res.ok){var cls=res.variance>=0?'stat-green':'stat-red';var html='';html+='<div class="recon-row"><span style="color:var(--muted)">Expected Cash</span><b>UGX '+fmt(res.expected_cash)+'</b></div>';html+='<div class="recon-row"><span style="color:var(--muted)">Actual Cash</span><b>UGX '+fmt(res.actual_cash)+'</b></div>';html+='<div class="recon-row"><span style="color:var(--muted)">Variance</span><b class="'+cls+'">UGX '+fmt(res.variance)+'</b></div>';$('finReconResult').innerHTML=html;logActivity('cash_reconciled','reconciliation','daily',{date:d,expected:res.expected_cash,actual:actual,variance:res.variance});showToast('Reconciliation saved');}else showToast('Reconciliation failed',true);}).catch(function(){showToast('Reconciliation failed',true);});}
-function renderEmployees(){var emps=DB.get('employees');$('employeeList').innerHTML=emps.length?emps.map(function(e){var badge=e.role==='manager'?'perm-manager':'perm-cashier';return '<div class="list-item"><div class="item-info"><div class="item-name">'+e.name+'</div><div class="item-meta"><span class="perm-badge '+badge+'">'+e.role+'</span>'+(e.branch?' • '+e.branch:'')+(e.phone?' • '+e.phone:'')+'</div></div><div class="item-actions"><button class="action-btn" onclick="toggleEmployeeStatus(\''+e.id+'\')" title="'+(e.status==='active'?'Suspend':'Activate')+'">'+(e.status==='active'?'⏸':'▶')+'</button><button class="action-btn" onclick="deleteEmployee(\''+e.id+'\')" title="Remove">🗑</button></div></div>'}).join(''):'<div class="empty-state">👥<p>No employees yet. Add your first team member.</p></div>';}
-function addEmployee(){var name=$('empName').value.trim();var phone=$('empPhone').value.trim();var role=$('empRole').value;var branch=$('empBranch').value.trim();var pin=$('empPin').value.trim();if(!name)return showToast('Enter employee name',true);if(!/^\d{4}$/.test(pin))return showToast('PIN must be 4 digits',true);hashPin(pin).then(function(h){var emps=DB.get('employees');var dup=emps.some(function(e){return e.pinHash===h&&e.status==='active'});if(dup)return showToast('That PIN is already in use',true);var id=genId();emps.push({id:id,name:name,phone:phone,role:role,branch:branch,pinHash:h,status:'active',createdAt:iso()});DB.set('employees',emps);logActivity('employee_added','employee',id,{name:name,role:role,branch:branch});['empName','empPhone','empBranch','empPin'].forEach(function(i){$(i).value=''});closeModal('addEmployeeModal');renderEmployees();showToast('Employee added: '+name);var p=DB.getObj('profile');if(navigator.onLine&&p&&p.shopKey){api('/rest/v1/rpc/create_cloud_employee',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_name:name,p_phone:phone,p_role_name:role,p_branch:branch,p_pin_hash:h})}).then(j).then(function(res){if(res&&res.ok){var emps2=DB.get('employees');var emp=emps2.find(function(e){return e.id===id});if(emp){emp.cloudId=res.employee_id;emp.userId=res.user_id;DB.set('employees',emps2);}}}).catch(function(){});}});}
-function toggleEmployeeStatus(id){var emps=DB.get('employees');var e=emps.find(function(x){return x.id===id});if(!e)return;e.status=e.status==='active'?'suspended':'active';DB.set('employees',emps);logActivity('employee_status_changed','employee',id,{status:e.status});renderEmployees();showToast(e.status==='active'?'Employee activated':'Employee suspended');}
-function deleteEmployee(id){if(!confirm('Remove this employee?'))return;var emps=DB.get('employees');emps=emps.filter(function(e){return e.id!==id});DB.set('employees',emps);logActivity('employee_removed','employee',id,{});renderEmployees();showToast('Employee removed');}
-function renderAudit(){var log=DB.get('activityLog');$('auditList').innerHTML=log.length?log.slice(0,100).map(function(a){return '<div class="list-item"><div class="item-info"><div class="item-name">'+a.action+'</div><div class="item-meta">'+new Date(a.at).toLocaleString()+' • '+(a.user||'System')+' ('+(a.role||'owner')+')'+(a.entity?' • '+a.entity:'')+'</div></div></div>'}).join(''):'<div class="empty-state">🧾<p>No activity recorded yet.</p></div>';}
-function recordRefund(){var pid=$('refundProduct').value;var qty=parseInt($('refundQty').value)||0;var amount=parseFloat($('refundAmount').value)||0;var payment=$('refundPayment').value;var reason=$('refundReason').value.trim();if(amount<=0)return showToast('Enter refund amount',true);var ps=DB.get('products');var prod=null;if(pid){prod=ps.find(function(x){return x.id===pid});}var cost=0;if(prod&&qty>0){cost=(prod.cost||0)*qty;prod.stock+=qty;prod.synced=false;DB.set('products',ps);queueStockMovement(pid,'return',qty,'refund: '+reason);renderProducts();}
-var refundId=genId();queueFinancialEvent(refundId,'refund',{amount:amount,cost:cost,payment_method:payment,occurred_at:iso()});
-logActivity('refund_recorded','refund',refundId,{amount:amount,cost:cost,payment:payment,reason:reason});
-markPending();renderAll();closeModal('refundModal');showToast('Refund recorded');$('refundQty').value='1';$('refundAmount').value='';$('refundReason').value='';}
-function recordWriteoff(){var pid=$('writeoffProduct').value;var qty=parseInt($('writeoffQty').value)||0;var reason=$('writeoffReason').value;if(!pid)return showToast('Select a product',true);if(qty<=0)return showToast('Enter quantity',true);var ps=DB.get('products');var prod=ps.find(function(x){return x.id===pid});if(!prod)return;if(qty>prod.stock)return showToast('Only '+prod.stock+' in stock',true);var amount=(prod.cost||0)*qty;prod.stock-=qty;prod.synced=false;DB.set('products',ps);queueStockMovement(pid,'write_off',-qty,reason);queueFinancialEvent(genId(),'write_off',{amount:amount,category:'write_off',reason:reason,occurred_at:iso()});logActivity('stock_write_off','product',pid,{qty:qty,amount:amount,reason:reason});markPending();renderAll();closeModal('writeoffModal');showToast('Write-off recorded: '+qty+'x '+prod.name);$('writeoffQty').value='1';}
-function recordDrawdown(){var amount=parseFloat($('drawdownAmount').value)||0;var source=$('drawdownSource').value;var note=$('drawdownNote').value.trim();if(amount<=0)return showToast('Enter an amount',true);var account='1000';if(source==='MTN MoMo')account='1001';if(source==='Airtel Money')account='1002';var id=genId();queueFinancialEvent(id,'owner_drawdown',{amount:amount,from_account:account,reason:note,occurred_at:iso()});logActivity('owner_drawdown','withdrawal',id,{amount:amount,source:source,note:note});markPending();renderAll();closeModal('drawdownModal');showToast('Owner drawdown recorded: UGX '+fmt(amount));$('drawdownAmount').value='';$('drawdownNote').value='';}
-function renderApprovals(){var approvals=DB.get('expenseApprovals');$('approvalList').innerHTML=approvals.length?approvals.map(function(a){var statusCls=a.status==='approved'?'stat-green':(a.status==='rejected'?'stat-red':'stat-yellow');return '<div class="list-item"><div class="item-info"><div class="item-name">'+a.category+'</div><div class="item-meta">UGX '+fmt(a.amount)+(a.note?' • '+a.note:'')+'</div></div><div class="'+statusCls+'" style="font-weight:700;font-size:12px;text-transform:uppercase">'+a.status+'</div></div>'}).join(''):'<div class="empty-state">✅<p>No expense approvals yet.</p></div>';}
-function reconcilePayment(){var d=$('payReconDate').value||today();var method=$('payReconMethod').value;var actual=parseFloat($('payReconActual').value)||0;var p=DB.getObj('profile');if(!navigator.onLine)return showToast('Connect to internet first',true);if(!p.shopKey)return showToast('Log in first',true);api('/rest/v1/rpc/reconcile_payment_method',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_date:d,p_payment_method:method,p_actual_amount:actual})}).then(j).then(function(res){if(res&&res.ok){var cls=res.variance>=0?'stat-green':'stat-red';var html='';html+='<div class="recon-row"><span style="color:var(--muted)">Expected</span><b>UGX '+fmt(res.expected_amount)+'</b></div>';html+='<div class="recon-row"><span style="color:var(--muted)">Actual</span><b>UGX '+fmt(res.actual_amount)+'</b></div>';html+='<div class="recon-row"><span style="color:var(--muted)">Variance</span><b class="'+cls+'">UGX '+fmt(res.variance)+'</b></div>';$('payReconResult').innerHTML=html;logActivity('payment_reconciled','payment',method,{date:d,expected:res.expected_amount,actual:actual,variance:res.variance});showToast('Payment reconciliation saved');}else showToast('Reconciliation failed',true);}).catch(function(){showToast('Reconciliation failed',true);});}
+function $(id){return document.getElementById(id)}
+function fmt(n){return(n||0).toLocaleString()}
+function iso(){return new Date().toISOString()}
+function today(){return new Date().toISOString().split('T')[0]}
+function genId(){return 'df_'+Date.now()+'_'+Math.random().toString(36).substr(2,9)}
+function np(p){return String(p).replace(/\D/g,'').slice(-9)}
+function isLow(p){return p.stock<=(p.reorderPoint||5)}
+function isOut(p){return p.stock<=0}
+function costOf(pid){var ps=DB.get('products');var p=ps.find(function(x){return x.id===pid});return p?(p.cost||0):0}
+function can(action){var role=SESSION.role||'owner';var perms=PERMS[role]||[];return perms.indexOf('*')!==-1||perms.indexOf(action)!==-1}
+
+function showToast(msg,isError){var t=$('toast');if(!t)return;t.textContent=msg;t.className='toast show'+(isError?' error':'');setTimeout(function(){t.className='toast'},2500)}
+function openModal(id){$(id).classList.add('active')}
+function closeModal(id){$(id).classList.remove('active')}
+function switchScreen(name){
+document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
+var scr=$('screen-'+name);if(scr)scr.classList.add('active');
+var navItems=document.querySelectorAll('.nav-item');
+var idx={dashboard:0,products:1,sales:2,reports:3,credits:4,settings:5}[name]||0;
+if(navItems[idx])navItems[idx].classList.add('active');
+if(name==='dashboard')renderDashboard();
+if(name==='products')renderProducts();
+if(name==='sales')renderSales();
+if(name==='reports')renderReports();
+if(name==='credits')renderCredits();
+if(name==='settings')renderSettings();
+}
+
+var DB={
+get:function(key){try{return JSON.parse(localStorage.getItem('df_'+key))||[]}catch(e){return[]}},
+set:function(key,val){localStorage.setItem('df_'+key,JSON.stringify(val))},
+getObj:function(key){try{return JSON.parse(localStorage.getItem('df_'+key))||{}}catch(e){return{}}},
+setObj:function(key,val){localStorage.setItem('df_'+key,JSON.stringify(val))}
+};
+
+function showAuth(s){document.querySelectorAll('.auth-screen').forEach(function(x){x.classList.remove('active')});var el=$('screen-'+s);if(el)el.classList.add('active')}
+
+function doRegister(){
+var shop=$('regShop').value.trim(),name=$('regName').value.trim(),phone=$('regPhone').value.trim(),loc=$('regLocation').value.trim(),sector=$('regSector').value,pin=$('regPin').value.trim();
+if(!shop||!name||!phone||!pin)return showToast('Fill all fields',true);
+if(pin.length!==4)return showToast('PIN must be 4 digits',true);
+hashPin(pin).then(function(h){
+DB.setObj('profile',{shopName:shop,owner:name,phone:phone,location:loc,sector:sector,createdAt:iso(),pinHash:h,shopKey:genId()});
+showToast('Welcome, '+name+'! 🎉');startApp();
+}).catch(function(){showToast('Error creating shop',true)});
+}
+
+function doLogin(){
+var phone=$('logPhone').value.trim(),pin=$('logPin').value.trim();
+if(!phone||!pin)return showToast('Enter phone and PIN',true);
+var p=DB.getObj('profile');
+if(!p||!p.shopName)return showToast('No shop found. Register first.',true);
+hashPin(pin).then(function(h){
+if(h===p.pinHash){SESSION={role:'owner',user:{name:p.owner}};startApp();}
+else{showToast('Wrong PIN',true);}
+}).catch(function(){showToast('Error',true)});
+}
+
+function doEmployeeLogin(){
+var phone=$('empLogPhone').value.trim(),pin=$('empLogPin').value.trim();
+if(!phone||!pin)return showToast('Enter phone and PIN',true);
+showToast('Verifying...');
+hashPin(pin).then(function(h){
+api('/rest/v1/rpc/employee_login',{method:'POST',body:JSON.stringify({p_phone:phone,p_pin_hash:h})}).then(j).then(function(res){
+if(!res||!res.ok)return showToast(res.error==='invalid_credentials'?'Wrong phone or PIN':'Login failed',true);
+DB.setObj('profile',{shopName:res.shop_name,owner:'',phone:phone,location:'',createdAt:iso(),cloudId:res.shop_id,shopKey:res.shop_key,sector:res.sector||'Retail',pinHash:h});
+SESSION={role:res.role,user:{id:res.user_id,name:res.name}};
+showToast('Welcome, '+res.name+'!');startApp();
+}).catch(function(){showToast('Connection error. Try again.',true)});
+});
+}
+
+function startApp(){
+$('authFlow').style.display='none';
+$('app').style.display='block';
+var p=DB.getObj('profile');
+$('shopNameDisplay').textContent=p.shopName||'My Shop';
+$('sectorBadge').textContent=p.sector||'Retail';
+renderAll();
+}
+
+function logout(){
+SESSION={role:'owner',user:null};
+$('app').style.display='none';
+$('authFlow').style.display='flex';
+showAuth('welcome');
+}
+
+function markPending(){var d=$('syncDot');if(d)d.classList.add('pending')}
+function api(path,opts){opts=opts||{};opts.headers=Object.assign({'apikey':API_KEY,'Content-Type':'application/json'},opts.headers||{});return fetch(CLOUD_URL+path,opts)}
+function j(r){return r.json()}
+function hashPin(pin){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(pin)).then(function(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('')})}
+
+function syncAll(){
+showToast('Syncing...');
+var p=DB.getObj('profile');
+if(!p||!p.shopKey){showToast('No cloud connection',true);return}
+var products=DB.get('products'),sales=DB.get('sales');
+Promise.all([
+api('/rest/v1/rpc/sync_products',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_products:products})}).catch(function(){}),
+api('/rest/v1/rpc/sync_sales',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_sales:sales})}).catch(function(){})
+]).then(function(){
+var d=$('syncDot');if(d)d.classList.remove('pending');
+showToast('Synced ✓');
+}).catch(function(){showToast('Sync failed',true)});
+}
+
+function restore(){
+showToast('Restoring...');
+var p=DB.getObj('profile');
+if(!p||!p.cloudId){showToast('No cloud data found',true);return}
+api('/rest/v1/rpc/restore_shop',{method:'POST',body:JSON.stringify({p_shop_id:p.cloudId})}).then(j).then(function(res){
+if(res&&res.ok){
+if(res.products)DB.set('products',res.products);
+if(res.sales)DB.set('sales',res.sales);
+if(res.expenses)DB.set('expenses',res.expenses);
+if(res.credits)DB.set('credits',res.credits);
+renderAll();showToast('Restored ✓');
+}else{showToast('Restore failed',true)}
+}).catch(function(){showToast('Connection error',true)});
+}
+
 function calcHealthScore(){
-var sales=getActive('sales'),ps=getActive('products'),creds=getActive('credits'),ex=getActive('expenses');
-var todayStr=today();var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);
+var sales=DB.get('sales'),ps=DB.get('products'),creds=DB.get('credits'),ex=DB.get('expenses');
+var todayStr=today();
+var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);
 var todaySales=sales.filter(function(s){return String(s.date||'').indexOf(todayStr)===0});
 var weekSales=sales.filter(function(s){return new Date(s.date)>=weekStart});
 var weekRevenue=weekSales.reduce(function(a,b){return a+b.total},0);
@@ -912,76 +431,428 @@ var weekCost=weekSales.reduce(function(a,b){return a+(costOf(b.productId)*b.quan
 var grossMargin=weekRevenue>0?((weekRevenue-weekCost)/weekRevenue*100):0;
 var lowStock=ps.filter(function(p){return isLow(p)||isOut(p)}).length;
 var stockHealth=ps.length>0?Math.max(0,100-Math.round((lowStock/ps.length)*100)):100;
-var totalCredit=creds.reduce(function(a,b){return a+b.totalAmount},0);
-var totalCollected=creds.reduce(function(a,b){return a+b.paidAmount},0);
+var totalCredit=creds.reduce(function(a,b){return a+(b.totalAmount||b.amount||0)},0);
+var totalCollected=creds.reduce(function(a,b){return a+(b.paidAmount||0)},0);
 var debtScore=totalCredit>0?Math.round((totalCollected/totalCredit)*100):100;
-var weekExpenses=ex.filter(function(e){return new Date(e.date)>=weekStart&&e.category!=='Stock Purchase'});
-var prevStart=new Date();prevStart.setDate(prevStart.getDate()-13);var prevEnd=new Date();prevEnd.setDate(prevEnd.getDate()-7);
-var prevExpenses=ex.filter(function(e){var d=new Date(e.date);return d>=prevStart&&d<=prevEnd&&e.category!=='Stock Purchase'});
-var weekExpTotal=weekExpenses.reduce(function(a,b){return a+b.amount},0);
-var prevExpTotal=prevExpenses.reduce(function(a,b){return a+b.amount},0);
-var expGrowth=prevExpTotal>0?((weekExpTotal-prevExpTotal)/prevExpTotal*100):0;
-var expenseScore=expGrowth<=0?100:Math.max(0,100-Math.round(expGrowth));
-var activeDays={};sales.forEach(function(s){var d=String(s.date||'').split('T')[0];if(d)activeDays[d]=true;});
+var weekExp=ex.filter(function(e){return new Date(e.date)>=weekStart});
+var weekExpTotal=weekExp.reduce(function(a,b){return a+b.amount},0);
+var expenseScore=weekExpTotal>weekRevenue*0.5?50:100;
+var activeDays={};sales.forEach(function(s){var d=String(s.date||'').split('T')[0];if(d)activeDays[d]=true});
 var consistency=Math.min(100,Math.round((Object.keys(activeDays).length/7)*100));
 var salesScore=todaySales.length>0?100:(weekSales.length>0?70:40);
 var profitScore=Math.min(100,Math.round(grossMargin*2));
-var cashScore=localStorage.getItem('df_last_recon')?80:50;
+var cashScore=80;
 var score=Math.round((salesScore*0.2)+(profitScore*0.2)+(stockHealth*0.15)+(debtScore*0.15)+(cashScore*0.1)+(expenseScore*0.1)+(consistency*0.1));
 score=Math.max(0,Math.min(100,score));
-var alerts=genAlerts(ps,sales,creds,ex,grossMargin,expGrowth);
+var alerts=genSectorAlerts(ps,sales,creds,ex,grossMargin);
 return{score:score,components:{sales:salesScore,profit:profitScore,stock:stockHealth,debt:debtScore,cash:cashScore,expense:expenseScore,consistency:consistency},alerts:alerts,grossMargin:grossMargin};
 }
-function genAlerts(ps,sales,creds,ex,grossMargin,expGrowth){
-var alerts=[];var sector=(DB.getObj('profile').sector)||'Retail';
-var now=Date.now();var dayMs=86400000;
+
+function genSectorAlerts(ps,sales,creds,ex,grossMargin){
+var alerts=[];
+var sector=(DB.getObj('profile').sector)||'Retail';
+var cfg=SECTOR_CONFIG[sector]||SECTOR_CONFIG['Retail'];
+var now=Date.now(),dayMs=86400000;
 var velocity={};
-sales.forEach(function(s){if(!s.productId)return;var d=new Date(s.date).getTime();if(now-d>7*dayMs)return;if(!velocity[s.productId])velocity[s.productId]={qty:0,days:0};velocity[s.productId].qty+=s.quantity;velocity[s.productId].days=Math.max(velocity[s.productId].days,(now-d)/dayMs);});
+sales.forEach(function(s){if(!s.productId)return;var d=new Date(s.date).getTime();if(now-d>7*dayMs)return;if(!velocity[s.productId])velocity[s.productId]={qty:0,days:0};velocity[s.productId].qty+=s.quantity;velocity[s.productId].days=Math.max(velocity[s.productId].days,(now-d)/dayMs)});
 ps.forEach(function(p){
 if(p.stock<=0)return;
 var v=velocity[p.id];
-if(v&&v.qty>0){var daily=v.qty/Math.max(v.days,1);var daysLeft=Math.floor(p.stock/daily);
-if(daysLeft<=3)alerts.push({type:'urgent',icon:'📦',title:p.name+' running out',desc:'~'+daysLeft+' day'+(daysLeft!==1?'s':'')+' of stock left. Reorder soon.'});
-else if(daysLeft<=7)alerts.push({type:'warning',icon:'📦',title:p.name+' low soon',desc:'~'+daysLeft+' days of stock remaining.'});}
+if(v&&v.qty>0){
+var daily=v.qty/Math.max(v.days,1);
+var daysLeft=Math.floor(p.stock/daily);
+if(daysLeft<=3)alerts.push({type:'urgent',icon:'📦',title:p.name+' running out',desc:'~'+daysLeft+' day'+(daysLeft!==1?'s':'')+' left. Reorder soon.'});
+else if(daysLeft<=7)alerts.push({type:'warning',icon:'📦',title:p.name+' low soon',desc:'~'+daysLeft+' days remaining.'});
+}
 });
-if(grossMargin<15&&grossMargin>0)alerts.push({type:'warning',icon:'📉',title:'Thin margins',desc:'Gross margin is '+grossMargin.toFixed(1)+'%. Review pricing or costs.'});
-if(expGrowth>20)alerts.push({type:'warning',icon:'💸',title:'Expenses growing fast',desc:'Expenses up '+expGrowth.toFixed(0)+'% vs last week.'});
+if(grossMargin<15&&grossMargin>0)alerts.push({type:'warning',icon:'📉',title:'Thin margins',desc:'Gross margin is '+grossMargin.toFixed(1)+'%. Review pricing.'});
 var overdue=creds.filter(function(c){if(c.status==='paid')return false;return(new Date()-new Date(c.date))/dayMs>7});
-if(overdue.length>0)alerts.push({type:'urgent',icon:'⏰',title:overdue.length+' overdue credit'+(overdue.length>1?'s':''),desc:'UGX '+fmt(overdue.reduce(function(a,b){return a+(b.totalAmount-b.paidAmount)},0))+' outstanding over 7 days.'});
-if(sector==='Transport'){var fuelExp=ex.filter(function(e){return e.category==='Fuel'&&new Date(e.date)>=new Date(Date.now()-7*dayMs)});if(fuelExp.length>0){var fuelTotal=fuelExp.reduce(function(a,b){return a+b.amount},0);var prevFuel=ex.filter(function(e){var d=new Date(e.date);return e.category==='Fuel'&&d>=new Date(Date.now()-14*dayMs)&&d<new Date(Date.now()-7*dayMs)});var prevTotal=prevFuel.reduce(function(a,b){return a+b.amount},0);if(prevTotal>0&&fuelTotal>prevTotal*1.15)alerts.push({type:'warning',icon:'⛽',title:'Fuel costs rising',desc:'Fuel spend up '+Math.round((fuelTotal-prevTotal)/prevTotal*100)+'% this week.'});}}
-if(sector==='Food'&&grossMargin<20)alerts.push({type:'warning',icon:'🍲',title:'Food margin below target',desc:'Gross margin '+grossMargin.toFixed(1)+'% is below the 20% food target.'});
-if(sector==='Agriculture'){var fertExp=ex.filter(function(e){return(e.category==='Fertilizer'||e.category==='Seeds')&&new Date(e.date)>=new Date(Date.now()-7*dayMs)});if(fertExp.length>0){var inputTotal=fertExp.reduce(function(a,b){return a+b.amount},0);var prevInput=ex.filter(function(e){var d=new Date(e.date);return(e.category==='Fertilizer'||e.category==='Seeds')&&d>=new Date(Date.now()-14*dayMs)&&d<new Date(Date.now()-7*dayMs)});var prevInputTotal=prevInput.reduce(function(a,b){return a+b.amount},0);if(prevInputTotal>0&&inputTotal>prevInputTotal*1.18)alerts.push({type:'warning',icon:'🌾',title:'Input costs rising',desc:'Fertilizer/seed costs up '+Math.round((inputTotal-prevInputTotal)/prevInputTotal*100)+'%.'});}}
+if(overdue.length>0)alerts.push({type:'urgent',icon:'⏰',title:overdue.length+' overdue credit'+(overdue.length>1?'s':''),desc:'UGX '+fmt(overdue.reduce(function(a,b){return a+((b.totalAmount||b.amount||0)-(b.paidAmount||0))},0))+' outstanding.'});
+if(cfg.sectorAlerts){cfg.sectorAlerts.forEach(function(a){alerts.push(a)})}
 return alerts;
 }
+
 function renderHealthScore(){
 var hs=calcHealthScore();
-var el=$('healthScoreCard');
-if(!el)return;
+var el=$('healthScoreCard');if(!el)return;
 var color=hs.score>=70?'var(--green)':hs.score>=40?'var(--yellow)':'var(--red)';
 var label=hs.score>=70?'Healthy':hs.score>=40?'Needs Attention':'At Risk';
-var html='<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">';
-html+='<div style="width:72px;height:72px;border-radius:50%;border:4px solid '+color+';display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:22px;font-weight:900;color:'+color+'">'+hs.score+'</div><div style="font-size:9px;color:var(--muted)">/100</div></div>';
-html+='<div><div style="font-size:16px;font-weight:800;color:'+color+'">'+label+'</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Sales '+hs.components.sales+' • Profit '+hs.components.profit+' • Stock '+hs.components.stock+'</div><div style="font-size:12px;color:var(--muted)">Debt '+hs.components.debt+' • Cash '+hs.components.cash+' • Expenses '+hs.components.expense+'</div></div></div>';
-if(hs.alerts.length>0){
-html+='<div class="sub-title">⚡ Smart Alerts ('+hs.alerts.length+')</div>';
-hs.alerts.slice(0,5).forEach(function(a){
-html+='<div class="insight-row" style="border-left:3px solid '+(a.type==='urgent'?'var(--red)':'var(--yellow)')+'"><div class="insight-icon">'+a.icon+'</div><div class="insight-text"><div class="insight-title">'+a.title+'</div><div class="insight-desc">'+a.desc+'</div></div></div>';
-});
-}else{
-html+='<div class="insight-desc" style="margin-top:8px">✅ No alerts. Business is on track.</div>';
-}
+var html='<div style="display:flex;align-items:center;gap:16px">';
+html+='<div class="health-ring" style="border:4px solid '+color+'"><div class="score" style="color:'+color+'">'+hs.score+'</div><div class="label">/100</div></div>';
+html+='<div style="flex:1"><div style="font-size:16px;font-weight:800;color:'+color+'">'+label+'</div>';
+html+='<div style="font-size:12px;color:var(--muted);margin-top:4px">Sales '+hs.components.sales+' • Profit '+hs.components.profit+' • Stock '+hs.components.stock+'</div>';
+html+='<div style="font-size:12px;color:var(--muted)">Debt '+hs.components.debt+' • Cash '+hs.components.cash+' • Expenses '+hs.components.expense+'</div></div></div>';
 el.innerHTML=html;
 var p=DB.getObj('profile');
 if(navigator.onLine&&p&&p.shopKey){
 api('/rest/v1/rpc/save_health_score',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_score:hs.score,p_sales_activity:hs.components.sales,p_profit_health:hs.components.profit,p_stock_health:hs.components.stock,p_debt_collection:hs.components.debt,p_cash_control:hs.components.cash,p_expense_control:hs.components.expense,p_consistency:hs.components.consistency,p_alerts:hs.alerts})}).catch(function(){});
 }
 }
-function memorySnapshot(){if(!window.Memory)return;Memory.save('profile',DB.getObj('profile'));Memory.save('settings',DB.getObj('settings'));['sales','products','expenses','credits','repayments','employees','activityLog','expenseApprovals'].forEach(function(k){Memory.save(k,DB.get(k));});Memory.save('syncQueue',SyncQueue.all());}
-window.addEventListener('online',function(){updatePending();syncAll();});
-window.addEventListener('offline',function(){updatePending();});
-window.addEventListener('beforeunload',function(){memorySnapshot();});
-setInterval(function(){memorySnapshot();},30000);
+
+var SECTOR_CONFIG={
+'Retail':{productLabel:'Stock',saleLabel:'Sale',stockLabel:'Stock',customerLabel:'Customer',expenseLabel:'Expense',
+kpis:[{id:'stockValue',label:'Stock Value'},{id:'dailyCash',label:'Daily Cash'},{id:'fastMovers',label:'Fast Movers'},{id:'lowStock',label:'Low Stock'}],
+sectorAlerts:[{type:'warning',icon:'📦',title:'Supplier price watch',desc:'Track supplier prices to catch increases early'}]},
+'Agriculture':{productLabel:'Produce',saleLabel:'Harvest Sold',stockLabel:'Stored Produce',customerLabel:'Buyer',expenseLabel:'Farm Cost',
+kpis:[{id:'yieldPerAcre',label:'Total Produce'},{id:'pricePerKg',label:'Avg Price/kg'},{id:'inputCost',label:'Input Cost'},{id:'transportCost',label:'Transport Cost'}],
+sectorAlerts:[{type:'urgent',icon:'🌾',title:'Harvest price risk',desc:'Consider storage to wait for better prices'}]},
+'Transport':{productLabel:'Vehicle',saleLabel:'Trip',stockLabel:'Fuel & Parts',customerLabel:'Passenger',expenseLabel:'Operating Cost',
+kpis:[{id:'revenuePerTrip',label:'Revenue/Trip'},{id:'fuelCost',label:'Fuel Cost'},{id:'netPerTrip',label:'Net/Trip'},{id:'dailyRemittance',label:'Daily Collection'}],
+sectorAlerts:[{type:'urgent',icon:'⛽',title:'Fuel price watch',desc:'Fuel costs affect your trip margins directly'}]},
+'Food':{productLabel:'Menu Item',saleLabel:'Order',stockLabel:'Ingredients',customerLabel:'Customer',expenseLabel:'Kitchen Cost',
+kpis:[{id:'dailySales',label:'Daily Sales'},{id:'foodCostPct',label:'Food Cost %'},{id:'outputVsWaste',label:'Orders Today'},{id:'bestSellers',label:'Best Seller'}],
+sectorAlerts:[{type:'warning',icon:'🍳',title:'Ingredient price watch',desc:'Key ingredient costs may have changed'}]},
+'Services':{productLabel:'Service',saleLabel:'Appointment',stockLabel:'Supplies',customerLabel:'Client',expenseLabel:'Business Cost',
+kpis:[{id:'customersPerDay',label:'Customers Today'},{id:'revenuePerJob',label:'Revenue/Job'},{id:'chairTurnover',label:'Jobs Today'},{id:'ordersPerWeek',label:'Jobs This Week'}],
+sectorAlerts:[{type:'warning',icon:'📅',title:'Appointment follow-up',desc:'Confirm booked appointments to reduce no-shows'}]},
+'Manufacturing':{productLabel:'Product',saleLabel:'Order',stockLabel:'Raw Materials',customerLabel:'Customer',expenseLabel:'Production Cost',
+kpis:[{id:'productionCost',label:'Production Cost'},{id:'marginPerPiece',label:'Margin/Piece'},{id:'outputPerDay',label:'Output Today'},{id:'materialCost',label:'Material Cost'}],
+sectorAlerts:[{type:'urgent',icon:'🏭',title:'Material price watch',desc:'Raw material costs may have changed since last quote'}]},
+'Energy':{productLabel:'Fuel',saleLabel:'Sale',stockLabel:'Tank Stock',customerLabel:'Customer',expenseLabel:'Operating Cost',
+kpis:[{id:'litresSold',label:'Litres Sold'},{id:'variance',label:'Variance'},{id:'cylindersPerDay',label:'Sales Today'},{id:'unitsInstalled',label:'Units Today'}],
+sectorAlerts:[{type:'urgent',icon:'⛽',title:'Stock reconciliation',desc:'Check dip stick vs pump meter for variance'}]}
+};
+
+function sectorLabel(key){var s=(DB.getObj('profile')||{}).sector||'Retail';var cfg=SECTOR_CONFIG[s]||SECTOR_CONFIG['Retail'];return cfg[key]||key}
+
+function calcKPI(id){
+var sales=DB.get('sales'),ps=DB.get('products'),ex=DB.get('expenses'),creds=DB.get('credits');
+var todayStr=today();
+var todaySales=sales.filter(function(s){return String(s.date||'').indexOf(todayStr)===0});
+var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);
+var weekSales=sales.filter(function(s){return new Date(s.date)>=weekStart});
+switch(id){
+case 'stockValue':return ps.reduce(function(a,p){return a+(p.stock*(p.cost||0))},0);
+case 'dailyCash':return todaySales.reduce(function(a,s){return a+s.total},0);
+case 'fastMovers':var sold={};weekSales.forEach(function(s){sold[s.productId]=(sold[s.productId]||0)+1});return Object.keys(sold).filter(function(k){return sold[k]>=3}).length;
+case 'lowStock':return ps.filter(function(p){return isLow(p)}).length;
+case 'yieldPerAcre':return ps.reduce(function(a,p){return a+p.stock},0);
+case 'pricePerKg':if(!ps.length)return 0;return Math.round(ps.reduce(function(a,p){return a+(p.price||0)},0)/ps.length);
+case 'inputCost':return ex.filter(function(e){return e.category==='Supplies'||e.category==='Labour'}).reduce(function(a,e){return a+e.amount},0);
+case 'transportCost':return ex.filter(function(e){return e.category==='Transport'}).reduce(function(a,e){return a+e.amount},0);
+case 'revenuePerTrip':if(!sales.length)return 0;return Math.round(sales.reduce(function(a,s){return a+s.total},0)/sales.length);
+case 'fuelCost':return ex.filter(function(e){return e.category==='Transport'||e.category==='Utilities'}).reduce(function(a,e){return a+e.amount},0);
+case 'netPerTrip':var rev=sales.reduce(function(a,s){return a+s.total},0);var fuel=ex.filter(function(e){return e.category==='Transport'}).reduce(function(a,e){return a+e.amount},0);return Math.max(0,rev-fuel);
+case 'dailyRemittance':return todaySales.reduce(function(a,s){return a+s.total},0);
+case 'dailySales':return todaySales.reduce(function(a,s){return a+s.total},0);
+case 'foodCostPct':var wr=weekSales.reduce(function(a,s){return a+s.total},0);var wc=weekSales.reduce(function(a,s){return a+(costOf(s.productId)*s.quantity)},0);return wr>0?Math.round((wc/wr)*100):0;
+case 'outputVsWaste':return todaySales.length;
+case 'bestSellers':var pc={};weekSales.forEach(function(s){pc[s.productId]=(pc[s.productId]||0)+s.quantity});var top=Object.keys(pc).sort(function(a,b){return pc[b]-pc[a]})[0];var tp=ps.find(function(p){return p.id===top});return tp?tp.name:'—';
+case 'customersPerDay':return todaySales.length;
+case 'revenuePerJob':if(!todaySales.length)return 0;return Math.round(todaySales.reduce(function(a,s){return a+s.total},0)/todaySales.length);
+case 'chairTurnover':return todaySales.length;
+case 'ordersPerWeek':return weekSales.length;
+case 'productionCost':return ex.reduce(function(a,e){return a+e.amount},0);
+case 'marginPerPiece':if(!ps.length)return 0;return Math.round(ps.reduce(function(a,p){return a+((p.price||0)-(p.cost||0))},0)/ps.length);
+case 'outputPerDay':return todaySales.length;
+case 'materialCost':return ex.filter(function(e){return e.category==='Supplies'}).reduce(function(a,e){return a+e.amount},0);
+case 'litresSold':return todaySales.reduce(function(a,s){return a+s.quantity},0);
+case 'variance':return 0;
+case 'cylindersPerDay':return todaySales.length;
+case 'unitsInstalled':return todaySales.length;
+default:return 0;
+}
+}
+
+function renderSectorKPIs(){
+var sector=(DB.getObj('profile')||{}).sector||'Retail';
+var cfg=SECTOR_CONFIG[sector]||SECTOR_CONFIG['Retail'];
+var el=$('sectorKPIs');if(!el)return;
+var html='';
+cfg.kpis.forEach(function(kpi){
+var val=calcKPI(kpi.id);
+var display=typeof val==='number'?'UGX '+fmt(val):val;
+if(kpi.id==='fastMovers'||kpi.id==='lowStock'||kpi.id==='customersPerDay'||kpi.id==='chairTurnover'||kpi.id==='ordersPerWeek'||kpi.id==='outputPerDay'||kpi.id==='outputVsWaste'||kpi.id==='cylindersPerDay'||kpi.id==='unitsInstalled'||kpi.id==='litresSold'||kpi.id==='yieldPerAcre')display=fmt(val);
+if(kpi.id==='foodCostPct')display=val+'%';
+if(kpi.id==='bestSellers')display=val;
+html+='<div class="kpi-card"><div class="kpi-label">'+kpi.label+'</div><div class="kpi-value">'+display+'</div></div>';
+});
+el.innerHTML=html;
+}
+
+function renderSectorAlerts(){
+var hs=calcHealthScore();
+var el=$('sectorAlerts');if(!el)return;
+if(hs.alerts.length===0){el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">✅ No alerts. Business is on track.</div>';return}
+var html='';
+hs.alerts.slice(0,5).forEach(function(a){
+var borderColor=a.type==='urgent'?'var(--red)':'var(--yellow)';
+html+='<div class="insight-row" style="border-left-color:'+borderColor+'"><div class="insight-icon">'+a.icon+'</div><div class="insight-text"><div class="insight-title">'+a.title+'</div><div class="insight-desc">'+a.desc+'</div></div></div>';
+});
+el.innerHTML=html;
+}
+
+function renderAll(){
+renderDashboard();renderProducts();renderSales();renderReports();renderCredits();renderSettings();
+applySectorLabels();
+}
+
+function applySectorLabels(){
+var sector=(DB.getObj('profile')||{}).sector||'Retail';
+var cfg=SECTOR_CONFIG[sector]||SECTOR_CONFIG['Retail'];
+if($('prodTitle'))$('prodTitle').textContent=cfg.productLabel;
+if($('saleBtn'))$('saleBtn').textContent='+ New '+cfg.saleLabel;
+if($('stockTab'))$('stockTab').textContent=cfg.stockLabel;
+if($('saleModalTitle'))$('saleModalTitle').textContent='New '+cfg.saleLabel;
+if($('saleProdLabel'))$('saleProdLabel').textContent=cfg.productLabel;
+if($('prodModalTitle'))$('prodModalTitle').textContent='Add '+cfg.productLabel;
+}
+
+function renderDashboard(){
+renderHealthScore();
+renderSectorKPIs();
+renderSectorAlerts();
+renderAttention();
+}
+
+function renderAttention(){
+var el=$('attentionList');if(!el)return;
+var ps=DB.get('products');
+var low=ps.filter(function(p){return isLow(p)||isOut(p)});
+if(low.length===0){el.innerHTML='<div style="color:var(--muted);font-size:13px">✅ All good. Nothing needs attention.</div>';return}
+var html='';
+low.slice(0,5).forEach(function(p){
+html+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+(isOut(p)?'Out of stock':'Low stock: '+p.stock+' left')+'</div></div><div class="'+(isOut(p)?'stat-red':'stat-yellow')+'" style="font-weight:700;font-size:12px">'+(isOut(p)?'OUT':'LOW')+'</div></div>';
+});
+el.innerHTML=html;
+}
+
+function renderProducts(){
+var ps=DB.get('products');
+var search=($('prodSearch')?$('prodSearch').value:'').toLowerCase();
+var filtered=ps.filter(function(p){return p.name.toLowerCase().indexOf(search)!==-1});
+var el=$('productList');if(!el)return;
+if(filtered.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📦</div><p>No '+(sectorLabel('productLabel')||'products').toLowerCase()+' yet. Add your first one!</p></div>';return}
+var html='';
+filtered.forEach(function(p){
+var stockCls=isOut(p)?'stat-red':isLow(p)?'stat-yellow':'stat-green';
+html+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">UGX '+fmt(p.price)+' • Cost: UGX '+fmt(p.cost||0)+'</div></div><div class="item-right"><div class="item-price">'+p.stock+'</div><div class="item-stock '+stockCls+'">'+(isOut(p)?'OUT':isLow(p)?'LOW':'OK')+'</div></div></div>';
+});
+el.innerHTML=html;
+}
+
+function renderSales(){
+var sales=DB.get('sales');
+var el=$('salesList');if(!el)return;
+if(sales.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛒</div><p>No sales yet. Record your first '+sectorLabel('saleLabel').toLowerCase()+'!</p></div>';return}
+var html='';
+sales.slice(0,20).forEach(function(s){
+var prod=DB.get('products').find(function(p){return p.id===s.productId});
+html+='<div class="list-item"><div class="item-info"><div class="item-name">'+(prod?prod.name:'Item')+' ×'+s.quantity+'</div><div class="item-meta">'+s.payment+' • '+String(s.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(s.total)+'</div></div></div>';
+});
+el.innerHTML=html;
+}
+
+function renderReports(){
+switchReportTab('overview');
+}
+
+function switchReportTab(tab){
+document.querySelectorAll('#reportTabs .tab-btn').forEach(function(t){t.classList.remove('active')});
+event.target.classList.add('active');
+var el=$('reportContent');if(!el)return;
+var sales=DB.get('sales'),ex=DB.get('expenses'),ps=DB.get('products');
+var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);
+var weekSales=sales.filter(function(s){return new Date(s.date)>=weekStart});
+var weekRevenue=weekSales.reduce(function(a,s){return a+s.total},0);
+var weekCost=weekSales.reduce(function(a,s){return a+(costOf(s.productId)*s.quantity)},0);
+var weekExp=ex.filter(function(e){return new Date(e.date)>=weekStart}).reduce(function(a,e){return a+e.amount},0);
+var profit=weekRevenue-weekCost-weekExp;
+if(tab==='overview'){
+el.innerHTML='<div class="kpi-grid"><div class="kpi-card"><div class="kpi-label">Revenue (7d)</div><div class="kpi-value stat-green">UGX '+fmt(weekRevenue)+'</div></div><div class="kpi-card"><div class="kpi-label">Cost of Goods</div><div class="kpi-value stat-yellow">UGX '+fmt(weekCost)+'</div></div><div class="kpi-card"><div class="kpi-label">Expenses (7d)</div><div class="kpi-value stat-red">UGX '+fmt(weekExp)+'</div></div><div class="kpi-card"><div class="kpi-label">Net Profit</div><div class="kpi-value '+(profit>=0?'stat-green':'stat-red')+'">UGX '+fmt(profit)+'</div></div></div>';
+}else if(tab==='expenses'){
+var html='<button class="btn btn-green btn-sm" style="margin-bottom:12px" onclick="openModal(\'expenseModal\')">+ Add Expense</button>';
+if(ex.length===0){html+='<div class="empty-state"><p>No expenses recorded.</p></div>'}
+else{ex.slice(0,20).forEach(function(e){html+='<div class="list-item"><div class="item-info"><div class="item-name">'+e.category+'</div><div class="item-meta">'+String(e.date).slice(0,10)+(e.note?' • '+e.note:'')+'</div></div><div class="item-right"><div class="item-price stat-red">UGX '+fmt(e.amount)+'</div></div></div>'})}
+el.innerHTML=html;
+}else if(tab==='reconciliation'){
+el.innerHTML='<div class="card"><div class="card-title">Cash Reconciliation</div><p style="font-size:13px;color:var(--muted)">Reconciliation feature coming soon. Track your cash vs expected for the day.</p></div>';
+}
+}
+
+function renderCredits(){
+var creds=DB.get('credits');
+var el=$('creditList');if(!el)return;
+if(creds.length===0){el.innerHTML='<div class="empty-state"><div class="icon">💳</div><p>No credit sales yet.</p></div>';return}
+var html='';
+creds.forEach(function(c){
+var remaining=(c.totalAmount||c.amount||0)-(c.paidAmount||0);
+var statusCls=remaining<=0?'stat-green':(new Date()-new Date(c.date))/86400000>7?'stat-red':'stat-yellow';
+html+='<div class="list-item"><div class="item-info"><div class="item-name">'+c.name+'</div><div class="item-meta">'+String(c.date).slice(0,10)+' • Paid: UGX '+fmt(c.paidAmount||0)+'</div></div><div class="item-right"><div class="item-price '+statusCls+'">UGX '+fmt(remaining)+'</div><div class="item-stock">'+(remaining<=0?'PAID':'OWED')+'</div></div></div>';
+});
+el.innerHTML=html;
+}
+
+function renderSettings(){
+var p=DB.getObj('profile');
+var el=$('shopInfoDisplay');if(!el)return;
+el.innerHTML='<div style="font-size:13px;color:var(--muted)">Owner: <b style="color:var(--text)">'+(p.owner||'—')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Phone: <b style="color:var(--text)">'+(p.phone||'—')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Sector: <b style="color:var(--text)">'+(p.sector||'Retail')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Location: <b style="color:var(--text)">'+(p.location||'—')+'</b></div>';
+renderEmployees();
+}
+
+function renderEmployees(){
+var emps=DB.get('employees');
+var el=$('employeeList');if(!el)return;
+if(emps.length===0){el.innerHTML='<div style="font-size:13px;color:var(--muted)">No employees yet.</div>';return}
+var html='';
+emps.forEach(function(e){
+html+='<div class="list-item"><div class="item-info"><div class="item-name">'+e.name+'</div><div class="item-meta">'+e.role+' • '+e.phone+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" onclick="toggleEmployeeStatus(\''+e.id+'\')">'+(e.status==='active'?'Suspend':'Activate')+'</button><button class="btn btn-red btn-sm" onclick="deleteEmployee(\''+e.id+'\')">✕</button></div></div>';
+});
+el.innerHTML=html;
+}
+
+function renderPulse(){}
+function saveProduct(){
+var name=$('prodName').value.trim(),cost=parseInt($('prodCost').value)||0,price=parseInt($('prodPrice').value)||0,stock=parseInt($('prodStock').value)||0;
+if(!name)return showToast('Enter product name',true);
+if(price<=0)return showToast('Enter selling price',true);
+var ps=DB.get('products');
+var prod={id:genId(),name:name,cost:cost,price:price,stock:stock,reorderPoint:5,synced:false,createdAt:iso()};
+ps.unshift(prod);
+DB.set('products',ps);
+closeModal('productModal');
+showToast((sectorLabel('productLabel')||'Product')+' added ✓');
+$('prodName').value='';$('prodCost').value='';$('prodPrice').value='';$('prodStock').value='';
+markPending();renderAll();
+}
+
+function recordSale(){
+var pid=$('saleProduct').value,qty=parseInt($('saleQty').value)||1,payment=$('salePayment').value;
+if(!pid)return showToast('Select a product',true);
+var ps=DB.get('products');
+var prod=ps.find(function(x){return x.id===pid});
+if(!prod)return showToast('Product not found',true);
+if(qty>prod.stock)return showToast('Only '+prod.stock+' in stock',true);
+var total=prod.price*qty;
+prod.stock-=qty;
+prod.synced=false;
+DB.set('products',ps);
+var sales=DB.get('sales');
+var sale={id:genId(),productId:pid,quantity:qty,total:total,payment:payment,date:iso(),synced:false};
+sales.unshift(sale);
+DB.set('sales',sales);
+closeModal('saleModal');
+showToast((sectorLabel('saleLabel')||'Sale')+' recorded: UGX '+fmt(total));
+$('saleQty').value='1';
+markPending();renderAll();
+}
+
+function recordExpense(){
+var category=$('expCategory').value,amount=parseInt($('expAmount').value)||0,note=$('expNote').value.trim();
+if(amount<=0)return showToast('Enter amount',true);
+var ex=DB.get('expenses');
+var exp={id:genId(),category:category,amount:amount,note:note,date:iso(),synced:false};
+ex.unshift(exp);
+DB.set('expenses',ex);
+closeModal('expenseModal');
+showToast('Expense recorded: UGX '+fmt(amount));
+$('expAmount').value='';$('expNote').value='';
+markPending();renderAll();
+}
+
+function addCredit(){
+var name=$('credName').value.trim(),amount=parseInt($('credAmount').value)||0,note=$('credNote').value.trim();
+if(!name)return showToast('Enter customer name',true);
+if(amount<=0)return showToast('Enter amount',true);
+var creds=DB.get('credits');
+var credit={id:genId(),name:name,totalAmount:amount,paidAmount:0,note:note,date:iso(),status:'unpaid',synced:false};
+creds.unshift(credit);
+DB.set('credits',creds);
+closeModal('creditModal');
+showToast('Credit added: UGX '+fmt(amount));
+$('credName').value='';$('credAmount').value='';$('credNote').value='';
+markPending();renderAll();
+}
+
+function addEmployee(){
+var name=$('empName').value.trim(),phone=$('empPhone').value.trim(),role=$('empRole').value,pin=$('empPin').value.trim();
+if(!name||!phone||!pin)return showToast('Fill all fields',true);
+if(pin.length!==4)return showToast('PIN must be 4 digits',true);
+hashPin(pin).then(function(h){
+var emps=DB.get('employees');
+var emp={id:genId(),name:name,phone:phone,role:role,pinHash:h,status:'active',createdAt:iso()};
+emps.push(emp);
+DB.set('employees',emps);
+closeModal('employeeModal');
+showToast('Employee added ✓');
+$('empName').value='';$('empPhone').value='';$('empPin').value='';
+var p=DB.getObj('profile');
+if(p&&p.shopKey&&navigator.onLine){
+api('/rest/v1/rpc/create_cloud_employee',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_name:name,p_phone:phone,p_role_name:role,p_branch:'main',p_pin_hash:h})}).catch(function(){});
+}
+renderSettings();
+}).catch(function(){showToast('Error adding employee',true)});
+}
+
+function toggleEmployeeStatus(id){
+var emps=DB.get('employees');
+var emp=emps.find(function(e){return e.id===id});
+if(!emp)return;
+emp.status=emp.status==='active'?'suspended':'active';
+DB.set('employees',emps);
+showToast('Employee '+(emp.status==='active'?'activated':'suspended'));
+renderSettings();
+}
+
+function deleteEmployee(id){
+if(!confirm('Delete this employee?'))return;
+var emps=DB.get('employees').filter(function(e){return e.id!==id});
+DB.set('employees',emps);
+showToast('Employee deleted');
+renderSettings();
+}
+
+function memorySnapshot(){
+try{
+var snap={ts:Date.now(),sales:DB.get('sales').length,products:DB.get('products').length,credits:DB.get('credits').length};
+localStorage.setItem('df_memory_snap',JSON.stringify(snap));
+}catch(e){}
+}
+
+// Populate sale product dropdown
+function populateSaleProducts(){
+var ps=DB.get('products').filter(function(p){return p.stock>0});
+var el=$('saleProduct');if(!el)return;
+el.innerHTML=ps.length?'':'<option value="">No stock available</option>';
+ps.forEach(function(p){
+el.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.stock+' left)</option>';
+});
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded',function(){
+// Populate sale products when modal opens
+var saleModal=$('saleModal');
+if(saleModal){
+var observer=new MutationObserver(function(mutations){
+mutations.forEach(function(m){
+if(m.target.classList.contains('active')){populateSaleProducts()}
+});
+});
+observer.observe(saleModal,{attributes:true,attributeFilter:['class']});
+}
+});
+
+// Startup sequence
+setTimeout(function(){
+var splash=$('splash');
+if(splash&&!splash.classList.contains('hide')){
+splash.classList.add('hide');
+setTimeout(function(){
+splash.style.display='none';
+var p=DB.getObj('profile');
+if(p&&p.shopName){
+startApp();
+}else{
+$('authFlow').style.display='flex';
+showAuth('welcome');
+}
+},500);
+}
+},2000);
+
+// Periodic memory snapshot
+setInterval(memorySnapshot,60000);
 </script>
-<script src="html5-qrcode.min.js"></script>
 </body>
 </html>
