@@ -348,6 +348,27 @@ showToast('Welcome, '+name+'! 🎉');startApp();
 function doLogin(){
 var phone=$('logPhone').value.trim(),pin=$('logPin').value.trim();
 if(!phone||!pin)return showToast('Enter phone and PIN',true);
+showToast('Verifying...');
+hashPin(pin).then(function(h){
+api('/rest/v1/rpc/owner_login',{method:'POST',body:JSON.stringify({p_phone:phone,p_pin_hash:h})}).then(j).then(function(res){
+if(!res||!res.ok)return showToast(res.error==='invalid_credentials'?'Wrong phone or PIN':'Login failed',true);
+DB.setObj('profile',{shopName:res.shop_name,owner:res.owner_name,phone:phone,location:res.location||'',sector:res.sector||'Retail',createdAt:res.created_at||iso(),cloudId:res.shop_id,shopKey:res.shop_key,pinHash:h});
+SESSION={role:'owner',user:{name:res.owner_name}};
+showToast('Welcome back, '+res.owner_name+'!');
+api('/rest/v1/rpc/restore_shop',{method:'POST',body:JSON.stringify({p_shop_id:res.shop_id})}).then(j).then(function(data){
+if(data&&data.ok){
+if(data.products)DB.set('products',data.products);
+if(data.sales)DB.set('sales',data.sales);
+if(data.expenses)DB.set('expenses',data.expenses);
+if(data.credits)DB.set('credits',data.credits);
+}
+startApp();
+}).catch(function(){startApp()});
+}).catch(function(){showToast('Connection error. Try again.',true)});
+});
+}
+var phone=$('logPhone').value.trim(),pin=$('logPin').value.trim();
+if(!phone||!pin)return showToast('Enter phone and PIN',true);
 var p=DB.getObj('profile');
 if(!p||!p.shopName)return showToast('No shop found. Register first.',true);
 hashPin(pin).then(function(h){
