@@ -1,3 +1,7 @@
+--- public/duka-flow-fixed.html (原始)
+
+
++++ public/duka-flow-fixed.html (修改后)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,7 +174,7 @@ select.form-input{appearance:none}
 <div class="nav-item" onclick="switchScreen('products')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span id="stockTab">Stock</span></div>
 <div class="nav-item quick" onclick="openModal('saleModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Sale</div>
 <div class="nav-item" onclick="openModal('expenseModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Expense</div>
-<div class="nav-item" onclick="switchScreen('credits')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Credits</div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Credit</div>
+<div class="nav-item" onclick="switchScreen('credits')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Credits</div>
 <div class="nav-item" onclick="switchScreen('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</div>
 </div>
 </div>
@@ -1025,13 +1029,13 @@ function recordHarvest() {
     var qty = parseInt($('harvestQty').value) || 0;
     var unit = $('harvestUnit').value;
     var notes = $('harvestNotes').value.trim();
-    
+
     if (!plotId) return showToast('Select a plot/pen', true);
     if (qty <= 0) return showToast('Enter quantity', true);
-    
+
     var plot = DB.get('plots').find(function(p) { return p.id === plotId; });
     if (!plot) return showToast('Plot not found', true);
-    
+
     // Record the harvest activity
     var activities = DB.get('activities');
     activities.unshift({
@@ -1041,18 +1045,18 @@ function recordHarvest() {
         quantity: qty, unit: unit, cost: 0, date: iso(), createdAt: iso()
     });
     DB.set('activities', activities);
-    
+
     // Update plot status
     plot.status = 'harvested';
     var plots = DB.get('plots');
     var idx = plots.findIndex(function(p) { return p.id === plotId; });
     if (idx !== -1) { plots[idx] = plot; DB.set('plots', plots); }
-    
+
     // ADD HARVEST TO STOCK (products)
     var season = DB.get('seasons').find(function(s) { return s.id === plot.seasonId; });
     var cropName = plot.crop || (season ? season.crop : 'Harvest');
     var ps = DB.get('products');
-    
+
     // Check if product already exists
     var existing = ps.find(function(p) { return p.name === cropName; });
     if (existing) {
@@ -1064,7 +1068,7 @@ function recordHarvest() {
         var totalInputCost = plotActivities.filter(function(a) { return a.type === 'input' || a.type === 'labour'; }).reduce(function(a, b) { return a + (b.cost || 0); }, 0);
         var totalHarvestQty = plotActivities.filter(function(a) { return a.type === 'harvest'; }).reduce(function(a, b) { return a + (b.quantity || 0); }, 0);
         var costPerUnit = totalHarvestQty > 0 ? Math.round(totalInputCost / totalHarvestQty) : 0;
-        
+
         ps.unshift({
             id: genId(),
             name: cropName,
@@ -1078,35 +1082,13 @@ function recordHarvest() {
         });
         DB.set('products', ps);
     }
-    
+
     var cfg = getFarmConfig(plot.seasonId);
     logAudit('HARVEST', cropName + ' — ' + fmt(qty) + ' ' + unit + ' → added to stock');
     closeModal('harvestModal');
     showToast(cfg.harvestLabel + ' recorded: ' + fmt(qty) + ' ' + unit + ' → Stock updated');
     $('harvestQty').value = '';
     $('harvestNotes').value = '';
-    renderFarm();
-}
-    var plotId = $('harvestPlot').value;
-    var qty = parseInt($('harvestQty').value) || 0;
-    var unit = $('harvestUnit').value;
-    var notes = $('harvestNotes').value.trim();
-    if (!plotId) return showToast('Select a plot/pen', true);
-    if (qty <= 0) return showToast('Enter quantity', true);
-    var plot = DB.get('plots').find(function(p) { return p.id === plotId; });
-    if (!plot) return showToast('Plot not found', true);
-    var activities = DB.get('activities');
-    activities.unshift({ id: genId(), plotId: plotId, seasonId: plot.seasonId, type: 'harvest', description: 'Harvest: ' + plot.crop + (notes ? ' — ' + notes : ''), quantity: qty, unit: unit, cost: 0, date: iso(), createdAt: iso() });
-    DB.set('activities', activities);
-    plot.status = 'harvested';
-    var plots = DB.get('plots');
-    var idx = plots.findIndex(function(p) { return p.id === plotId; });
-    if (idx !== -1) { plots[idx] = plot; DB.set('plots', plots); }
-    var cfg = getFarmConfig(plot.seasonId);
-    logAudit('HARVEST', plot.crop + ' — ' + fmt(qty) + ' ' + unit);
-    closeModal('harvestModal');
-    showToast(cfg.harvestLabel + ' recorded: ' + fmt(qty) + ' ' + unit);
-    $('harvestQty').value = ''; $('harvestNotes').value = '';
     renderFarm();
 }
 
@@ -1348,11 +1330,6 @@ function populateSaleProducts() {
 // STARTUP
 // ============================================
 setTimeout(function() {
-    if (window.location.href.indexOf('founder') !== -1) {
-        var splash = $('splash');
-        if (splash) { splash.classList.add('hide'); setTimeout(function() { splash.style.display = 'none'; openFounderConsole(); }, 500); }
-        return;
-    }
     var splash = $('splash');
     if (splash && !splash.classList.contains('hide')) {
         splash.classList.add('hide');
