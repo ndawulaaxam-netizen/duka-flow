@@ -6,874 +6,1857 @@
 <meta name="theme-color" content="#09090B">
 <title>DukaFlow</title>
 <style>
-:root{--bg:#09090B;--card:#18181B;--border:#27272A;--green:#10B981;--green2:#34D399;--text:#F4F4F5;--muted:#A1A1AA;--blue:#3B82F6;--yellow:#F59E0B;--red:#EF4444;--purple:#8B5CF6;--gold:#F59E0B}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-#splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s}
-#splash.hide{opacity:0;pointer-events:none}
-#splash img{width:80px;height:80px;border-radius:20px;margin-bottom:16px}
-#splash h1{font-size:28px;font-weight:900}
-#splash h1 span{color:var(--green)}
-#splash p{color:var(--muted);font-size:13px;margin-top:8px}
-.auth-flow{display:none;min-height:100vh;padding:20px;align-items:center;justify-content:center}
-.auth-screen{display:none;width:100%;max-width:400px;margin:0 auto}
-.auth-screen.active{display:block;animation:fadeIn 0.3s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.auth-logo{width:64px;height:64px;border-radius:16px;margin:0 auto 20px;display:block}
-.auth-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px}
-.auth-card h2{font-size:22px;font-weight:900;margin-bottom:6px}
-.auth-card p{color:var(--muted);font-size:13px;margin-bottom:20px}
-.form-group{margin-bottom:14px}
-.form-label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.form-input{width:100%;padding:13px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;outline:none;transition:border-color 0.2s}
-.form-input:focus{border-color:var(--green)}
-select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all 0.2s;width:100%}
-.btn-green{background:var(--green);color:#052e22}
-.btn-green:hover{background:var(--green2)}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-dark{background:var(--card);border:1px solid var(--border);color:var(--text)}
-.btn-red{background:var(--red);color:#fff}
-.btn-sm{padding:8px 14px;font-size:12px;width:auto}
-.app{display:none;min-height:100vh;padding-bottom:80px}
-.header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
-.header h1{font-size:18px;font-weight:900}
-.header .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-left:6px}
-.header .sync-dot.pending{background:var(--yellow)}
-.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 env(safe-area-inset-bottom)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:600;transition:color 0.2s}
-.nav-item.active{color:var(--green)}
-.nav-item svg{width:22px;height:22px;margin-bottom:3px}
-.screen{display:none;padding:16px 20px;animation:fadeIn 0.3s}
-.screen.active{display:block}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
-.card-title{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
-.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
-.kpi-value{font-size:22px;font-weight:900;margin-top:4px}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:2px}
-.list-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
-.list-item:last-child{border-bottom:none}
-.item-info{flex:1}
-.item-name{font-size:14px;font-weight:700}
-.item-meta{font-size:12px;color:var(--muted);margin-top:2px}
-.item-right{text-align:right}
-.item-price{font-size:14px;font-weight:800}
-.item-stock{font-size:11px;color:var(--muted)}
-.stat-green{color:var(--green)}
-.stat-red{color:var(--red)}
-.stat-yellow{color:var(--yellow)}
-.stat-blue{color:var(--blue)}
-.empty-state{text-align:center;padding:30px 20px;color:var(--muted)}
-.empty-state .icon{font-size:36px;margin-bottom:8px}
-.empty-state p{font-size:13px}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:flex-end;justify-content:center}
-.modal-overlay.active{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;animation:slideUp 0.3s}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal h3{font-size:18px;font-weight:900;margin-bottom:16px}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--green);padding:12px 20px;border-radius:12px;font-weight:700;font-size:13px;z-index:4000;display:none;max-width:90%}
-.toast.error{border-color:var(--red);color:var(--red)}
-.toast.show{display:block;animation:fadeIn 0.3s}
-.insight-row{display:flex;gap:10px;padding:10px;background:var(--bg);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--border)}
-.insight-icon{font-size:18px}
-.insight-text{flex:1}
-.insight-title{font-size:13px;font-weight:700}
-.insight-desc{font-size:11px;color:var(--muted);margin-top:2px}
-.health-ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0}
-.health-ring .score{font-size:24px;font-weight:900}
-.health-ring .label{font-size:8px;color:var(--muted)}
-.sector-badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:var(--bg);border:1px solid var(--border)}
-.tab-row{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
-.tab-btn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);white-space:nowrap}
-.tab-btn.active{background:var(--green);color:#052e22;border-color:var(--green)}
-.search-box{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;outline:none;margin-bottom:12px}
-@media(min-width:768px){.kpi-grid{grid-template-columns:repeat(4,1fr)}.modal{border-radius:20px;margin-bottom:40px}}
+:root {
+    --bg: #09090B;
+    --card: #18181B;
+    --border: #27272A;
+    --green: #10B981;
+    --green2: #34D399;
+    --text: #F4F4F5;
+    --muted: #A1A1AA;
+    --blue: #3B82F6;
+    --yellow: #F59E0B;
+    --red: #EF4444;
+    --purple: #8B5CF6;
+    --gold: #F59E0B;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Splash Screen */
+#splash {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s;
+}
+#splash.hide { opacity: 0; pointer-events: none; }
+#splash h1 { font-size: 28px; font-weight: 900; }
+#splash h1 span { color: var(--green); }
+#splash p { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+/* Auth Flow */
+.auth-flow {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+}
+.auth-screen {
+    display: none;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+.auth-screen.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.auth-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+}
+.auth-card h2 { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
+.auth-card p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+
+/* Form Elements */
+.form-group { margin-bottom: 14px; }
+.form-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+.form-input {
+    width: 100%;
+    padding: 13px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--green); }
+select.form-input { appearance: none; }
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 13px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    width: 100%;
+}
+.btn-green { background: var(--green); color: #052e22; }
+.btn-green:hover { background: var(--green2); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-dark { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+.btn-red { background: var(--red); color: #fff; }
+.btn-sm { padding: 8px 14px; font-size: 12px; width: auto; }
+
+/* Main App */
+.app { display: none; min-height: 100vh; padding-bottom: 80px; }
+.header {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+}
+.header h1 { font-size: 18px; font-weight: 900; }
+.header .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-left: 6px;
+}
+.header .sync-dot.pending { background: var(--yellow); }
+
+/* Bottom Navigation */
+.nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 100;
+    padding: 6px 0 env(safe-area-inset-bottom);
+}
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+.nav-item.active { color: var(--green); }
+.nav-item svg { width: 22px; height: 22px; margin-bottom: 3px; }
+
+/* Screens */
+.screen { display: none; padding: 16px 20px; animation: fadeIn 0.3s; }
+.screen.active { display: block; }
+
+/* Cards */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+.card-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* KPI Grid */
+.kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+.kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+}
+.kpi-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+.kpi-value { font-size: 22px; font-weight: 900; margin-top: 4px; }
+.kpi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* List Items */
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+.list-item:last-child { border-bottom: none; }
+.item-info { flex: 1; }
+.item-name { font-size: 14px; font-weight: 700; }
+.item-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.item-right { text-align: right; }
+.item-price { font-size: 14px; font-weight: 800; }
+.item-stock { font-size: 11px; color: var(--muted); }
+
+/* Status Colors */
+.stat-green { color: var(--green2); }
+.stat-blue { color: var(--blue); }
+.stat-yellow { color: var(--yellow); }
+.stat-red { color: var(--red); }
+.stat-purple { color: var(--purple); }
+
+/* Empty State */
+.empty-state { text-align: center; padding: 30px 20px; color: var(--muted); }
+.empty-state .icon { font-size: 36px; margin-bottom: 8px; }
+.empty-state p { font-size: 13px; }
+
+/* Modal */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: flex-end;
+    justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    padding: 24px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal h3 { font-size: 18px; font-weight: 900; margin-bottom: 16px; }
+
+/* Toast */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card);
+    border: 1px solid var(--green);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    z-index: 4000;
+    display: none;
+    max-width: 90%;
+}
+.toast.error { border-color: var(--red); color: var(--red); }
+.toast.show { display: block; animation: fadeIn 0.3s; }
+
+/* Insights/Alerts */
+.insight-row {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: var(--bg);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--border);
+}
+.insight-icon { font-size: 18px; }
+.insight-text { flex: 1; }
+.insight-title { font-size: 13px; font-weight: 700; }
+.insight-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* Health Score Ring */
+.health-ring {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+.health-ring .score { font-size: 24px; font-weight: 900; }
+.health-ring .label { font-size: 8px; color: var(--muted); }
+
+/* Sector Badge */
+.sector-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+/* Search Box */
+.search-box {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 12px;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+    .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+    .modal { border-radius: 20px; margin-bottom: 40px; }
+}
 </style>
 </head>
 <body>
 
+<!-- Splash Screen -->
 <div id="splash">
-<img src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="DukaFlow">
-<h1>Duka<span>Flow</span></h1>
-<p>Your business. Your command centre.</p>
+    <h1>Duka<span>Flow</span></h1>
+    <p>Your business. Your command centre.</p>
 </div>
 
+<!-- Auth Flow -->
 <div class="auth-flow" id="authFlow">
 
-<div class="auth-screen active" id="screen-welcome">
-<img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
-<div class="auth-card">
-<h2>Welcome to DukaFlow</h2>
-<p>Run your business like a CEO. Track sales, stock, credits, and profit — all in one place.</p>
-<button class="btn btn-green" onclick="showAuth('register')">🚀 Get Started Free</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('login')">🔑 I have a shop — Log In</button>
-<button class="btn btn-dark" style="margin-top:12px" onclick="showAuth('empLogin')">👤 I'm an Employee — Log In</button>
-</div>
+    <!-- Welcome Screen -->
+    <div class="auth-screen active" id="screen-welcome">
+        <div class="auth-card">
+            <h2>Welcome to DukaFlow</h2>
+            <p>Run your business like a CEO. Track sales, stock, credits, and profit — all in one place.</p>
+            <button class="btn btn-green" onclick="showAuth('register')">🚀 Get Started Free</button>
+            <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('login')">🔑 I have a shop — Log In</button>
+            <button class="btn btn-dark" style="margin-top:12px" onclick="showAuth('empLogin')">👤 I'm an Employee — Log In</button>
+        </div>
+    </div>
+
+    <!-- Register Screen -->
+    <div class="auth-screen" id="screen-register">
+        <div class="auth-card">
+            <h2>Create Your Shop</h2>
+            <p>Set up your business in 60 seconds.</p>
+            <div class="form-group">
+                <label class="form-label">Shop Name</label>
+                <input class="form-input" id="regShop" placeholder="e.g., Mama's Store">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Your Name</label>
+                <input class="form-input" id="regName" placeholder="e.g., Sarah">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" id="regPhone" placeholder="e.g., 0772 123 456">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Business Type</label>
+                <select class="form-input" id="regSector">
+                    <option value="Retail">🏪 Retail / Shop</option>
+                    <option value="Agriculture">🌾 Agriculture / Farming</option>
+                    <option value="Transport">🚚 Transport / Fleet</option>
+                    <option value="Food">🍲 Food / Restaurant</option>
+                    <option value="Services">✂️ Services</option>
+                    <option value="Manufacturing">🏭 Manufacturing</option>
+                    <option value="Energy">⛽ Energy / Fuel</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">4-Digit PIN</label>
+                <input type="password" class="form-input" id="regPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px">
+            </div>
+            <button class="btn btn-green" onclick="doRegister()">Create My Shop →</button>
+            <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div class="auth-screen" id="screen-login">
+        <div class="auth-card">
+            <h2>Welcome Back</h2>
+            <p>Enter your phone and secret PIN.</p>
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" id="logPhone" placeholder="e.g., 0772 123 456">
+            </div>
+            <div class="form-group">
+                <label class="form-label">4-Digit PIN</label>
+                <input type="password" class="form-input" id="logPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px">
+            </div>
+            <button class="btn btn-green" onclick="doLogin()">🔓 Unlock My Shop</button>
+            <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
+        </div>
+    </div>
+
+    <!-- Employee Login Screen -->
+    <div class="auth-screen" id="screen-empLogin">
+        <div class="auth-card">
+            <h2>Employee Login</h2>
+            <p>Enter your phone and secret PIN.</p>
+            <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" id="empLogPhone" placeholder="e.g., 0772 123 456">
+            </div>
+            <div class="form-group">
+                <label class="form-label">4-Digit PIN</label>
+                <input type="password" class="form-input" id="empLogPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px">
+            </div>
+            <button class="btn btn-green" onclick="doEmployeeLogin()">🔓 Unlock My Access</button>
+            <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
+        </div>
+    </div>
+
 </div>
 
-<div class="auth-screen" id="screen-register">
-<img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
-<div class="auth-card">
-<h2>Create Your Shop</h2>
-<p>Set up your business in 60 seconds.</p>
-<div class="form-group"><label class="form-label">Shop Name</label><input class="form-input" id="regShop" placeholder="e.g., Mama's Store"></div>
-<div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="regName" placeholder="e.g., Sarah"></div>
-<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="regPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="regLocation" placeholder="e.g., Owino Market"></div>
-<div class="form-group"><label class="form-label">Business Type</label>
-<select class="form-input" id="regSector">
-<option value="Retail">🏪 Retail / Shop</option>
-<option value="Agriculture">🌾 Agriculture / Farming</option>
-<option value="Transport">🚚 Transport / Fleet</option>
-<option value="Food">🍲 Food / Restaurant</option>
-<option value="Services">✂️ Services</option>
-<option value="Manufacturing">🏭 Manufacturing</option>
-<option value="Energy">⛽ Energy / Fuel</option>
-</select></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="regPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="doRegister()">Create My Shop →</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
-</div>
-</div>
-
-<div class="auth-screen" id="screen-login">
-<img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
-<div class="auth-card">
-<h2>Welcome Back</h2>
-<p>Enter your phone and secret PIN.</p>
-<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="logPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="logPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="doLogin()">🔓 Unlock My Shop</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
-</div>
-</div>
-
-<div class="auth-screen" id="screen-empLogin">
-<img class="auth-logo" src="logo.png" onerror="this.onerror=null;this.src='logo.jpg'" alt="">
-<div class="auth-card">
-<h2>Employee Login</h2>
-<p>Enter your phone and secret PIN.</p>
-<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="empLogPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="empLogPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="doEmployeeLogin()">🔓 Unlock My Access</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
-</div>
-</div>
-
-</div>
-
+<!-- Main App -->
 <div class="app" id="app">
-<div class="header">
-<h1 id="shopNameDisplay">My Shop</h1>
-<div style="display:flex;align-items:center;gap:8px">
-<span class="sector-badge" id="sectorBadge">Retail</span>
-<span class="sync-dot" id="syncDot"></span>
-</div>
+    <div class="header">
+        <h1 id="shopNameDisplay">My Shop</h1>
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="sector-badge" id="sectorBadge">Retail</span>
+            <span class="sync-dot" id="syncDot"></span>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div class="screen active" id="screen-dashboard">
+        <div class="card" id="healthScoreCard">
+            <div style="color:var(--muted);font-size:13px">Calculating...</div>
+        </div>
+        <div class="kpi-grid" id="sectorKPIs"></div>
+        <div class="card">
+            <div class="card-title">⚡ Smart Alerts</div>
+            <div id="sectorAlerts">
+                <div style="color:var(--muted);font-size:13px">Loading...</div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">🔔 Needs Attention</div>
+            <div id="attentionList"></div>
+        </div>
+    </div>
+
+    <!-- Products Screen -->
+    <div class="screen" id="screen-products">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h2 id="prodTitle" style="font-size:20px;font-weight:900">Products</h2>
+            <button class="btn btn-green btn-sm" onclick="openModal('productModal')">+ Add</button>
+        </div>
+        <input class="search-box" id="prodSearch" placeholder="Search..." oninput="renderProducts()">
+        <div id="productList"></div>
+    </div>
+
+    <!-- Sales Screen -->
+    <div class="screen" id="screen-sales">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h2 style="font-size:20px;font-weight:900">Sales</h2>
+            <button class="btn btn-green btn-sm" id="saleBtn" onclick="openModal('saleModal')">+ New Sale</button>
+        </div>
+        <div id="salesList"></div>
+    </div>
+
+    <!-- Reports Screen -->
+    <div class="screen" id="screen-reports">
+        <h2 style="font-size:20px;font-weight:900;margin-bottom:12px">Reports</h2>
+        <div id="reportContent"></div>
+    </div>
+
+    <!-- Credits Screen -->
+    <div class="screen" id="screen-credits">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h2 style="font-size:20px;font-weight:900">Credits</h2>
+            <button class="btn btn-green btn-sm" onclick="openModal('creditModal')">+ Add Credit</button>
+        </div>
+        <div id="creditList"></div>
+    </div>
+
+    <!-- Settings Screen -->
+    <div class="screen" id="screen-settings">
+        <h2 style="font-size:20px;font-weight:900;margin-bottom:16px">Settings</h2>
+        <div class="card">
+            <div class="card-title">👤 Shop Info</div>
+            <div id="shopInfoDisplay"></div>
+        </div>
+        <div class="card">
+            <div class="card-title">👥 Employees</div>
+            <div id="employeeList"></div>
+            <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="openModal('employeeModal')">+ Add Employee</button>
+        </div>
+        <div class="card">
+            <div class="card-title">☁️ Cloud Sync</div>
+            <button class="btn btn-outline btn-sm" onclick="syncAll()">Sync Now</button>
+            <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="restore()">Restore from Cloud</button>
+        </div>
+        <button class="btn btn-outline" style="margin-top:12px" onclick="logout()">🚪 Log Out</button>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="nav">
+        <div class="nav-item active" onclick="switchScreen('dashboard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+            Home
+        </div>
+        <div class="nav-item" onclick="switchScreen('products')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            <span id="stockTab">Stock</span>
+        </div>
+        <div class="nav-item" onclick="switchScreen('sales')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+            Sales
+        </div>
+        <div class="nav-item" onclick="switchScreen('reports')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            Reports
+        </div>
+        <div class="nav-item" onclick="switchScreen('credits')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Credits
+        </div>
+        <div class="nav-item" onclick="switchScreen('settings')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Settings
+        </div>
+    </div>
 </div>
 
-<div class="screen active" id="screen-dashboard">
-<div class="card" id="healthScoreCard"><div style="color:var(--muted);font-size:13px">Calculating...</div></div>
-<div class="kpi-grid" id="sectorKPIs"></div>
-<div class="card"><div class="card-title">⚡ Smart Alerts</div><div id="sectorAlerts"><div style="color:var(--muted);font-size:13px">Loading...</div></div></div>
-<div class="card"><div class="card-title">🔔 Needs Attention</div><div id="attentionList"></div></div>
+<!-- Product Modal -->
+<div class="modal-overlay" id="productModal">
+    <div class="modal">
+        <h3 id="prodModalTitle">Add Product</h3>
+        <div class="form-group">
+            <label class="form-label">Name</label>
+            <input class="form-input" id="prodName">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Cost Price (UGX)</label>
+            <input type="number" class="form-input" id="prodCost">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Selling Price (UGX)</label>
+            <input type="number" class="form-input" id="prodPrice">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Stock Quantity</label>
+            <input type="number" class="form-input" id="prodStock">
+        </div>
+        <button class="btn btn-green" onclick="saveProduct()">Save</button>
+        <button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('productModal')">Cancel</button>
+    </div>
 </div>
 
-<div class="screen" id="screen-products">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-<h2 id="prodTitle" style="font-size:20px;font-weight:900">Products</h2>
-<button class="btn btn-green btn-sm" onclick="openModal('productModal')">+ Add</button>
-</div>
-<input class="search-box" id="prodSearch" placeholder="Search..." oninput="renderProducts()">
-<div id="productList"></div>
-</div>
-
-<div class="screen" id="screen-sales">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-<h2 style="font-size:20px;font-weight:900">Sales</h2>
-<button class="btn btn-green btn-sm" id="saleBtn" onclick="openModal('saleModal')">+ New Sale</button>
-</div>
-<div id="salesList"></div>
-</div>
-
-<div class="screen" id="screen-reports">
-<h2 style="font-size:20px;font-weight:900;margin-bottom:12px">Reports</h2>
-<div class="tab-row" id="reportTabs">
-<div class="tab-btn active" onclick="switchReportTab('overview')">Overview</div>
-<div class="tab-btn" onclick="switchReportTab('expenses')">Expenses</div>
-<div class="tab-btn" onclick="switchReportTab('reconciliation')">Reconciliation</div>
-</div>
-<div id="reportContent"></div>
-</div>
-
-<div class="screen" id="screen-credits">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-<h2 style="font-size:20px;font-weight:900">Credits</h2>
-<button class="btn btn-green btn-sm" onclick="openModal('creditModal')">+ Add Credit</button>
-</div>
-<div id="creditList"></div>
+<!-- Sale Modal -->
+<div class="modal-overlay" id="saleModal">
+    <div class="modal">
+        <h3 id="saleModalTitle">New Sale</h3>
+        <div class="form-group">
+            <label class="form-label" id="saleProdLabel">Product</label>
+            <select class="form-input" id="saleProduct"></select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input type="number" class="form-input" id="saleQty" value="1">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Payment</label>
+            <select class="form-input" id="salePayment">
+                <option>Cash</option>
+                <option>MTN MoMo</option>
+                <option>Airtel Money</option>
+                <option>Credit</option>
+            </select>
+        </div>
+        <button class="btn btn-green" onclick="recordSale()">Record Sale</button>
+        <button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('saleModal')">Cancel</button>
+    </div>
 </div>
 
-<div class="screen" id="screen-settings">
-<h2 style="font-size:20px;font-weight:900;margin-bottom:16px">Settings</h2>
-<div class="card"><div class="card-title">👤 Shop Info</div><div id="shopInfoDisplay"></div></div>
-<div class="card"><div class="card-title">👥 Employees</div><div id="employeeList"></div>
-<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="openModal('employeeModal')">+ Add Employee</button></div>
-<div class="card"><div class="card-title">☁️ Cloud Sync</div>
-<button class="btn btn-outline btn-sm" onclick="syncAll()">Sync Now</button>
-<button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="restore()">Restore from Cloud</button></div>
-<div class="card"><div class="card-title">⚙️ Data</div>
-<button class="btn btn-red btn-sm" onclick="if(confirm('Delete ALL data? This cannot be undone.')){localStorage.clear();location.reload()}">Reset All Data</button></div>
-<button class="btn btn-outline" style="margin-top:12px" onclick="logout()">🚪 Log Out</button>
+<!-- Expense Modal -->
+<div class="modal-overlay" id="expenseModal">
+    <div class="modal">
+        <h3>Record Expense</h3>
+        <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-input" id="expCategory">
+                <option>Rent</option>
+                <option>Transport</option>
+                <option>Utilities</option>
+                <option>Supplies</option>
+                <option>Labour</option>
+                <option>Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Amount (UGX)</label>
+            <input type="number" class="form-input" id="expAmount">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Note</label>
+            <input class="form-input" id="expNote">
+        </div>
+        <button class="btn btn-green" onclick="recordExpense()">Save Expense</button>
+        <button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('expenseModal')">Cancel</button>
+    </div>
 </div>
 
-<div class="nav">
-<div class="nav-item active" onclick="switchScreen('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home</div>
-<div class="nav-item" onclick="switchScreen('products')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span id="stockTab">Stock</span></div>
-<div class="nav-item" onclick="switchScreen('sales')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>Sales</div>
-<div class="nav-item" onclick="switchScreen('reports')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Reports</div>
-<div class="nav-item" onclick="switchScreen('credits')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Credits</div>
-<div class="nav-item" onclick="switchScreen('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</div>
+<!-- Credit Modal -->
+<div class="modal-overlay" id="creditModal">
+    <div class="modal">
+        <h3>Add Credit Sale</h3>
+        <div class="form-group">
+            <label class="form-label">Customer Name</label>
+            <input class="form-input" id="credName">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Amount (UGX)</label>
+            <input type="number" class="form-input" id="credAmount">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Note</label>
+            <input class="form-input" id="credNote">
+        </div>
+        <button class="btn btn-green" onclick="addCredit()">Save Credit</button>
+        <button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('creditModal')">Cancel</button>
+    </div>
 </div>
+
+<!-- Employee Modal -->
+<div class="modal-overlay" id="employeeModal">
+    <div class="modal">
+        <h3>Add Employee</h3>
+        <div class="form-group">
+            <label class="form-label">Name</label>
+            <input class="form-input" id="empName">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="empPhone">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Role</label>
+            <select class="form-input" id="empRole">
+                <option value="cashier">Cashier</option>
+                <option value="manager">Manager</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">4-Digit PIN</label>
+            <input type="password" class="form-input" id="empPin" maxlength="4" style="text-align:center;letter-spacing:8px">
+        </div>
+        <button class="btn btn-green" onclick="addEmployee()">Add Employee</button>
+        <button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('employeeModal')">Cancel</button>
+    </div>
 </div>
 
-<div class="modal-overlay" id="productModal"><div class="modal">
-<h3 id="prodModalTitle">Add Product</h3>
-<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="prodName"></div>
-<div class="form-group"><label class="form-label">Cost Price (UGX)</label><input type="number" class="form-input" id="prodCost"></div>
-<div class="form-group"><label class="form-label">Selling Price (UGX)</label><input type="number" class="form-input" id="prodPrice"></div>
-<div class="form-group"><label class="form-label">Stock Quantity</label><input type="number" class="form-input" id="prodStock"></div>
-<button class="btn btn-green" onclick="saveProduct()">Save</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('productModal')">Cancel</button>
-</div></div>
-
-<div class="modal-overlay" id="saleModal"><div class="modal">
-<h3 id="saleModalTitle">New Sale</h3>
-<div class="form-group"><label class="form-label" id="saleProdLabel">Product</label>
-<select class="form-input" id="saleProduct"></select></div>
-<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="saleQty" value="1"></div>
-<div class="form-group"><label class="form-label">Payment</label>
-<select class="form-input" id="salePayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Credit</option></select></div>
-<button class="btn btn-green" onclick="recordSale()">Record Sale</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('saleModal')">Cancel</button>
-</div></div>
-
-<div class="modal-overlay" id="expenseModal"><div class="modal">
-<h3>Record Expense</h3>
-<div class="form-group"><label class="form-label">Category</label>
-<select class="form-input" id="expCategory"><option>Rent</option><option>Transport</option><option>Utilities</option><option>Supplies</option><option>Labour</option><option>Other</option></select></div>
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="expAmount"></div>
-<div class="form-group"><label class="form-label">Note</label><input class="form-input" id="expNote"></div>
-<button class="btn btn-green" onclick="recordExpense()">Save Expense</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('expenseModal')">Cancel</button>
-</div></div>
-
-<div class="modal-overlay" id="creditModal"><div class="modal">
-<h3>Add Credit Sale</h3>
-<div class="form-group"><label class="form-label">Customer Name</label><input class="form-input" id="credName"></div>
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="credAmount"></div>
-<div class="form-group"><label class="form-label">Note</label><input class="form-input" id="credNote"></div>
-<button class="btn btn-green" onclick="addCredit()">Save Credit</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('creditModal')">Cancel</button>
-</div></div>
-
-<div class="modal-overlay" id="employeeModal"><div class="modal">
-<h3>Add Employee</h3>
-<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="empName"></div>
-<div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="empPhone"></div>
-<div class="form-group"><label class="form-label">Role</label>
-<select class="form-input" id="empRole"><option value="cashier">Cashier</option><option value="manager">Manager</option></select></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="empPin" maxlength="4" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="addEmployee()">Add Employee</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('employeeModal')">Cancel</button>
-</div></div>
-
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-var CLOUD_URL='https://mrkawvyaybphbfpqrvqb.supabase.co';
-var API_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
-var SESSION={role:'owner',user:null};
-var PERMS={owner:['*'],manager:['dashboard','products','sales','reports','credits','settings'],cashier:['dashboard','sales','credits']};
+// ============================================
+// DUKAFLOW CORE - EXPANDED READABLE VERSION
+// ============================================
 
-function $(id){return document.getElementById(id)}
-function fmt(n){return(n||0).toLocaleString()}
-function iso(){return new Date().toISOString()}
-function today(){return new Date().toISOString().split('T')[0]}
-function genId(){return 'df_'+Date.now()+'_'+Math.random().toString(36).substr(2,9)}
-function np(p){return String(p).replace(/\D/g,'').slice(-9)}
-function isLow(p){return p.stock<=(p.reorderPoint||5)}
-function isOut(p){return p.stock<=0}
-function costOf(pid){var ps=DB.get('products');var p=ps.find(function(x){return x.id===pid});return p?(p.cost||0):0}
-function can(action){var role=SESSION.role||'owner';var perms=PERMS[role]||[];return perms.indexOf('*')!==-1||perms.indexOf(action)!==-1}
+// Cloud Configuration
+var CLOUD_URL = 'https://mrkawvyaybphbfpqrvqb.supabase.co';
+var API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
 
-function showToast(msg,isError){var t=$('toast');if(!t)return;t.textContent=msg;t.className='toast show'+(isError?' error':'');setTimeout(function(){t.className='toast'},2500)}
-function openModal(id){$(id).classList.add('active')}
-function closeModal(id){$(id).classList.remove('active')}
-function switchScreen(name){
-document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
-document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
-var scr=$('screen-'+name);if(scr)scr.classList.add('active');
-var navItems=document.querySelectorAll('.nav-item');
-var idx={dashboard:0,products:1,sales:2,reports:3,credits:4,settings:5}[name]||0;
-if(navItems[idx])navItems[idx].classList.add('active');
-if(name==='dashboard')renderDashboard();
-if(name==='products')renderProducts();
-if(name==='sales')renderSales();
-if(name==='reports')renderReports();
-if(name==='credits')renderCredits();
-if(name==='settings')renderSettings();
+// Session State
+var SESSION = { role: 'owner', user: null };
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+function $(id) {
+    return document.getElementById(id);
 }
 
-var DB={
-get:function(key){try{return JSON.parse(localStorage.getItem('df_'+key))||[]}catch(e){return[]}},
-set:function(key,val){localStorage.setItem('df_'+key,JSON.stringify(val))},
-getObj:function(key){try{return JSON.parse(localStorage.getItem('df_'+key))||{}}catch(e){return{}}},
-setObj:function(key,val){localStorage.setItem('df_'+key,JSON.stringify(val))}
+function fmt(n) {
+    return (n || 0).toLocaleString();
+}
+
+function iso() {
+    return new Date().toISOString();
+}
+
+function today() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function genId() {
+    return 'df_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
+
+function isLow(p) {
+    return p.stock <= (p.reorderPoint || 5);
+}
+
+function isOut(p) {
+    return p.stock <= 0;
+}
+
+function costOf(pid) {
+    var ps = DB.get('products');
+    var p = ps.find(function(x) { return x.id === pid; });
+    return p ? (p.cost || 0) : 0;
+}
+
+// ============================================
+// UI HELPERS
+// ============================================
+
+function showToast(msg, isError) {
+    var t = $('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(function() { t.className = 'toast'; }, 2500);
+}
+
+function openModal(id) {
+    $(id).classList.add('active');
+}
+
+function closeModal(id) {
+    $(id).classList.remove('active');
+}
+
+function switchScreen(name) {
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+    
+    var scr = $('screen-' + name);
+    if (scr) scr.classList.add('active');
+    
+    var navItems = document.querySelectorAll('.nav-item');
+    var idx = { dashboard: 0, products: 1, sales: 2, reports: 3, credits: 4, settings: 5 }[name] || 0;
+    if (navItems[idx]) navItems[idx].classList.add('active');
+    
+    if (name === 'dashboard') renderDashboard();
+    if (name === 'products') renderProducts();
+    if (name === 'sales') renderSales();
+    if (name === 'reports') renderReports();
+    if (name === 'credits') renderCredits();
+    if (name === 'settings') renderSettings();
+}
+
+// ============================================
+// LOCAL DATABASE (localStorage)
+// ============================================
+
+var DB = {
+    get: function(key) {
+        try { return JSON.parse(localStorage.getItem('df_' + key)) || []; }
+        catch (e) { return []; }
+    },
+    set: function(key, val) {
+        localStorage.setItem('df_' + key, JSON.stringify(val));
+    },
+    getObj: function(key) {
+        try { return JSON.parse(localStorage.getItem('df_' + key)) || {}; }
+        catch (e) { return {}; }
+    },
+    setObj: function(key, val) {
+        localStorage.setItem('df_' + key, JSON.stringify(val));
+    }
 };
 
-function showAuth(s){document.querySelectorAll('.auth-screen').forEach(function(x){x.classList.remove('active')});var el=$('screen-'+s);if(el)el.classList.add('active')}
+// ============================================
+// AUTH FUNCTIONS
+// ============================================
 
-function doRegister(){
-var shop=$('regShop').value.trim(),name=$('regName').value.trim(),phone=$('regPhone').value.trim(),loc=$('regLocation').value.trim(),sector=$('regSector').value,pin=$('regPin').value.trim();
-if(!shop||!name||!phone||!pin)return showToast('Fill all fields',true);
-if(pin.length!==4)return showToast('PIN must be 4 digits',true);
-hashPin(pin).then(function(h){
-DB.setObj('profile',{shopName:shop,owner:name,phone:phone,location:loc,sector:sector,createdAt:iso(),pinHash:h,shopKey:genId()});
-showToast('Welcome, '+name+'! 🎉');startApp();
-}).catch(function(){showToast('Error creating shop',true)});
+function showAuth(screen) {
+    document.querySelectorAll('.auth-screen').forEach(function(x) { x.classList.remove('active'); });
+    var el = $('screen-' + screen);
+    if (el) el.classList.add('active');
 }
 
-function doLogin(){
-var phone=$('logPhone').value.trim(),pin=$('logPin').value.trim();
-if(!phone||!pin)return showToast('Enter phone and PIN',true);
-showToast('Verifying...');
-hashPin(pin).then(function(h){
-api('/rest/v1/rpc/owner_login',{method:'POST',body:JSON.stringify({p_phone:phone,p_pin_hash:h})}).then(j).then(function(res){
-if(!res||!res.ok)return showToast(res.error==='invalid_credentials'?'Wrong phone or PIN':'Login failed',true);
-DB.setObj('profile',{shopName:res.shop_name,owner:res.owner_name,phone:phone,location:res.location||'',sector:res.sector||'Retail',createdAt:res.created_at||iso(),cloudId:res.shop_id,shopKey:res.shop_key,pinHash:h});
-SESSION={role:'owner',user:{name:res.owner_name}};
-showToast('Welcome back, '+res.owner_name+'!');
-api('/rest/v1/rpc/restore_shop',{method:'POST',body:JSON.stringify({p_shop_id:res.shop_id})}).then(j).then(function(data){
-if(data&&data.ok){
-if(data.products)DB.set('products',data.products);
-if(data.sales)DB.set('sales',data.sales);
-if(data.expenses)DB.set('expenses',data.expenses);
-if(data.credits)DB.set('credits',data.credits);
-}
-startApp();
-}).catch(function(){startApp()});
-}).catch(function(){showToast('Connection error. Try again.',true)});
-});
-}
-var phone=$('logPhone').value.trim(),pin=$('logPin').value.trim();
-if(!phone||!pin)return showToast('Enter phone and PIN',true);
-var p=DB.getObj('profile');
-if(!p||!p.shopName)return showToast('No shop found. Register first.',true);
-hashPin(pin).then(function(h){
-if(h===p.pinHash){SESSION={role:'owner',user:{name:p.owner}};startApp();}
-else{showToast('Wrong PIN',true);}
-}).catch(function(){showToast('Error',true)});
+function doRegister() {
+    var shop = $('regShop').value.trim();
+    var name = $('regName').value.trim();
+    var phone = $('regPhone').value.trim();
+    var sector = $('regSector').value;
+    var pin = $('regPin').value.trim();
+    
+    if (!shop || !name || !phone || !pin) return showToast('Fill all fields', true);
+    if (pin.length !== 4) return showToast('PIN must be 4 digits', true);
+    
+    hashPin(pin).then(function(h) {
+        DB.setObj('profile', {
+            shopName: shop,
+            owner: name,
+            phone: phone,
+            sector: sector,
+            createdAt: iso(),
+            pinHash: h,
+            shopKey: genId()
+        });
+        showToast('Welcome, ' + name + '! 🎉');
+        startApp();
+    }).catch(function() { showToast('Error creating shop', true); });
 }
 
-function doEmployeeLogin(){
-var phone=$('empLogPhone').value.trim(),pin=$('empLogPin').value.trim();
-if(!phone||!pin)return showToast('Enter phone and PIN',true);
-showToast('Verifying...');
-hashPin(pin).then(function(h){
-api('/rest/v1/rpc/employee_login',{method:'POST',body:JSON.stringify({p_phone:phone,p_pin_hash:h})}).then(j).then(function(res){
-if(!res||!res.ok)return showToast(res.error==='invalid_credentials'?'Wrong phone or PIN':'Login failed',true);
-DB.setObj('profile',{shopName:res.shop_name,owner:'',phone:phone,location:'',createdAt:iso(),cloudId:res.shop_id,shopKey:res.shop_key,sector:res.sector||'Retail',pinHash:h});
-SESSION={role:res.role,user:{id:res.user_id,name:res.name}};
-showToast('Welcome, '+res.name+'!');startApp();
-}).catch(function(){showToast('Connection error. Try again.',true)});
-});
+function doLogin() {
+    var phone = $('logPhone').value.trim();
+    var pin = $('logPin').value.trim();
+    
+    if (!phone || !pin) return showToast('Enter phone and PIN', true);
+    
+    showToast('Verifying...');
+    hashPin(pin).then(function(h) {
+        var p = DB.getObj('profile');
+        if (p && p.phone === phone && p.pinHash === h) {
+            SESSION = { role: 'owner', user: { name: p.owner } };
+            showToast('Welcome back, ' + p.owner + '!');
+            startApp();
+        } else {
+            showToast('Wrong phone or PIN', true);
+        }
+    }).catch(function() { showToast('Error', true); });
 }
 
-function startApp(){
-$('authFlow').style.display='none';
-$('app').style.display='block';
-var p=DB.getObj('profile');
-$('shopNameDisplay').textContent=p.shopName||'My Shop';
-$('sectorBadge').textContent=p.sector||'Retail';
-renderAll();
+function doEmployeeLogin() {
+    var phone = $('empLogPhone').value.trim();
+    var pin = $('empLogPin').value.trim();
+    
+    if (!phone || !pin) return showToast('Enter phone and PIN', true);
+    
+    showToast('Verifying...');
+    hashPin(pin).then(function(h) {
+        var emps = DB.get('employees');
+        var emp = emps.find(function(e) { return e.phone === phone && e.pinHash === h && e.status === 'active'; });
+        
+        if (emp) {
+            SESSION = { role: emp.role, user: { name: emp.name } };
+            showToast('Welcome, ' + emp.name + '!');
+            startApp();
+        } else {
+            showToast('Wrong phone, PIN, or suspended', true);
+        }
+    }).catch(function() { showToast('Error', true); });
 }
 
-function logout(){
-SESSION={role:'owner',user:null};
-$('app').style.display='none';
-$('authFlow').style.display='flex';
-showAuth('welcome');
+function startApp() {
+    $('authFlow').style.display = 'none';
+    $('app').style.display = 'block';
+    
+    var p = DB.getObj('profile');
+    $('shopNameDisplay').textContent = p.shopName || 'My Shop';
+    $('sectorBadge').textContent = p.sector || 'Retail';
+    
+    renderAll();
 }
 
-function markPending(){var d=$('syncDot');if(d)d.classList.add('pending')}
-function api(path,opts){opts=opts||{};opts.headers=Object.assign({'apikey':API_KEY,'Content-Type':'application/json'},opts.headers||{});return fetch(CLOUD_URL+path,opts)}
-function j(r){return r.json()}
-function hashPin(pin){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(pin)).then(function(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('')})}
-
-function syncAll(){
-showToast('Syncing...');
-var p=DB.getObj('profile');
-if(!p||!p.shopKey){showToast('No cloud connection',true);return}
-var products=DB.get('products'),sales=DB.get('sales');
-Promise.all([
-api('/rest/v1/rpc/sync_products',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_products:products})}).catch(function(){}),
-api('/rest/v1/rpc/sync_sales',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_sales:sales})}).catch(function(){})
-]).then(function(){
-var d=$('syncDot');if(d)d.classList.remove('pending');
-showToast('Synced ✓');
-}).catch(function(){showToast('Sync failed',true)});
+function logout() {
+    SESSION = { role: 'owner', user: null };
+    $('app').style.display = 'none';
+    $('authFlow').style.display = 'flex';
+    showAuth('welcome');
 }
 
-function restore(){
-showToast('Restoring...');
-var p=DB.getObj('profile');
-if(!p||!p.cloudId){showToast('No cloud data found',true);return}
-api('/rest/v1/rpc/restore_shop',{method:'POST',body:JSON.stringify({p_shop_id:p.cloudId})}).then(j).then(function(res){
-if(res&&res.ok){
-if(res.products)DB.set('products',res.products);
-if(res.sales)DB.set('sales',res.sales);
-if(res.expenses)DB.set('expenses',res.expenses);
-if(res.credits)DB.set('credits',res.credits);
-renderAll();showToast('Restored ✓');
-}else{showToast('Restore failed',true)}
-}).catch(function(){showToast('Connection error',true)});
+// ============================================
+// CLOUD API
+// ============================================
+
+function markPending() {
+    var d = $('syncDot');
+    if (d) d.classList.add('pending');
 }
 
-function calcHealthScore(){
-var sales=DB.get('sales'),ps=DB.get('products'),creds=DB.get('credits'),ex=DB.get('expenses');
-var todayStr=today();
-var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);
-var todaySales=sales.filter(function(s){return String(s.date||'').indexOf(todayStr)===0});
-var weekSales=sales.filter(function(s){return new Date(s.date)>=weekStart});
-var weekRevenue=weekSales.reduce(function(a,b){return a+b.total},0);
-var weekCost=weekSales.reduce(function(a,b){return a+(costOf(b.productId)*b.quantity)},0);
-var grossMargin=weekRevenue>0?((weekRevenue-weekCost)/weekRevenue*100):0;
-var lowStock=ps.filter(function(p){return isLow(p)||isOut(p)}).length;
-var stockHealth=ps.length>0?Math.max(0,100-Math.round((lowStock/ps.length)*100)):100;
-var totalCredit=creds.reduce(function(a,b){return a+(b.totalAmount||b.amount||0)},0);
-var totalCollected=creds.reduce(function(a,b){return a+(b.paidAmount||0)},0);
-var debtScore=totalCredit>0?Math.round((totalCollected/totalCredit)*100):100;
-var weekExp=ex.filter(function(e){return new Date(e.date)>=weekStart});
-var weekExpTotal=weekExp.reduce(function(a,b){return a+b.amount},0);
-var expenseScore=weekExpTotal>weekRevenue*0.5?50:100;
-var activeDays={};sales.forEach(function(s){var d=String(s.date||'').split('T')[0];if(d)activeDays[d]=true});
-var consistency=Math.min(100,Math.round((Object.keys(activeDays).length/7)*100));
-var salesScore=todaySales.length>0?100:(weekSales.length>0?70:40);
-var profitScore=Math.min(100,Math.round(grossMargin*2));
-var cashScore=80;
-var score=Math.round((salesScore*0.2)+(profitScore*0.2)+(stockHealth*0.15)+(debtScore*0.15)+(cashScore*0.1)+(expenseScore*0.1)+(consistency*0.1));
-score=Math.max(0,Math.min(100,score));
-var alerts=genSectorAlerts(ps,sales,creds,ex,grossMargin);
-return{score:score,components:{sales:salesScore,profit:profitScore,stock:stockHealth,debt:debtScore,cash:cashScore,expense:expenseScore,consistency:consistency},alerts:alerts,grossMargin:grossMargin};
+function api(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({ 'apikey': API_KEY, 'Content-Type': 'application/json' }, opts.headers || {});
+    return fetch(CLOUD_URL + path, opts);
 }
 
-function genSectorAlerts(ps,sales,creds,ex,grossMargin){
-var alerts=[];
-var sector=(DB.getObj('profile').sector)||'Retail';
-var cfg=SECTOR_CONFIG[sector]||SECTOR_CONFIG['Retail'];
-var now=Date.now(),dayMs=86400000;
-var velocity={};
-sales.forEach(function(s){if(!s.productId)return;var d=new Date(s.date).getTime();if(now-d>7*dayMs)return;if(!velocity[s.productId])velocity[s.productId]={qty:0,days:0};velocity[s.productId].qty+=s.quantity;velocity[s.productId].days=Math.max(velocity[s.productId].days,(now-d)/dayMs)});
-ps.forEach(function(p){
-if(p.stock<=0)return;
-var v=velocity[p.id];
-if(v&&v.qty>0){
-var daily=v.qty/Math.max(v.days,1);
-var daysLeft=Math.floor(p.stock/daily);
-if(daysLeft<=3)alerts.push({type:'urgent',icon:'📦',title:p.name+' running out',desc:'~'+daysLeft+' day'+(daysLeft!==1?'s':'')+' left. Reorder soon.'});
-else if(daysLeft<=7)alerts.push({type:'warning',icon:'📦',title:p.name+' low soon',desc:'~'+daysLeft+' days remaining.'});
-}
-});
-if(grossMargin<15&&grossMargin>0)alerts.push({type:'warning',icon:'📉',title:'Thin margins',desc:'Gross margin is '+grossMargin.toFixed(1)+'%. Review pricing.'});
-var overdue=creds.filter(function(c){if(c.status==='paid')return false;return(new Date()-new Date(c.date))/dayMs>7});
-if(overdue.length>0)alerts.push({type:'urgent',icon:'⏰',title:overdue.length+' overdue credit'+(overdue.length>1?'s':''),desc:'UGX '+fmt(overdue.reduce(function(a,b){return a+((b.totalAmount||b.amount||0)-(b.paidAmount||0))},0))+' outstanding.'});
-if(cfg.sectorAlerts){cfg.sectorAlerts.forEach(function(a){alerts.push(a)})}
-return alerts;
+function j(r) { return r.json(); }
+
+function hashPin(pin) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin)).then(function(buf) {
+        return Array.from(new Uint8Array(buf)).map(function(b) {
+            return b.toString(16).padStart(2, '0');
+        }).join('');
+    });
 }
 
-function renderHealthScore(){
-var hs=calcHealthScore();
-var el=$('healthScoreCard');if(!el)return;
-var color=hs.score>=70?'var(--green)':hs.score>=40?'var(--yellow)':'var(--red)';
-var label=hs.score>=70?'Healthy':hs.score>=40?'Needs Attention':'At Risk';
-var html='<div style="display:flex;align-items:center;gap:16px">';
-html+='<div class="health-ring" style="border:4px solid '+color+'"><div class="score" style="color:'+color+'">'+hs.score+'</div><div class="label">/100</div></div>';
-html+='<div style="flex:1"><div style="font-size:16px;font-weight:800;color:'+color+'">'+label+'</div>';
-html+='<div style="font-size:12px;color:var(--muted);margin-top:4px">Sales '+hs.components.sales+' • Profit '+hs.components.profit+' • Stock '+hs.components.stock+'</div>';
-html+='<div style="font-size:12px;color:var(--muted)">Debt '+hs.components.debt+' • Cash '+hs.components.cash+' • Expenses '+hs.components.expense+'</div></div></div>';
-el.innerHTML=html;
-var p=DB.getObj('profile');
-if(navigator.onLine&&p&&p.shopKey){
-api('/rest/v1/rpc/save_health_score',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_score:hs.score,p_sales_activity:hs.components.sales,p_profit_health:hs.components.profit,p_stock_health:hs.components.stock,p_debt_collection:hs.components.debt,p_cash_control:hs.components.cash,p_expense_control:hs.components.expense,p_consistency:hs.components.consistency,p_alerts:hs.alerts})}).catch(function(){});
-}
+function syncAll() {
+    showToast('Syncing...');
+    var p = DB.getObj('profile');
+    if (!p || !p.shopKey) { showToast('No cloud connection', true); return; }
+    
+    var products = DB.get('products');
+    var sales = DB.get('sales');
+    
+    Promise.all([
+        api('/rest/v1/rpc/sync_products', { method: 'POST', body: JSON.stringify({ p_shop_key: p.shopKey, p_products: products }) }).catch(function() {}),
+        api('/rest/v1/rpc/sync_sales', { method: 'POST', body: JSON.stringify({ p_shop_key: p.shopKey, p_sales: sales }) }).catch(function() {})
+    ]).then(function() {
+        var d = $('syncDot');
+        if (d) d.classList.remove('pending');
+        showToast('Synced ✓');
+    }).catch(function() { showToast('Sync failed', true); });
 }
 
-var SECTOR_CONFIG={
-'Retail':{productLabel:'Stock',saleLabel:'Sale',stockLabel:'Stock',customerLabel:'Customer',expenseLabel:'Expense',
-kpis:[{id:'stockValue',label:'Stock Value'},{id:'dailyCash',label:'Daily Cash'},{id:'fastMovers',label:'Fast Movers'},{id:'lowStock',label:'Low Stock'}],
-sectorAlerts:[{type:'warning',icon:'📦',title:'Supplier price watch',desc:'Track supplier prices to catch increases early'}]},
-'Agriculture':{productLabel:'Produce',saleLabel:'Harvest Sold',stockLabel:'Stored Produce',customerLabel:'Buyer',expenseLabel:'Farm Cost',
-kpis:[{id:'yieldPerAcre',label:'Total Produce'},{id:'pricePerKg',label:'Avg Price/kg'},{id:'inputCost',label:'Input Cost'},{id:'transportCost',label:'Transport Cost'}],
-sectorAlerts:[{type:'urgent',icon:'🌾',title:'Harvest price risk',desc:'Consider storage to wait for better prices'}]},
-'Transport':{productLabel:'Vehicle',saleLabel:'Trip',stockLabel:'Fuel & Parts',customerLabel:'Passenger',expenseLabel:'Operating Cost',
-kpis:[{id:'revenuePerTrip',label:'Revenue/Trip'},{id:'fuelCost',label:'Fuel Cost'},{id:'netPerTrip',label:'Net/Trip'},{id:'dailyRemittance',label:'Daily Collection'}],
-sectorAlerts:[{type:'urgent',icon:'⛽',title:'Fuel price watch',desc:'Fuel costs affect your trip margins directly'}]},
-'Food':{productLabel:'Menu Item',saleLabel:'Order',stockLabel:'Ingredients',customerLabel:'Customer',expenseLabel:'Kitchen Cost',
-kpis:[{id:'dailySales',label:'Daily Sales'},{id:'foodCostPct',label:'Food Cost %'},{id:'outputVsWaste',label:'Orders Today'},{id:'bestSellers',label:'Best Seller'}],
-sectorAlerts:[{type:'warning',icon:'🍳',title:'Ingredient price watch',desc:'Key ingredient costs may have changed'}]},
-'Services':{productLabel:'Service',saleLabel:'Appointment',stockLabel:'Supplies',customerLabel:'Client',expenseLabel:'Business Cost',
-kpis:[{id:'customersPerDay',label:'Customers Today'},{id:'revenuePerJob',label:'Revenue/Job'},{id:'chairTurnover',label:'Jobs Today'},{id:'ordersPerWeek',label:'Jobs This Week'}],
-sectorAlerts:[{type:'warning',icon:'📅',title:'Appointment follow-up',desc:'Confirm booked appointments to reduce no-shows'}]},
-'Manufacturing':{productLabel:'Product',saleLabel:'Order',stockLabel:'Raw Materials',customerLabel:'Customer',expenseLabel:'Production Cost',
-kpis:[{id:'productionCost',label:'Production Cost'},{id:'marginPerPiece',label:'Margin/Piece'},{id:'outputPerDay',label:'Output Today'},{id:'materialCost',label:'Material Cost'}],
-sectorAlerts:[{type:'urgent',icon:'🏭',title:'Material price watch',desc:'Raw material costs may have changed since last quote'}]},
-'Energy':{productLabel:'Fuel',saleLabel:'Sale',stockLabel:'Tank Stock',customerLabel:'Customer',expenseLabel:'Operating Cost',
-kpis:[{id:'litresSold',label:'Litres Sold'},{id:'variance',label:'Variance'},{id:'cylindersPerDay',label:'Sales Today'},{id:'unitsInstalled',label:'Units Today'}],
-sectorAlerts:[{type:'urgent',icon:'⛽',title:'Stock reconciliation',desc:'Check dip stick vs pump meter for variance'}]}
+function restore() {
+    showToast('Restoring...');
+    var p = DB.getObj('profile');
+    if (!p || !p.cloudId) { showToast('No cloud data found', true); return; }
+    
+    api('/rest/v1/rpc/restore_shop', { method: 'POST', body: JSON.stringify({ p_shop_id: p.cloudId }) })
+        .then(j)
+        .then(function(res) {
+            if (res && res.ok) {
+                if (res.products) DB.set('products', res.products);
+                if (res.sales) DB.set('sales', res.sales);
+                if (res.expenses) DB.set('expenses', res.expenses);
+                if (res.credits) DB.set('credits', res.credits);
+                renderAll();
+                showToast('Restored ✓');
+            } else {
+                showToast('Restore failed', true);
+            }
+        })
+        .catch(function() { showToast('Connection error', true); });
+}
+
+// ============================================
+// HEALTH SCORE & INTELLIGENCE
+// ============================================
+
+function calcHealthScore() {
+    var sales = DB.get('sales');
+    var ps = DB.get('products');
+    var creds = DB.get('credits');
+    var ex = DB.get('expenses');
+    
+    var todayStr = today();
+    var weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 6);
+    
+    var todaySales = sales.filter(function(s) { return String(s.date || '').indexOf(todayStr) === 0; });
+    var weekSales = sales.filter(function(s) { return new Date(s.date) >= weekStart; });
+    
+    var weekRevenue = weekSales.reduce(function(a, b) { return a + b.total; }, 0);
+    var weekCost = weekSales.reduce(function(a, b) { return a + (costOf(b.productId) * b.quantity); }, 0);
+    var grossMargin = weekRevenue > 0 ? ((weekRevenue - weekCost) / weekRevenue * 100) : 0;
+    
+    var lowStock = ps.filter(function(p) { return isLow(p) || isOut(p); }).length;
+    var stockHealth = ps.length > 0 ? Math.max(0, 100 - Math.round((lowStock / ps.length) * 100)) : 100;
+    
+    var totalCredit = creds.reduce(function(a, b) { return a + (b.totalAmount || b.amount || 0); }, 0);
+    var totalCollected = creds.reduce(function(a, b) { return a + (b.paidAmount || 0); }, 0);
+    var debtScore = totalCredit > 0 ? Math.round((totalCollected / totalCredit) * 100) : 100;
+    
+    var weekExp = ex.filter(function(e) { return new Date(e.date) >= weekStart; });
+    var weekExpTotal = weekExp.reduce(function(a, b) { return a + b.amount; }, 0);
+    var expenseScore = weekExpTotal > weekRevenue * 0.5 ? 50 : 100;
+    
+    var activeDays = {};
+    sales.forEach(function(s) {
+        var d = String(s.date || '').split('T')[0];
+        if (d) activeDays[d] = true;
+    });
+    var consistency = Math.min(100, Math.round((Object.keys(activeDays).length / 7) * 100));
+    
+    var salesScore = todaySales.length > 0 ? 100 : (weekSales.length > 0 ? 70 : 40);
+    var profitScore = Math.min(100, Math.round(grossMargin * 2));
+    var cashScore = 80;
+    
+    var score = Math.round(
+        (salesScore * 0.2) +
+        (profitScore * 0.2) +
+        (stockHealth * 0.15) +
+        (debtScore * 0.15) +
+        (cashScore * 0.1) +
+        (expenseScore * 0.1) +
+        (consistency * 0.1)
+    );
+    
+    score = Math.max(0, Math.min(100, score));
+    
+    var alerts = genSectorAlerts(ps, sales, creds, ex, grossMargin);
+    
+    return {
+        score: score,
+        components: {
+            sales: salesScore,
+            profit: profitScore,
+            stock: stockHealth,
+            debt: debtScore,
+            cash: cashScore,
+            expense: expenseScore,
+            consistency: consistency
+        },
+        alerts: alerts,
+        grossMargin: grossMargin
+    };
+}
+
+function genSectorAlerts(ps, sales, creds, ex, grossMargin) {
+    var alerts = [];
+    var sector = (DB.getObj('profile').sector) || 'Retail';
+    var cfg = SECTOR_CONFIG[sector] || SECTOR_CONFIG['Retail'];
+    
+    var now = Date.now();
+    var dayMs = 86400000;
+    
+    var velocity = {};
+    sales.forEach(function(s) {
+        if (!s.productId) return;
+        var d = new Date(s.date).getTime();
+        if (now - d > 7 * dayMs) return;
+        if (!velocity[s.productId]) velocity[s.productId] = { qty: 0, days: 0 };
+        velocity[s.productId].qty += s.quantity;
+        velocity[s.productId].days = Math.max(velocity[s.productId].days, (now - d) / dayMs);
+    });
+    
+    ps.forEach(function(p) {
+        if (p.stock <= 0) return;
+        var v = velocity[p.id];
+        if (v && v.qty > 0) {
+            var daily = v.qty / Math.max(v.days, 1);
+            var daysLeft = Math.floor(p.stock / daily);
+            if (daysLeft <= 3) {
+                alerts.push({ type: 'urgent', icon: '📦', title: p.name + ' running out', desc: '~' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + ' left. Reorder soon.' });
+            } else if (daysLeft <= 7) {
+                alerts.push({ type: 'warning', icon: '📦', title: p.name + ' low soon', desc: '~' + daysLeft + ' days remaining.' });
+            }
+        }
+    });
+    
+    if (grossMargin < 15 && grossMargin > 0) {
+        alerts.push({ type: 'warning', icon: '📉', title: 'Thin margins', desc: 'Gross margin is ' + grossMargin.toFixed(1) + '%. Review pricing.' });
+    }
+    
+    var overdue = creds.filter(function(c) {
+        if (c.status === 'paid') return false;
+        return (new Date() - new Date(c.date)) / dayMs > 7;
+    });
+    
+    if (overdue.length > 0) {
+        alerts.push({
+            type: 'urgent',
+            icon: '⏰',
+            title: overdue.length + ' overdue credit' + (overdue.length > 1 ? 's' : ''),
+            desc: 'UGX ' + fmt(overdue.reduce(function(a, b) { return a + ((b.totalAmount || b.amount || 0) - (b.paidAmount || 0)); }, 0)) + ' outstanding.'
+        });
+    }
+    
+    if (cfg.sectorAlerts) {
+        cfg.sectorAlerts.forEach(function(a) { alerts.push(a); });
+    }
+    
+    return alerts;
+}
+
+function renderHealthScore() {
+    var hs = calcHealthScore();
+    var el = $('healthScoreCard');
+    if (!el) return;
+    
+    var color = hs.score >= 70 ? 'var(--green)' : hs.score >= 40 ? 'var(--yellow)' : 'var(--red)';
+    var label = hs.score >= 70 ? 'Healthy' : hs.score >= 40 ? 'Needs Attention' : 'At Risk';
+    
+    var html = '<div style="display:flex;align-items:center;gap:16px">';
+    html += '<div class="health-ring" style="border:4px solid ' + color + '">';
+    html += '<div class="score" style="color:' + color + '">' + hs.score + '</div>';
+    html += '<div class="label">/100</div></div>';
+    html += '<div style="flex:1">';
+    html += '<div style="font-size:16px;font-weight:800;color:' + color + '">' + label + '</div>';
+    html += '<div style="font-size:12px;color:var(--muted);margin-top:4px">Sales ' + hs.components.sales + ' • Profit ' + hs.components.profit + ' • Stock ' + hs.components.stock + '</div>';
+    html += '<div style="font-size:12px;color:var(--muted)">Debt ' + hs.components.debt + ' • Cash ' + hs.components.cash + ' • Expenses ' + hs.components.expense + '</div>';
+    html += '</div></div>';
+    
+    el.innerHTML = html;
+    
+    var p = DB.getObj('profile');
+    if (navigator.onLine && p && p.shopKey) {
+        api('/rest/v1/rpc/save_health_score', {
+            method: 'POST',
+            body: JSON.stringify({
+                p_shop_key: p.shopKey,
+                p_score: hs.score,
+                p_sales_activity: hs.components.sales,
+                p_profit_health: hs.components.profit,
+                p_stock_health: hs.components.stock,
+                p_debt_collection: hs.components.debt,
+                p_cash_control: hs.components.cash,
+                p_expense_control: hs.components.expense,
+                p_consistency: hs.components.consistency,
+                p_alerts: hs.alerts
+            })
+        }).catch(function() {});
+    }
+}
+
+// ============================================
+// SECTOR CONFIGURATION
+// ============================================
+
+var SECTOR_CONFIG = {
+    'Retail': {
+        productLabel: 'Stock',
+        saleLabel: 'Sale',
+        stockLabel: 'Stock',
+        customerLabel: 'Customer',
+        expenseLabel: 'Expense',
+        kpis: [
+            { id: 'stockValue', label: 'Stock Value' },
+            { id: 'dailyCash', label: 'Daily Cash' },
+            { id: 'fastMovers', label: 'Fast Movers' },
+            { id: 'lowStock', label: 'Low Stock' }
+        ],
+        sectorAlerts: [
+            { type: 'warning', icon: '📦', title: 'Supplier price watch', desc: 'Track supplier prices to catch increases early' }
+        ]
+    },
+    'Agriculture': {
+        productLabel: 'Produce',
+        saleLabel: 'Harvest Sold',
+        stockLabel: 'Stored Produce',
+        customerLabel: 'Buyer',
+        expenseLabel: 'Farm Cost',
+        kpis: [
+            { id: 'yieldPerAcre', label: 'Total Produce' },
+            { id: 'pricePerKg', label: 'Avg Price/kg' },
+            { id: 'inputCost', label: 'Input Cost' },
+            { id: 'transportCost', label: 'Transport Cost' }
+        ],
+        sectorAlerts: [
+            { type: 'urgent', icon: '🌾', title: 'Harvest price risk', desc: 'Consider storage to wait for better prices' }
+        ]
+    },
+    'Transport': {
+        productLabel: 'Vehicle',
+        saleLabel: 'Trip',
+        stockLabel: 'Fuel & Parts',
+        customerLabel: 'Passenger',
+        expenseLabel: 'Operating Cost',
+        kpis: [
+            { id: 'revenuePerTrip', label: 'Revenue/Trip' },
+            { id: 'fuelCost', label: 'Fuel Cost' },
+            { id: 'netPerTrip', label: 'Net/Trip' },
+            { id: 'dailyRemittance', label: 'Daily Collection' }
+        ],
+        sectorAlerts: [
+            { type: 'urgent', icon: '⛽', title: 'Fuel price watch', desc: 'Fuel costs affect your trip margins directly' }
+        ]
+    },
+    'Food': {
+        productLabel: 'Menu Item',
+        saleLabel: 'Order',
+        stockLabel: 'Ingredients',
+        customerLabel: 'Customer',
+        expenseLabel: 'Kitchen Cost',
+        kpis: [
+            { id: 'dailySales', label: 'Daily Sales' },
+            { id: 'foodCostPct', label: 'Food Cost %' },
+            { id: 'outputVsWaste', label: 'Orders Today' },
+            { id: 'bestSellers', label: 'Best Seller' }
+        ],
+        sectorAlerts: [
+            { type: 'warning', icon: '🍳', title: 'Ingredient price watch', desc: 'Key ingredient costs may have changed' }
+        ]
+    },
+    'Services': {
+        productLabel: 'Service',
+        saleLabel: 'Appointment',
+        stockLabel: 'Supplies',
+        customerLabel: 'Client',
+        expenseLabel: 'Business Cost',
+        kpis: [
+            { id: 'customersPerDay', label: 'Customers Today' },
+            { id: 'revenuePerJob', label: 'Revenue/Job' },
+            { id: 'chairTurnover', label: 'Jobs Today' },
+            { id: 'ordersPerWeek', label: 'Jobs This Week' }
+        ],
+        sectorAlerts: [
+            { type: 'warning', icon: '📅', title: 'Appointment follow-up', desc: 'Confirm booked appointments to reduce no-shows' }
+        ]
+    },
+    'Manufacturing': {
+        productLabel: 'Product',
+        saleLabel: 'Order',
+        stockLabel: 'Raw Materials',
+        customerLabel: 'Customer',
+        expenseLabel: 'Production Cost',
+        kpis: [
+            { id: 'productionCost', label: 'Production Cost' },
+            { id: 'marginPerPiece', label: 'Margin/Piece' },
+            { id: 'outputPerDay', label: 'Output Today' },
+            { id: 'materialCost', label: 'Material Cost' }
+        ],
+        sectorAlerts: [
+            { type: 'urgent', icon: '🏭', title: 'Material price watch', desc: 'Raw material costs may have changed since last quote' }
+        ]
+    },
+    'Energy': {
+        productLabel: 'Fuel',
+        saleLabel: 'Sale',
+        stockLabel: 'Tank Stock',
+        customerLabel: 'Customer',
+        expenseLabel: 'Operating Cost',
+        kpis: [
+            { id: 'litresSold', label: 'Litres Sold' },
+            { id: 'variance', label: 'Variance' },
+            { id: 'cylindersPerDay', label: 'Sales Today' },
+            { id: 'unitsInstalled', label: 'Units Today' }
+        ],
+        sectorAlerts: [
+            { type: 'urgent', icon: '⛽', title: 'Stock reconciliation', desc: 'Check dip stick vs pump meter for variance' }
+        ]
+    }
 };
 
-function sectorLabel(key){var s=(DB.getObj('profile')||{}).sector||'Retail';var cfg=SECTOR_CONFIG[s]||SECTOR_CONFIG['Retail'];return cfg[key]||key}
-
-function calcKPI(id){
-var sales=DB.get('sales'),ps=DB.get('products'),ex=DB.get('expenses'),creds=DB.get('credits');
-var todayStr=today();
-var todaySales=sales.filter(function(s){return String(s.date||'').indexOf(todayStr)===0});
-var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);
-var weekSales=sales.filter(function(s){return new Date(s.date)>=weekStart});
-switch(id){
-case 'stockValue':return ps.reduce(function(a,p){return a+(p.stock*(p.cost||0))},0);
-case 'dailyCash':return todaySales.reduce(function(a,s){return a+s.total},0);
-case 'fastMovers':var sold={};weekSales.forEach(function(s){sold[s.productId]=(sold[s.productId]||0)+1});return Object.keys(sold).filter(function(k){return sold[k]>=3}).length;
-case 'lowStock':return ps.filter(function(p){return isLow(p)}).length;
-case 'yieldPerAcre':return ps.reduce(function(a,p){return a+p.stock},0);
-case 'pricePerKg':if(!ps.length)return 0;return Math.round(ps.reduce(function(a,p){return a+(p.price||0)},0)/ps.length);
-case 'inputCost':return ex.filter(function(e){return e.category==='Supplies'||e.category==='Labour'}).reduce(function(a,e){return a+e.amount},0);
-case 'transportCost':return ex.filter(function(e){return e.category==='Transport'}).reduce(function(a,e){return a+e.amount},0);
-case 'revenuePerTrip':if(!sales.length)return 0;return Math.round(sales.reduce(function(a,s){return a+s.total},0)/sales.length);
-case 'fuelCost':return ex.filter(function(e){return e.category==='Transport'||e.category==='Utilities'}).reduce(function(a,e){return a+e.amount},0);
-case 'netPerTrip':var rev=sales.reduce(function(a,s){return a+s.total},0);var fuel=ex.filter(function(e){return e.category==='Transport'}).reduce(function(a,e){return a+e.amount},0);return Math.max(0,rev-fuel);
-case 'dailyRemittance':return todaySales.reduce(function(a,s){return a+s.total},0);
-case 'dailySales':return todaySales.reduce(function(a,s){return a+s.total},0);
-case 'foodCostPct':var wr=weekSales.reduce(function(a,s){return a+s.total},0);var wc=weekSales.reduce(function(a,s){return a+(costOf(s.productId)*s.quantity)},0);return wr>0?Math.round((wc/wr)*100):0;
-case 'outputVsWaste':return todaySales.length;
-case 'bestSellers':var pc={};weekSales.forEach(function(s){pc[s.productId]=(pc[s.productId]||0)+s.quantity});var top=Object.keys(pc).sort(function(a,b){return pc[b]-pc[a]})[0];var tp=ps.find(function(p){return p.id===top});return tp?tp.name:'—';
-case 'customersPerDay':return todaySales.length;
-case 'revenuePerJob':if(!todaySales.length)return 0;return Math.round(todaySales.reduce(function(a,s){return a+s.total},0)/todaySales.length);
-case 'chairTurnover':return todaySales.length;
-case 'ordersPerWeek':return weekSales.length;
-case 'productionCost':return ex.reduce(function(a,e){return a+e.amount},0);
-case 'marginPerPiece':if(!ps.length)return 0;return Math.round(ps.reduce(function(a,p){return a+((p.price||0)-(p.cost||0))},0)/ps.length);
-case 'outputPerDay':return todaySales.length;
-case 'materialCost':return ex.filter(function(e){return e.category==='Supplies'}).reduce(function(a,e){return a+e.amount},0);
-case 'litresSold':return todaySales.reduce(function(a,s){return a+s.quantity},0);
-case 'variance':return 0;
-case 'cylindersPerDay':return todaySales.length;
-case 'unitsInstalled':return todaySales.length;
-default:return 0;
-}
+function sectorLabel(key) {
+    var s = (DB.getObj('profile') || {}).sector || 'Retail';
+    var cfg = SECTOR_CONFIG[s] || SECTOR_CONFIG['Retail'];
+    return cfg[key] || key;
 }
 
-function renderSectorKPIs(){
-var sector=(DB.getObj('profile')||{}).sector||'Retail';
-var cfg=SECTOR_CONFIG[sector]||SECTOR_CONFIG['Retail'];
-var el=$('sectorKPIs');if(!el)return;
-var html='';
-cfg.kpis.forEach(function(kpi){
-var val=calcKPI(kpi.id);
-var display=typeof val==='number'?'UGX '+fmt(val):val;
-if(kpi.id==='fastMovers'||kpi.id==='lowStock'||kpi.id==='customersPerDay'||kpi.id==='chairTurnover'||kpi.id==='ordersPerWeek'||kpi.id==='outputPerDay'||kpi.id==='outputVsWaste'||kpi.id==='cylindersPerDay'||kpi.id==='unitsInstalled'||kpi.id==='litresSold'||kpi.id==='yieldPerAcre')display=fmt(val);
-if(kpi.id==='foodCostPct')display=val+'%';
-if(kpi.id==='bestSellers')display=val;
-html+='<div class="kpi-card"><div class="kpi-label">'+kpi.label+'</div><div class="kpi-value">'+display+'</div></div>';
-});
-el.innerHTML=html;
+function calcKPI(id) {
+    var sales = DB.get('sales');
+    var ps = DB.get('products');
+    var ex = DB.get('expenses');
+    var creds = DB.get('credits');
+    
+    var todayStr = today();
+    var todaySales = sales.filter(function(s) { return String(s.date || '').indexOf(todayStr) === 0; });
+    
+    var weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 6);
+    var weekSales = sales.filter(function(s) { return new Date(s.date) >= weekStart; });
+    
+    switch (id) {
+        case 'stockValue':
+            return ps.reduce(function(a, p) { return a + (p.stock * (p.cost || 0)); }, 0);
+        case 'dailyCash':
+            return todaySales.reduce(function(a, s) { return a + s.total; }, 0);
+        case 'fastMovers':
+            var sold = {};
+            weekSales.forEach(function(s) { sold[s.productId] = (sold[s.productId] || 0) + 1; });
+            return Object.keys(sold).filter(function(k) { return sold[k] >= 3; }).length;
+        case 'lowStock':
+            return ps.filter(function(p) { return isLow(p); }).length;
+        case 'yieldPerAcre':
+            return ps.reduce(function(a, p) { return a + p.stock; }, 0);
+        case 'pricePerKg':
+            if (!ps.length) return 0;
+            return Math.round(ps.reduce(function(a, p) { return a + (p.price || 0); }, 0) / ps.length);
+        case 'inputCost':
+            return ex.filter(function(e) { return e.category === 'Supplies' || e.category === 'Labour'; }).reduce(function(a, e) { return a + e.amount; }, 0);
+        case 'transportCost':
+            return ex.filter(function(e) { return e.category === 'Transport'; }).reduce(function(a, e) { return a + e.amount; }, 0);
+        case 'revenuePerTrip':
+            if (!sales.length) return 0;
+            return Math.round(sales.reduce(function(a, s) { return a + s.total; }, 0) / sales.length);
+        case 'fuelCost':
+            return ex.filter(function(e) { return e.category === 'Transport' || e.category === 'Utilities'; }).reduce(function(a, e) { return a + e.amount; }, 0);
+        case 'netPerTrip':
+            var rev = sales.reduce(function(a, s) { return a + s.total; }, 0);
+            var fuel = ex.filter(function(e) { return e.category === 'Transport'; }).reduce(function(a, e) { return a + e.amount; }, 0);
+            return Math.max(0, rev - fuel);
+        case 'dailyRemittance':
+            return todaySales.reduce(function(a, s) { return a + s.total; }, 0);
+        case 'dailySales':
+            return todaySales.reduce(function(a, s) { return a + s.total; }, 0);
+        case 'foodCostPct':
+            var wr = weekSales.reduce(function(a, s) { return a + s.total; }, 0);
+            var wc = weekSales.reduce(function(a, s) { return a + (costOf(s.productId) * s.quantity); }, 0);
+            return wr > 0 ? Math.round((wc / wr) * 100) : 0;
+        case 'outputVsWaste':
+            return todaySales.length;
+        case 'bestSellers':
+            var pc = {};
+            weekSales.forEach(function(s) { pc[s.productId] = (pc[s.productId] || 0) + s.quantity; });
+            var top = Object.keys(pc).sort(function(a, b) { return pc[b] - pc[a]; })[0];
+            var tp = ps.find(function(p) { return p.id === top; });
+            return tp ? tp.name : '—';
+        case 'customersPerDay':
+            return todaySales.length;
+        case 'revenuePerJob':
+            if (!todaySales.length) return 0;
+            return Math.round(todaySales.reduce(function(a, s) { return a + s.total; }, 0) / todaySales.length);
+        case 'chairTurnover':
+            return todaySales.length;
+        case 'ordersPerWeek':
+            return weekSales.length;
+        case 'productionCost':
+            return ex.reduce(function(a, e) { return a + e.amount; }, 0);
+        case 'marginPerPiece':
+            if (!ps.length) return 0;
+            return Math.round(ps.reduce(function(a, p) { return a + ((p.price || 0) - (p.cost || 0)); }, 0) / ps.length);
+        case 'outputPerDay':
+            return todaySales.length;
+        case 'materialCost':
+            return ex.filter(function(e) { return e.category === 'Supplies'; }).reduce(function(a, e) { return a + e.amount; }, 0);
+        case 'litresSold':
+            return todaySales.reduce(function(a, s) { return a + s.quantity; }, 0);
+        case 'variance':
+            return 0;
+        case 'cylindersPerDay':
+            return todaySales.length;
+        case 'unitsInstalled':
+            return todaySales.length;
+        default:
+            return 0;
+    }
 }
 
-function renderSectorAlerts(){
-var hs=calcHealthScore();
-var el=$('sectorAlerts');if(!el)return;
-if(hs.alerts.length===0){el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">✅ No alerts. Business is on track.</div>';return}
-var html='';
-hs.alerts.slice(0,5).forEach(function(a){
-var borderColor=a.type==='urgent'?'var(--red)':'var(--yellow)';
-html+='<div class="insight-row" style="border-left-color:'+borderColor+'"><div class="insight-icon">'+a.icon+'</div><div class="insight-text"><div class="insight-title">'+a.title+'</div><div class="insight-desc">'+a.desc+'</div></div></div>';
-});
-el.innerHTML=html;
+function renderSectorKPIs() {
+    var sector = (DB.getObj('profile') || {}).sector || 'Retail';
+    var cfg = SECTOR_CONFIG[sector] || SECTOR_CONFIG['Retail'];
+    var el = $('sectorKPIs');
+    if (!el) return;
+    
+    var html = '';
+    cfg.kpis.forEach(function(kpi) {
+        var val = calcKPI(kpi.id);
+        var display = typeof val === 'number' ? 'UGX ' + fmt(val) : val;
+        
+        if (kpi.id === 'fastMovers' || kpi.id === 'lowStock' || kpi.id === 'customersPerDay' ||
+            kpi.id === 'chairTurnover' || kpi.id === 'ordersPerWeek' || kpi.id === 'outputPerDay' ||
+            kpi.id === 'outputVsWaste' || kpi.id === 'cylindersPerDay' || kpi.id === 'unitsInstalled' ||
+            kpi.id === 'litresSold' || kpi.id === 'yieldPerAcre') {
+            display = fmt(val);
+        }
+        if (kpi.id === 'foodCostPct') display = val + '%';
+        if (kpi.id === 'bestSellers') display = val;
+        
+        html += '<div class="kpi-card"><div class="kpi-label">' + kpi.label + '</div><div class="kpi-value">' + display + '</div></div>';
+    });
+    
+    el.innerHTML = html;
 }
 
-function renderAll(){
-renderDashboard();renderProducts();renderSales();renderReports();renderCredits();renderSettings();
-applySectorLabels();
+function renderSectorAlerts() {
+    var hs = calcHealthScore();
+    var el = $('sectorAlerts');
+    if (!el) return;
+    
+    if (hs.alerts.length === 0) {
+        el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">✅ No alerts. Business is on track.</div>';
+        return;
+    }
+    
+    var html = '';
+    hs.alerts.slice(0, 5).forEach(function(a) {
+        var borderColor = a.type === 'urgent' ? 'var(--red)' : 'var(--yellow)';
+        html += '<div class="insight-row" style="border-left-color:' + borderColor + '">';
+        html += '<div class="insight-icon">' + a.icon + '</div>';
+        html += '<div class="insight-text"><div class="insight-title">' + a.title + '</div><div class="insight-desc">' + a.desc + '</div></div>';
+        html += '</div>';
+    });
+    
+    el.innerHTML = html;
 }
 
-function applySectorLabels(){
-var sector=(DB.getObj('profile')||{}).sector||'Retail';
-var cfg=SECTOR_CONFIG[sector]||SECTOR_CONFIG['Retail'];
-if($('prodTitle'))$('prodTitle').textContent=cfg.productLabel;
-if($('saleBtn'))$('saleBtn').textContent='+ New '+cfg.saleLabel;
-if($('stockTab'))$('stockTab').textContent=cfg.stockLabel;
-if($('saleModalTitle'))$('saleModalTitle').textContent='New '+cfg.saleLabel;
-if($('saleProdLabel'))$('saleProdLabel').textContent=cfg.productLabel;
-if($('prodModalTitle'))$('prodModalTitle').textContent='Add '+cfg.productLabel;
+// ============================================
+// RENDER FUNCTIONS
+// ============================================
+
+function renderAll() {
+    renderDashboard();
+    renderProducts();
+    renderSales();
+    renderReports();
+    renderCredits();
+    renderSettings();
+    applySectorLabels();
 }
 
-function renderDashboard(){
-renderHealthScore();
-renderSectorKPIs();
-renderSectorAlerts();
-renderAttention();
+function applySectorLabels() {
+    var sector = (DB.getObj('profile') || {}).sector || 'Retail';
+    var cfg = SECTOR_CONFIG[sector] || SECTOR_CONFIG['Retail'];
+    
+    if ($('prodTitle')) $('prodTitle').textContent = cfg.productLabel;
+    if ($('saleBtn')) $('saleBtn').textContent = '+ New ' + cfg.saleLabel;
+    if ($('stockTab')) $('stockTab').textContent = cfg.stockLabel;
+    if ($('saleModalTitle')) $('saleModalTitle').textContent = 'New ' + cfg.saleLabel;
+    if ($('saleProdLabel')) $('saleProdLabel').textContent = cfg.productLabel;
+    if ($('prodModalTitle')) $('prodModalTitle').textContent = 'Add ' + cfg.productLabel;
 }
 
-function renderAttention(){
-var el=$('attentionList');if(!el)return;
-var ps=DB.get('products');
-var low=ps.filter(function(p){return isLow(p)||isOut(p)});
-if(low.length===0){el.innerHTML='<div style="color:var(--muted);font-size:13px">✅ All good. Nothing needs attention.</div>';return}
-var html='';
-low.slice(0,5).forEach(function(p){
-html+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+(isOut(p)?'Out of stock':'Low stock: '+p.stock+' left')+'</div></div><div class="'+(isOut(p)?'stat-red':'stat-yellow')+'" style="font-weight:700;font-size:12px">'+(isOut(p)?'OUT':'LOW')+'</div></div>';
-});
-el.innerHTML=html;
+function renderDashboard() {
+    renderHealthScore();
+    renderSectorKPIs();
+    renderSectorAlerts();
+    renderAttention();
 }
 
-function renderProducts(){
-var ps=DB.get('products');
-var search=($('prodSearch')?$('prodSearch').value:'').toLowerCase();
-var filtered=ps.filter(function(p){return p.name.toLowerCase().indexOf(search)!==-1});
-var el=$('productList');if(!el)return;
-if(filtered.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📦</div><p>No '+(sectorLabel('productLabel')||'products').toLowerCase()+' yet. Add your first one!</p></div>';return}
-var html='';
-filtered.forEach(function(p){
-var stockCls=isOut(p)?'stat-red':isLow(p)?'stat-yellow':'stat-green';
-html+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">UGX '+fmt(p.price)+' • Cost: UGX '+fmt(p.cost||0)+'</div></div><div class="item-right"><div class="item-price">'+p.stock+'</div><div class="item-stock '+stockCls+'">'+(isOut(p)?'OUT':isLow(p)?'LOW':'OK')+'</div></div></div>';
-});
-el.innerHTML=html;
+function renderAttention() {
+    var el = $('attentionList');
+    if (!el) return;
+    
+    var ps = DB.get('products');
+    var low = ps.filter(function(p) { return isLow(p) || isOut(p); });
+    
+    if (low.length === 0) {
+        el.innerHTML = '<div style="color:var(--muted);font-size:13px">✅ All good. Nothing needs attention.</div>';
+        return;
+    }
+    
+    var html = '';
+    low.slice(0, 5).forEach(function(p) {
+        html += '<div class="list-item">';
+        html += '<div class="item-info"><div class="item-name">' + p.name + '</div><div class="item-meta">' + (isOut(p) ? 'Out of stock' : 'Low stock: ' + p.stock + ' left') + '</div></div>';
+        html += '<div class="' + (isOut(p) ? 'stat-red' : 'stat-yellow') + '" style="font-weight:700;font-size:12px">' + (isOut(p) ? 'OUT' : 'LOW') + '</div>';
+        html += '</div>';
+    });
+    
+    el.innerHTML = html;
 }
 
-function renderSales(){
-var sales=DB.get('sales');
-var el=$('salesList');if(!el)return;
-if(sales.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛒</div><p>No sales yet. Record your first '+sectorLabel('saleLabel').toLowerCase()+'!</p></div>';return}
-var html='';
-sales.slice(0,20).forEach(function(s){
-var prod=DB.get('products').find(function(p){return p.id===s.productId});
-html+='<div class="list-item"><div class="item-info"><div class="item-name">'+(prod?prod.name:'Item')+' ×'+s.quantity+'</div><div class="item-meta">'+s.payment+' • '+String(s.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(s.total)+'</div></div></div>';
-});
-el.innerHTML=html;
+function renderProducts() {
+    var ps = DB.get('products');
+    var search = ($('prodSearch') ? $('prodSearch').value : '').toLowerCase();
+    var filtered = ps.filter(function(p) { return p.name.toLowerCase().indexOf(search) !== -1; });
+    
+    var el = $('productList');
+    if (!el) return;
+    
+    if (filtered.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No ' + (sectorLabel('productLabel') || 'products').toLowerCase() + ' yet. Add your first one!</p></div>';
+        return;
+    }
+    
+    var html = '';
+    filtered.forEach(function(p) {
+        var stockCls = isOut(p) ? 'stat-red' : isLow(p) ? 'stat-yellow' : 'stat-green';
+        html += '<div class="list-item">';
+        html += '<div class="item-info"><div class="item-name">' + p.name + '</div><div class="item-meta">UGX ' + fmt(p.price) + ' • Cost: UGX ' + fmt(p.cost || 0) + '</div></div>';
+        html += '<div class="item-right"><div class="item-price">' + p.stock + '</div><div class="item-stock ' + stockCls + '">' + (isOut(p) ? 'OUT' : isLow(p) ? 'LOW' : 'OK') + '</div></div>';
+        html += '</div>';
+    });
+    
+    el.innerHTML = html;
 }
 
-function renderReports(){
-switchReportTab('overview');
+function renderSales() {
+    var sales = DB.get('sales');
+    var el = $('salesList');
+    if (!el) return;
+    
+    if (sales.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">🛒</div><p>No sales yet. Record your first ' + sectorLabel('saleLabel').toLowerCase() + '!</p></div>';
+        return;
+    }
+    
+    var html = '';
+    sales.slice(0, 20).forEach(function(s) {
+        var prod = DB.get('products').find(function(p) { return p.id === s.productId; });
+        html += '<div class="list-item">';
+        html += '<div class="item-info"><div class="item-name">' + (prod ? prod.name : 'Item') + ' ×' + s.quantity + '</div><div class="item-meta">' + s.payment + ' • ' + String(s.date).slice(0, 10) + '</div></div>';
+        html += '<div class="item-right"><div class="item-price stat-green">UGX ' + fmt(s.total) + '</div></div>';
+        html += '</div>';
+    });
+    
+    el.innerHTML = html;
 }
 
-function switchReportTab(tab){
-document.querySelectorAll('#reportTabs .tab-btn').forEach(function(t){t.classList.remove('active')});
-event.target.classList.add('active');
-var el=$('reportContent');if(!el)return;
-var sales=DB.get('sales'),ex=DB.get('expenses'),ps=DB.get('products');
-var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);
-var weekSales=sales.filter(function(s){return new Date(s.date)>=weekStart});
-var weekRevenue=weekSales.reduce(function(a,s){return a+s.total},0);
-var weekCost=weekSales.reduce(function(a,s){return a+(costOf(s.productId)*s.quantity)},0);
-var weekExp=ex.filter(function(e){return new Date(e.date)>=weekStart}).reduce(function(a,e){return a+e.amount},0);
-var profit=weekRevenue-weekCost-weekExp;
-if(tab==='overview'){
-el.innerHTML='<div class="kpi-grid"><div class="kpi-card"><div class="kpi-label">Revenue (7d)</div><div class="kpi-value stat-green">UGX '+fmt(weekRevenue)+'</div></div><div class="kpi-card"><div class="kpi-label">Cost of Goods</div><div class="kpi-value stat-yellow">UGX '+fmt(weekCost)+'</div></div><div class="kpi-card"><div class="kpi-label">Expenses (7d)</div><div class="kpi-value stat-red">UGX '+fmt(weekExp)+'</div></div><div class="kpi-card"><div class="kpi-label">Net Profit</div><div class="kpi-value '+(profit>=0?'stat-green':'stat-red')+'">UGX '+fmt(profit)+'</div></div></div>';
-}else if(tab==='expenses'){
-var html='<button class="btn btn-green btn-sm" style="margin-bottom:12px" onclick="openModal(\'expenseModal\')">+ Add Expense</button>';
-if(ex.length===0){html+='<div class="empty-state"><p>No expenses recorded.</p></div>'}
-else{ex.slice(0,20).forEach(function(e){html+='<div class="list-item"><div class="item-info"><div class="item-name">'+e.category+'</div><div class="item-meta">'+String(e.date).slice(0,10)+(e.note?' • '+e.note:'')+'</div></div><div class="item-right"><div class="item-price stat-red">UGX '+fmt(e.amount)+'</div></div></div>'})}
-el.innerHTML=html;
-}else if(tab==='reconciliation'){
-el.innerHTML='<div class="card"><div class="card-title">Cash Reconciliation</div><p style="font-size:13px;color:var(--muted)">Reconciliation feature coming soon. Track your cash vs expected for the day.</p></div>';
-}
-}
-
-function renderCredits(){
-var creds=DB.get('credits');
-var el=$('creditList');if(!el)return;
-if(creds.length===0){el.innerHTML='<div class="empty-state"><div class="icon">💳</div><p>No credit sales yet.</p></div>';return}
-var html='';
-creds.forEach(function(c){
-var remaining=(c.totalAmount||c.amount||0)-(c.paidAmount||0);
-var statusCls=remaining<=0?'stat-green':(new Date()-new Date(c.date))/86400000>7?'stat-red':'stat-yellow';
-html+='<div class="list-item"><div class="item-info"><div class="item-name">'+c.name+'</div><div class="item-meta">'+String(c.date).slice(0,10)+' • Paid: UGX '+fmt(c.paidAmount||0)+'</div></div><div class="item-right"><div class="item-price '+statusCls+'">UGX '+fmt(remaining)+'</div><div class="item-stock">'+(remaining<=0?'PAID':'OWED')+'</div></div></div>';
-});
-el.innerHTML=html;
+function renderReports() {
+    var el = $('reportContent');
+    if (!el) return;
+    
+    var sales = DB.get('sales');
+    var ex = DB.get('expenses');
+    var ps = DB.get('products');
+    
+    var weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 6);
+    var weekSales = sales.filter(function(s) { return new Date(s.date) >= weekStart; });
+    
+    var weekRevenue = weekSales.reduce(function(a, s) { return a + s.total; }, 0);
+    var weekCost = weekSales.reduce(function(a, s) { return a + (costOf(s.productId) * s.quantity); }, 0);
+    var weekExp = ex.filter(function(e) { return new Date(e.date) >= weekStart; }).reduce(function(a, e) { return a + e.amount; }, 0);
+    var profit = weekRevenue - weekCost - weekExp;
+    
+    var html = '<div class="kpi-grid">';
+    html += '<div class="kpi-card"><div class="kpi-label">Revenue (7d)</div><div class="kpi-value stat-green">UGX ' + fmt(weekRevenue) + '</div></div>';
+    html += '<div class="kpi-card"><div class="kpi-label">Cost of Goods</div><div class="kpi-value stat-yellow">UGX ' + fmt(weekCost) + '</div></div>';
+    html += '<div class="kpi-card"><div class="kpi-label">Expenses (7d)</div><div class="kpi-value stat-red">UGX ' + fmt(weekExp) + '</div></div>';
+    html += '<div class="kpi-card"><div class="kpi-label">Net Profit</div><div class="kpi-value ' + (profit >= 0 ? 'stat-green' : 'stat-red') + '">UGX ' + fmt(profit) + '</div></div>';
+    html += '</div>';
+    
+    html += '<button class="btn btn-green btn-sm" style="margin-top:12px" onclick="openModal(\'expenseModal\')">+ Add Expense</button>';
+    
+    el.innerHTML = html;
 }
 
-function renderSettings(){
-var p=DB.getObj('profile');
-var el=$('shopInfoDisplay');if(!el)return;
-el.innerHTML='<div style="font-size:13px;color:var(--muted)">Owner: <b style="color:var(--text)">'+(p.owner||'—')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Phone: <b style="color:var(--text)">'+(p.phone||'—')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Sector: <b style="color:var(--text)">'+(p.sector||'Retail')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Location: <b style="color:var(--text)">'+(p.location||'—')+'</b></div>';
-renderEmployees();
+function renderCredits() {
+    var creds = DB.get('credits');
+    var el = $('creditList');
+    if (!el) return;
+    
+    if (creds.length === 0) {
+        el.innerHTML = '<div class="empty-state"><div class="icon">💳</div><p>No credit sales yet.</p></div>';
+        return;
+    }
+    
+    var html = '';
+    creds.forEach(function(c) {
+        var remaining = (c.totalAmount || c.amount || 0) - (c.paidAmount || 0);
+        var statusCls = remaining <= 0 ? 'stat-green' : (new Date() - new Date(c.date)) / 86400000 > 7 ? 'stat-red' : 'stat-yellow';
+        
+        html += '<div class="list-item">';
+        html += '<div class="item-info"><div class="item-name">' + c.name + '</div><div class="item-meta">' + String(c.date).slice(0, 10) + ' • Paid: UGX ' + fmt(c.paidAmount || 0) + '</div></div>';
+        html += '<div class="item-right"><div class="item-price ' + statusCls + '">UGX ' + fmt(remaining) + '</div><div class="item-stock">' + (remaining <= 0 ? 'PAID' : 'OWED') + '</div></div>';
+        html += '</div>';
+    });
+    
+    el.innerHTML = html;
 }
 
-function renderEmployees(){
-var emps=DB.get('employees');
-var el=$('employeeList');if(!el)return;
-if(emps.length===0){el.innerHTML='<div style="font-size:13px;color:var(--muted)">No employees yet.</div>';return}
-var html='';
-emps.forEach(function(e){
-html+='<div class="list-item"><div class="item-info"><div class="item-name">'+e.name+'</div><div class="item-meta">'+e.role+' • '+e.phone+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" onclick="toggleEmployeeStatus(\''+e.id+'\')">'+(e.status==='active'?'Suspend':'Activate')+'</button><button class="btn btn-red btn-sm" onclick="deleteEmployee(\''+e.id+'\')">✕</button></div></div>';
-});
-el.innerHTML=html;
+function renderSettings() {
+    var p = DB.getObj('profile');
+    var el = $('shopInfoDisplay');
+    if (!el) return;
+    
+    el.innerHTML = '<div style="font-size:13px;color:var(--muted)">Owner: <b style="color:var(--text)">' + (p.owner || '—') + '</b></div>' +
+                   '<div style="font-size:13px;color:var(--muted);margin-top:4px">Phone: <b style="color:var(--text)">' + (p.phone || '—') + '</b></div>' +
+                   '<div style="font-size:13px;color:var(--muted);margin-top:4px">Sector: <b style="color:var(--text)">' + (p.sector || 'Retail') + '</b></div>' +
+                   '<div style="font-size:13px;color:var(--muted);margin-top:4px">Location: <b style="color:var(--text)">' + (p.location || '—') + '</b></div>';
+    
+    renderEmployees();
 }
 
-function renderPulse(){}
-function saveProduct(){
-var name=$('prodName').value.trim(),cost=parseInt($('prodCost').value)||0,price=parseInt($('prodPrice').value)||0,stock=parseInt($('prodStock').value)||0;
-if(!name)return showToast('Enter product name',true);
-if(price<=0)return showToast('Enter selling price',true);
-var ps=DB.get('products');
-var prod={id:genId(),name:name,cost:cost,price:price,stock:stock,reorderPoint:5,synced:false,createdAt:iso()};
-ps.unshift(prod);
-DB.set('products',ps);
-closeModal('productModal');
-showToast((sectorLabel('productLabel')||'Product')+' added ✓');
-$('prodName').value='';$('prodCost').value='';$('prodPrice').value='';$('prodStock').value='';
-markPending();renderAll();
+function renderEmployees() {
+    var emps = DB.get('employees');
+    var el = $('employeeList');
+    if (!el) return;
+    
+    if (emps.length === 0) {
+        el.innerHTML = '<div style="font-size:13px;color:var(--muted)">No employees yet.</div>';
+        return;
+    }
+    
+    var html = '';
+    emps.forEach(function(e) {
+        html += '<div class="list-item">';
+        html += '<div class="item-info"><div class="item-name">' + e.name + '</div><div class="item-meta">' + e.role + ' • ' + e.phone + '</div></div>';
+        html += '<div style="display:flex;gap:6px">';
+        html += '<button class="btn btn-outline btn-sm" onclick="toggleEmployeeStatus(\'' + e.id + '\')">' + (e.status === 'active' ? 'Suspend' : 'Activate') + '</button>';
+        html += '<button class="btn btn-red btn-sm" onclick="deleteEmployee(\'' + e.id + '\')">✕</button>';
+        html += '</div></div>';
+    });
+    
+    el.innerHTML = html;
 }
 
-function recordSale(){
-var pid=$('saleProduct').value,qty=parseInt($('saleQty').value)||1,payment=$('salePayment').value;
-if(!pid)return showToast('Select a product',true);
-var ps=DB.get('products');
-var prod=ps.find(function(x){return x.id===pid});
-if(!prod)return showToast('Product not found',true);
-if(qty>prod.stock)return showToast('Only '+prod.stock+' in stock',true);
-var total=prod.price*qty;
-prod.stock-=qty;
-prod.synced=false;
-DB.set('products',ps);
-var sales=DB.get('sales');
-var sale={id:genId(),productId:pid,quantity:qty,total:total,payment:payment,date:iso(),synced:false};
-sales.unshift(sale);
-DB.set('sales',sales);
-closeModal('saleModal');
-showToast((sectorLabel('saleLabel')||'Sale')+' recorded: UGX '+fmt(total));
-$('saleQty').value='1';
-markPending();renderAll();
+// ============================================
+// CRUD FUNCTIONS
+// ============================================
+
+function saveProduct() {
+    var name = $('prodName').value.trim();
+    var cost = parseInt($('prodCost').value) || 0;
+    var price = parseInt($('prodPrice').value) || 0;
+    var stock = parseInt($('prodStock').value) || 0;
+    
+    if (!name) return showToast('Enter product name', true);
+    if (price <= 0) return showToast('Enter selling price', true);
+    
+    var ps = DB.get('products');
+    var prod = {
+        id: genId(),
+        name: name,
+        cost: cost,
+        price: price,
+        stock: stock,
+        reorderPoint: 5,
+        synced: false,
+        createdAt: iso()
+    };
+    
+    ps.unshift(prod);
+    DB.set('products', ps);
+    
+    closeModal('productModal');
+    showToast((sectorLabel('productLabel') || 'Product') + ' added ✓');
+    
+    $('prodName').value = '';
+    $('prodCost').value = '';
+    $('prodPrice').value = '';
+    $('prodStock').value = '';
+    
+    markPending();
+    renderAll();
 }
 
-function recordExpense(){
-var category=$('expCategory').value,amount=parseInt($('expAmount').value)||0,note=$('expNote').value.trim();
-if(amount<=0)return showToast('Enter amount',true);
-var ex=DB.get('expenses');
-var exp={id:genId(),category:category,amount:amount,note:note,date:iso(),synced:false};
-ex.unshift(exp);
-DB.set('expenses',ex);
-closeModal('expenseModal');
-showToast('Expense recorded: UGX '+fmt(amount));
-$('expAmount').value='';$('expNote').value='';
-markPending();renderAll();
+function recordSale() {
+    var pid = $('saleProduct').value;
+    var qty = parseInt($('saleQty').value) || 1;
+    var payment = $('salePayment').value;
+    
+    if (!pid) return showToast('Select a product', true);
+    
+    var ps = DB.get('products');
+    var prod = ps.find(function(x) { return x.id === pid; });
+    
+    if (!prod) return showToast('Product not found', true);
+    if (qty > prod.stock) return showToast('Only ' + prod.stock + ' in stock', true);
+    
+    var total = prod.price * qty;
+    prod.stock -= qty;
+    prod.synced = false;
+    DB.set('products', ps);
+    
+    var sales = DB.get('sales');
+    var sale = {
+        id: genId(),
+        productId: pid,
+        quantity: qty,
+        total: total,
+        payment: payment,
+        date: iso(),
+        synced: false
+    };
+    
+    sales.unshift(sale);
+    DB.set('sales', sales);
+    
+    closeModal('saleModal');
+    showToast((sectorLabel('saleLabel') || 'Sale') + ' recorded: UGX ' + fmt(total));
+    
+    $('saleQty').value = '1';
+    
+    markPending();
+    renderAll();
 }
 
-function addCredit(){
-var name=$('credName').value.trim(),amount=parseInt($('credAmount').value)||0,note=$('credNote').value.trim();
-if(!name)return showToast('Enter customer name',true);
-if(amount<=0)return showToast('Enter amount',true);
-var creds=DB.get('credits');
-var credit={id:genId(),name:name,totalAmount:amount,paidAmount:0,note:note,date:iso(),status:'unpaid',synced:false};
-creds.unshift(credit);
-DB.set('credits',creds);
-closeModal('creditModal');
-showToast('Credit added: UGX '+fmt(amount));
-$('credName').value='';$('credAmount').value='';$('credNote').value='';
-markPending();renderAll();
+function recordExpense() {
+    var category = $('expCategory').value;
+    var amount = parseInt($('expAmount').value) || 0;
+    var note = $('expNote').value.trim();
+    
+    if (amount <= 0) return showToast('Enter amount', true);
+    
+    var ex = DB.get('expenses');
+    var exp = {
+        id: genId(),
+        category: category,
+        amount: amount,
+        note: note,
+        date: iso(),
+        synced: false
+    };
+    
+    ex.unshift(exp);
+    DB.set('expenses', ex);
+    
+    closeModal('expenseModal');
+    showToast('Expense recorded: UGX ' + fmt(amount));
+    
+    $('expAmount').value = '';
+    $('expNote').value = '';
+    
+    markPending();
+    renderAll();
 }
 
-function addEmployee(){
-var name=$('empName').value.trim(),phone=$('empPhone').value.trim(),role=$('empRole').value,pin=$('empPin').value.trim();
-if(!name||!phone||!pin)return showToast('Fill all fields',true);
-if(pin.length!==4)return showToast('PIN must be 4 digits',true);
-hashPin(pin).then(function(h){
-var emps=DB.get('employees');
-var emp={id:genId(),name:name,phone:phone,role:role,pinHash:h,status:'active',createdAt:iso()};
-emps.push(emp);
-DB.set('employees',emps);
-closeModal('employeeModal');
-showToast('Employee added ✓');
-$('empName').value='';$('empPhone').value='';$('empPin').value='';
-var p=DB.getObj('profile');
-if(p&&p.shopKey&&navigator.onLine){
-api('/rest/v1/rpc/create_cloud_employee',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_name:name,p_phone:phone,p_role_name:role,p_branch:'main',p_pin_hash:h})}).catch(function(){});
-}
-renderSettings();
-}).catch(function(){showToast('Error adding employee',true)});
-}
-
-function toggleEmployeeStatus(id){
-var emps=DB.get('employees');
-var emp=emps.find(function(e){return e.id===id});
-if(!emp)return;
-emp.status=emp.status==='active'?'suspended':'active';
-DB.set('employees',emps);
-showToast('Employee '+(emp.status==='active'?'activated':'suspended'));
-renderSettings();
-}
-
-function deleteEmployee(id){
-if(!confirm('Delete this employee?'))return;
-var emps=DB.get('employees').filter(function(e){return e.id!==id});
-DB.set('employees',emps);
-showToast('Employee deleted');
-renderSettings();
+function addCredit() {
+    var name = $('credName').value.trim();
+    var amount = parseInt($('credAmount').value) || 0;
+    var note = $('credNote').value.trim();
+    
+    if (!name) return showToast('Enter customer name', true);
+    if (amount <= 0) return showToast('Enter amount', true);
+    
+    var creds = DB.get('credits');
+    var credit = {
+        id: genId(),
+        name: name,
+        totalAmount: amount,
+        paidAmount: 0,
+        note: note,
+        date: iso(),
+        status: 'unpaid',
+        synced: false
+    };
+    
+    creds.unshift(credit);
+    DB.set('credits', creds);
+    
+    closeModal('creditModal');
+    showToast('Credit added: UGX ' + fmt(amount));
+    
+    $('credName').value = '';
+    $('credAmount').value = '';
+    $('credNote').value = '';
+    
+    markPending();
+    renderAll();
 }
 
-function memorySnapshot(){
-try{
-var snap={ts:Date.now(),sales:DB.get('sales').length,products:DB.get('products').length,credits:DB.get('credits').length};
-localStorage.setItem('df_memory_snap',JSON.stringify(snap));
-}catch(e){}
+function addEmployee() {
+    var name = $('empName').value.trim();
+    var phone = $('empPhone').value.trim();
+    var role = $('empRole').value;
+    var pin = $('empPin').value.trim();
+    
+    if (!name || !phone || !pin) return showToast('Fill all fields', true);
+    if (pin.length !== 4) return showToast('PIN must be 4 digits', true);
+    
+    hashPin(pin).then(function(h) {
+        var emps = DB.get('employees');
+        var emp = {
+            id: genId(),
+            name: name,
+            phone: phone,
+            role: role,
+            pinHash: h,
+            status: 'active',
+            createdAt: iso()
+        };
+        
+        emps.push(emp);
+        DB.set('employees', emps);
+        
+        closeModal('employeeModal');
+        showToast('Employee added ✓');
+        
+        $('empName').value = '';
+        $('empPhone').value = '';
+        $('empPin').value = '';
+        
+        var p = DB.getObj('profile');
+        if (p && p.shopKey && navigator.onLine) {
+            api('/rest/v1/rpc/create_cloud_employee', {
+                method: 'POST',
+                body: JSON.stringify({
+                    p_shop_key: p.shopKey,
+                    p_name: name,
+                    p_phone: phone,
+                    p_role_name: role,
+                    p_branch: 'main',
+                    p_pin_hash: h
+                })
+            }).catch(function() {});
+        }
+        
+        renderSettings();
+    }).catch(function() { showToast('Error adding employee', true); });
 }
 
-// Populate sale product dropdown
-function populateSaleProducts(){
-var ps=DB.get('products').filter(function(p){return p.stock>0});
-var el=$('saleProduct');if(!el)return;
-el.innerHTML=ps.length?'':'<option value="">No stock available</option>';
-ps.forEach(function(p){
-el.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.stock+' left)</option>';
-});
+function toggleEmployeeStatus(id) {
+    var emps = DB.get('employees');
+    var emp = emps.find(function(e) { return e.id === id; });
+    
+    if (!emp) return;
+    
+    emp.status = emp.status === 'active' ? 'suspended' : 'active';
+    DB.set('employees', emps);
+    
+    showToast('Employee ' + (emp.status === 'active' ? 'activated' : 'suspended'));
+    renderSettings();
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded',function(){
-// Populate sale products when modal opens
-var saleModal=$('saleModal');
-if(saleModal){
-var observer=new MutationObserver(function(mutations){
-mutations.forEach(function(m){
-if(m.target.classList.contains('active')){populateSaleProducts()}
-});
-});
-observer.observe(saleModal,{attributes:true,attributeFilter:['class']});
+function deleteEmployee(id) {
+    if (!confirm('Delete this employee?')) return;
+    
+    var emps = DB.get('employees').filter(function(e) { return e.id !== id; });
+    DB.set('employees', emps);
+    
+    showToast('Employee deleted');
+    renderSettings();
 }
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+function populateSaleProducts() {
+    var ps = DB.get('products').filter(function(p) { return p.stock > 0; });
+    var el = $('saleProduct');
+    if (!el) return;
+    
+    el.innerHTML = ps.length ? '' : '<option value="">No stock available</option>';
+    
+    ps.forEach(function(p) {
+        el.innerHTML += '<option value="' + p.id + '">' + p.name + ' (' + p.stock + ' left)</option>';
+    });
+}
+
+function memorySnapshot() {
+    try {
+        var snap = {
+            ts: Date.now(),
+            sales: DB.get('sales').length,
+            products: DB.get('products').length,
+            credits: DB.get('credits').length
+        };
+        localStorage.setItem('df_memory_snap', JSON.stringify(snap));
+    } catch (e) {}
+}
+
+// ============================================
+// EVENT LISTENERS & STARTUP
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Populate sale products when modal opens
+    var saleModal = $('saleModal');
+    if (saleModal) {
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(m) {
+                if (m.target.classList.contains('active')) {
+                    populateSaleProducts();
+                }
+            });
+        });
+        observer.observe(saleModal, { attributes: true, attributeFilter: ['class'] });
+    }
 });
 
 // Startup sequence
-setTimeout(function(){
-var splash=$('splash');
-if(splash&&!splash.classList.contains('hide')){
-splash.classList.add('hide');
-setTimeout(function(){
-splash.style.display='none';
-var p=DB.getObj('profile');
-if(p&&p.shopName){
-startApp();
-}else{
-$('authFlow').style.display='flex';
-showAuth('welcome');
-}
-},500);
-}
-},2000);
+setTimeout(function() {
+    var splash = $('splash');
+    if (splash && !splash.classList.contains('hide')) {
+        splash.classList.add('hide');
+        setTimeout(function() {
+            splash.style.display = 'none';
+            var p = DB.getObj('profile');
+            if (p && p.shopName) {
+                startApp();
+            } else {
+                $('authFlow').style.display = 'flex';
+                showAuth('welcome');
+            }
+        }, 500);
+    }
+}, 2000);
 
 // Periodic memory snapshot
-setInterval(memorySnapshot,60000);
+setInterval(memorySnapshot, 60000);
 </script>
 </body>
 </html>
