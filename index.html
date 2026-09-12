@@ -12,8 +12,7 @@
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
 #splash.hide{opacity:0;pointer-events:none}
-#splash h1{font-size:28px;font-weight:900}
-#splash h1 span{color:var(--green)}
+#splash h1{font-size:28px;font-weight:900}#splash h1 span{color:var(--green)}
 #splash p{color:var(--muted);font-size:13px;margin-top:8px}
 .auth-flow{display:none;min-height:100vh;padding:20px;align-items:center;justify-content:center}
 .auth-screen{display:none;width:100%;max-width:400px;margin:0 auto}
@@ -54,16 +53,11 @@ select.form-input{appearance:none}
 .kpi-value{font-size:22px;font-weight:900;margin-top:4px}
 .list-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
 .list-item:last-child{border-bottom:none}
-.item-info{flex:1}
-.item-name{font-size:14px;font-weight:700}
+.item-info{flex:1}.item-name{font-size:14px;font-weight:700}
 .item-meta{font-size:12px;color:var(--muted);margin-top:2px}
-.item-right{text-align:right}
-.item-price{font-size:14px;font-weight:800}
+.item-right{text-align:right}.item-price{font-size:14px;font-weight:800}
 .item-stock{font-size:11px;color:var(--muted)}
-.stat-green{color:var(--green)}
-.stat-red{color:var(--red)}
-.stat-yellow{color:var(--yellow)}
-.stat-blue{color:var(--blue)}
+.stat-green{color:var(--green)}.stat-red{color:var(--red)}.stat-yellow{color:var(--yellow)}.stat-blue{color:var(--blue)}
 .empty-state{text-align:center;padding:30px 20px;color:var(--muted)}
 .empty-state .icon{font-size:36px;margin-bottom:8px}
 .empty-state p{font-size:13px}
@@ -76,8 +70,7 @@ select.form-input{appearance:none}
 .toast.error{border-color:var(--red);color:var(--red)}
 .toast.show{display:block;animation:fadeIn .3s}
 .insight-row{display:flex;gap:10px;padding:10px;background:var(--bg);border-radius:10px;margin-bottom:8px;border-left:3px solid var(--border)}
-.insight-icon{font-size:18px}
-.insight-text{flex:1}
+.insight-icon{font-size:18px}.insight-text{flex:1}
 .insight-title{font-size:13px;font-weight:700}
 .insight-desc{font-size:11px;color:var(--muted);margin-top:2px}
 .health-ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;flex-shrink:0}
@@ -88,8 +81,7 @@ select.form-input{appearance:none}
 .tab-row{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
 .tab-btn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);white-space:nowrap}
 .tab-btn.active{background:var(--green);color:#052e22;border-color:var(--green)}
-.wizard-step{display:none}
-.wizard-step.active{display:block}
+.wizard-step{display:none}.wizard-step.active{display:block}
 .wizard-progress{display:flex;gap:6px;margin-bottom:20px}
 .wizard-dot{width:100%;height:4px;border-radius:2px;background:var(--border)}
 .wizard-dot.done{background:var(--green)}
@@ -98,138 +90,83 @@ select.form-input{appearance:none}
 </style>
 </head>
 <body>
-
 <div id="splash"><h1>Duka<span>Flow</span></h1><p>Your business. Your command centre.</p></div>
-
 <div class="auth-flow" id="authFlow">
-<div class="auth-screen active" id="screen-welcome">
-<div class="auth-card">
-<h2>Welcome to DukaFlow</h2>
-<p>Run your business like a CEO. Track sales, stock, credits, and profit.</p>
+<div class="auth-screen active" id="screen-welcome"><div class="auth-card"><h2>Welcome to DukaFlow</h2><p>Run your business like a CEO.</p>
 <button class="btn btn-green" onclick="showAuth('register')">🚀 Get Started Free</button>
-<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('login')">🔑 I have a shop — Log In</button>
-<button class="btn btn-dark" style="margin-top:12px" onclick="showAuth('empLogin')">👤 I'm an Employee — Log In</button>
-</div>
-</div>
-<div class="auth-screen" id="screen-register">
-<div class="auth-card">
-<h2>Create Your Shop</h2>
-<p>Set up your business in 60 seconds.</p>
-<div class="form-group"><label class="form-label">Shop Name</label><input class="form-input" id="regShop" placeholder="e.g., Mama's Store"></div>
-<div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="regName" placeholder="e.g., Sarah"></div>
-<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="regPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="regLocation" placeholder="e.g., Owino Market"></div>
+<button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('login')">🔑 Log In</button>
+<button class="btn btn-dark" style="margin-top:12px" onclick="showAuth('empLogin')">👤 Employee Login</button>
+</div></div>
+<div class="auth-screen" id="screen-register"><div class="auth-card"><h2>Create Your Shop</h2><p>Set up your business in 60 seconds.</p>
+<div class="form-group"><label class="form-label">Shop Name</label><input class="form-input" id="regShop"></div>
+<div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="regName"></div>
+<div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="regPhone"></div>
+<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="regLocation"></div>
 <div class="form-group"><label class="form-label">Business Type</label>
-<select class="form-input" id="regSector">
-<option value="Retail">🏪 Retail / Shop</option>
-<option value="Agriculture">🌾 Agriculture / Farming</option>
-<option value="Transport">🚚 Transport / Fleet</option>
-<option value="Food">🍲 Food / Restaurant</option>
-<option value="Services">✂️ Services</option>
-<option value="Manufacturing">🏭 Manufacturing</option>
-<option value="Energy">⛽ Energy / Fuel</option>
-</select></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="regPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
+<select class="form-input" id="regSector"><option value="Retail">🏪 Retail</option><option value="Agriculture">🌾 Agriculture</option><option value="Transport">🚚 Transport</option><option value="Food">🍲 Food</option><option value="Services">✂️ Services</option><option value="Manufacturing">🏭 Manufacturing</option><option value="Energy">⛽ Energy</option></select></div>
+<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="regPin" maxlength="4" style="text-align:center;letter-spacing:8px"></div>
 <button class="btn btn-green" onclick="doRegister()">Create My Shop →</button>
 <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
-</div>
-</div>
-<div class="auth-screen" id="screen-login">
-<div class="auth-card">
-<h2>Welcome Back</h2>
-<p>Enter your phone and secret PIN.</p>
-<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="logPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="logPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="doLogin()">🔓 Unlock My Shop</button>
+</div></div>
+<div class="auth-screen" id="screen-login"><div class="auth-card"><h2>Welcome Back</h2>
+<div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="logPhone"></div>
+<div class="form-group"><label class="form-label">PIN</label><input type="password" class="form-input" id="logPin" maxlength="4" style="text-align:center;letter-spacing:8px"></div>
+<button class="btn btn-green" onclick="doLogin()">🔓 Unlock</button>
 <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
-</div>
-</div>
-<div class="auth-screen" id="screen-empLogin">
-<div class="auth-card">
-<h2>Employee Login</h2>
-<p>Enter your phone and secret PIN.</p>
-<div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="empLogPhone" placeholder="e.g., 0772 123 456"></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="empLogPin" maxlength="4" placeholder="****" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="doEmployeeLogin()">🔓 Unlock My Access</button>
+</div></div>
+<div class="auth-screen" id="screen-empLogin"><div class="auth-card"><h2>Employee Login</h2>
+<div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="empLogPhone"></div>
+<div class="form-group"><label class="form-label">PIN</label><input type="password" class="form-input" id="empLogPin" maxlength="4" style="text-align:center;letter-spacing:8px"></div>
+<button class="btn btn-green" onclick="doEmployeeLogin()">🔓 Unlock</button>
 <button class="btn btn-outline" style="margin-top:12px" onclick="showAuth('welcome')">← Back</button>
+</div></div>
 </div>
-</div>
-</div>
-
 <div class="app" id="app">
-<div class="header">
-<h1 id="shopNameDisplay">My Shop</h1>
-<div style="display:flex;align-items:center;gap:8px">
-<span class="sector-badge" id="sectorBadge">Retail</span>
-<span class="sync-dot" id="syncDot"></span>
-</div>
-</div>
-
+<div class="header"><h1 id="shopNameDisplay">My Shop</h1><div style="display:flex;align-items:center;gap:8px"><span class="sector-badge" id="sectorBadge">Retail</span><span class="sync-dot" id="syncDot"></span></div></div>
 <div class="screen active" id="screen-dashboard">
 <div class="card" id="healthScoreCard"><div style="color:var(--muted);font-size:13px">Calculating...</div></div>
 <div class="kpi-grid" id="sectorKPIs"></div>
-<div class="card"><div class="card-title">⚡ Smart Alerts</div><div id="sectorAlerts"><div style="color:var(--muted);font-size:13px">Loading...</div></div></div>
+<div class="card"><div class="card-title">⚡ Smart Alerts</div><div id="sectorAlerts"></div></div>
 <div class="card"><div class="card-title">🔔 Needs Attention</div><div id="attentionList"></div></div>
 </div>
-
+<div class="screen" id="screen-farm">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">🌾 Farm Manager</h2><button class="btn btn-green btn-sm" onclick="openModal('seasonModal')">+ New Season</button></div>
+<div class="kpi-grid" id="farmKPIs"></div>
+<div class="card"><div class="card-title">📅 Seasons</div><div id="seasonList"></div></div>
+<div class="card"><div class="card-title">🗺️ Plots / Pens</div><div id="plotList"></div></div>
+<div class="card"><div class="card-title">📝 Activities</div><div id="activityList"></div></div>
+</div>
 <div class="screen" id="screen-products">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-<h2 id="prodTitle" style="font-size:20px;font-weight:900">Products</h2>
-<div style="display:flex;gap:8px">
-<button class="btn btn-outline btn-sm" onclick="openModal('barcodeModal')">📷 Scan</button>
-<button class="btn btn-green btn-sm" onclick="openModal('productModal')">+ Add</button>
-</div>
-</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 id="prodTitle" style="font-size:20px;font-weight:900">Products</h2>
+<div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="openModal('barcodeModal')">📷 Scan</button><button class="btn btn-green btn-sm" onclick="openModal('productModal')">+ Add</button></div></div>
 <input class="search-box" id="prodSearch" placeholder="Search..." oninput="renderProducts()">
 <div id="productList"></div>
 </div>
-
 <div class="screen" id="screen-sales">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-<h2 style="font-size:20px;font-weight:900">Sales</h2>
-<button class="btn btn-green btn-sm" id="saleBtn" onclick="openModal('saleModal')">+ New Sale</button>
-</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">Sales</h2><button class="btn btn-green btn-sm" id="saleBtn" onclick="openModal('saleModal')">+ New Sale</button></div>
 <div id="salesList"></div>
 </div>
-
 <div class="screen" id="screen-reports">
 <h2 style="font-size:20px;font-weight:900;margin-bottom:12px">Reports</h2>
-<div class="tab-row" id="reportTabs">
-<div class="tab-btn active" onclick="switchReportTab('overview',this)">Overview</div>
-<div class="tab-btn" onclick="switchReportTab('expenses',this)">Expenses</div>
-<div class="tab-btn" onclick="switchReportTab('reconciliation',this)">Reconciliation</div>
-</div>
+<div class="tab-row" id="reportTabs"><div class="tab-btn active" onclick="switchReportTab('overview',this)">Overview</div><div class="tab-btn" onclick="switchReportTab('expenses',this)">Expenses</div><div class="tab-btn" onclick="switchReportTab('reconciliation',this)">Reconciliation</div></div>
 <div id="reportContent"></div>
 </div>
-
 <div class="screen" id="screen-credits">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-<h2 style="font-size:20px;font-weight:900">Credits</h2>
-<button class="btn btn-green btn-sm" onclick="openModal('creditModal')">+ Add Credit</button>
-</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">Credits</h2><button class="btn btn-green btn-sm" onclick="openModal('creditModal')">+ Add Credit</button></div>
 <div id="creditList"></div>
 </div>
-
 <div class="screen" id="screen-settings">
 <h2 style="font-size:20px;font-weight:900;margin-bottom:16px">Settings</h2>
 <div class="card"><div class="card-title">👤 Shop Info</div><div id="shopInfoDisplay"></div></div>
-<div class="card"><div class="card-title">👥 Employees</div><div id="employeeList"></div>
-<button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="openModal('employeeModal')">+ Add Employee</button></div>
-<div class="card"><div class="card-title">🔧 Control Center</div>
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<button class="btn btn-outline btn-sm" onclick="openModal('refundModal')">↩️ Refund</button>
-<button class="btn btn-outline btn-sm" onclick="openModal('writeoffModal')">🗑️ Write-Off</button>
-<button class="btn btn-outline btn-sm" onclick="openModal('drawdownModal')">💰 Drawdown</button>
-</div></div>
-<div class="card"><div class="card-title">☁️ Cloud Sync</div>
-<button class="btn btn-outline btn-sm" onclick="syncAll()">Sync Now</button>
-<button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="restore()">Restore from Cloud</button></div>
-<div class="card"><div class="card-title">📋 Audit Trail</div><div id="auditList"><div style="color:var(--muted);font-size:13px">No activity yet</div></div></div>
+<div class="card"><div class="card-title">👥 Employees</div><div id="employeeList"></div><button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="openModal('employeeModal')">+ Add Employee</button></div>
+<div class="card"><div class="card-title">🔧 Control Center</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="openModal('refundModal')">↩️ Refund</button><button class="btn btn-outline btn-sm" onclick="openModal('writeoffModal')">🗑️ Write-Off</button><button class="btn btn-outline btn-sm" onclick="openModal('drawdownModal')">💰 Drawdown</button></div></div>
+<div class="card"><div class="card-title">☁️ Cloud</div><button class="btn btn-outline btn-sm" onclick="syncAll()">Sync Now</button><button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="restore()">Restore</button></div>
+<div class="card"><div class="card-title">📋 Audit Trail</div><div id="auditList"></div></div>
 <button class="btn btn-outline" style="margin-top:12px" onclick="logout()">🚪 Log Out</button>
 </div>
-
 <div class="nav">
 <div class="nav-item active" onclick="switchScreen('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home</div>
+<div class="nav-item" id="navFarm" style="display:none" onclick="switchScreen('farm')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Farm</div>
 <div class="nav-item" onclick="switchScreen('products')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span id="stockTab">Stock</span></div>
 <div class="nav-item quick" onclick="openModal('saleModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Sale</div>
 <div class="nav-item" onclick="openModal('expenseModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Expense</div>
@@ -237,132 +174,106 @@ select.form-input{appearance:none}
 <div class="nav-item" onclick="switchScreen('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</div>
 </div>
 </div>
-
-<!-- Product Modal -->
-<div class="modal-overlay" id="productModal"><div class="modal">
-<h3 id="prodModalTitle">Add Product</h3>
+<div class="modal-overlay" id="productModal"><div class="modal"><h3 id="prodModalTitle">Add Product</h3>
 <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="prodName"></div>
-<div class="form-group"><label class="form-label">Barcode (optional)</label><input class="form-input" id="prodBarcode"></div>
-<div class="form-group"><label class="form-label">Cost Price (UGX)</label><input type="number" class="form-input" id="prodCost"></div>
-<div class="form-group"><label class="form-label">Selling Price (UGX)</label><input type="number" class="form-input" id="prodPrice"></div>
-<div class="form-group"><label class="form-label">Stock Quantity</label><input type="number" class="form-input" id="prodStock"></div>
-<button class="btn btn-green" onclick="saveProduct()">Save</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('productModal')">Cancel</button>
-</div></div>
-
-<!-- Sale Modal -->
-<div class="modal-overlay" id="saleModal"><div class="modal">
-<h3 id="saleModalTitle">New Sale</h3>
+<div class="form-group"><label class="form-label">Barcode</label><input class="form-input" id="prodBarcode"></div>
+<div class="form-group"><label class="form-label">Cost</label><input type="number" class="form-input" id="prodCost"></div>
+<div class="form-group"><label class="form-label">Price</label><input type="number" class="form-input" id="prodPrice"></div>
+<div class="form-group"><label class="form-label">Stock</label><input type="number" class="form-input" id="prodStock"></div>
+<button class="btn btn-green" onclick="saveProduct()">Save</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('productModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="saleModal"><div class="modal"><h3 id="saleModalTitle">New Sale</h3>
 <div class="form-group"><label class="form-label" id="saleProdLabel">Product</label><select class="form-input" id="saleProduct"></select></div>
-<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="saleQty" value="1"></div>
-<div class="form-group"><label class="form-label">Payment</label>
-<select class="form-input" id="salePayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Credit</option></select></div>
-<button class="btn btn-green" onclick="recordSale()">Record Sale</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('saleModal')">Cancel</button>
-</div></div>
-
-<!-- Expense Modal -->
-<div class="modal-overlay" id="expenseModal"><div class="modal">
-<h3>Record Expense</h3>
-<div class="form-group"><label class="form-label">Category</label>
-<select class="form-input" id="expCategory"><option>Rent</option><option>Transport</option><option>Utilities</option><option>Supplies</option><option>Labour</option><option>Other</option></select></div>
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="expAmount"></div>
+<div class="form-group"><label class="form-label">Qty</label><input type="number" class="form-input" id="saleQty" value="1"></div>
+<div class="form-group"><label class="form-label">Payment</label><select class="form-input" id="salePayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Credit</option></select></div>
+<button class="btn btn-green" onclick="recordSale()">Record</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('saleModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="expenseModal"><div class="modal"><h3>Expense</h3>
+<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="expCategory"><option>Rent</option><option>Transport</option><option>Utilities</option><option>Supplies</option><option>Labour</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Amount</label><input type="number" class="form-input" id="expAmount"></div>
 <div class="form-group"><label class="form-label">Note</label><input class="form-input" id="expNote"></div>
-<button class="btn btn-green" onclick="recordExpense()">Save Expense</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('expenseModal')">Cancel</button>
-</div></div>
-
-<!-- Credit Modal -->
-<div class="modal-overlay" id="creditModal"><div class="modal">
-<h3>Add Credit Sale</h3>
-<div class="form-group"><label class="form-label">Customer Name</label><input class="form-input" id="credName"></div>
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="credAmount"></div>
+<button class="btn btn-green" onclick="recordExpense()">Save</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('expenseModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="creditModal"><div class="modal"><h3>Add Credit</h3>
+<div class="form-group"><label class="form-label">Customer</label><input class="form-input" id="credName"></div>
+<div class="form-group"><label class="form-label">Amount</label><input type="number" class="form-input" id="credAmount"></div>
 <div class="form-group"><label class="form-label">Note</label><input class="form-input" id="credNote"></div>
-<button class="btn btn-green" onclick="addCredit()">Save Credit</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('creditModal')">Cancel</button>
-</div></div>
-
-<!-- Employee Modal -->
-<div class="modal-overlay" id="employeeModal"><div class="modal">
-<h3>Add Employee</h3>
+<button class="btn btn-green" onclick="addCredit()">Save</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('creditModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="employeeModal"><div class="modal"><h3>Add Employee</h3>
 <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="empName"></div>
 <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="empPhone"></div>
-<div class="form-group"><label class="form-label">Role</label>
-<select class="form-input" id="empRole"><option value="cashier">Cashier</option><option value="manager">Manager</option></select></div>
-<div class="form-group"><label class="form-label">4-Digit PIN</label><input type="password" class="form-input" id="empPin" maxlength="4" style="text-align:center;letter-spacing:8px"></div>
-<button class="btn btn-green" onclick="addEmployee()">Add Employee</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('employeeModal')">Cancel</button>
-</div></div>
-
-<!-- Barcode Scanner Modal -->
-<div class="modal-overlay" id="barcodeModal"><div class="modal">
-<h3>📷 Scan Barcode</h3>
+<div class="form-group"><label class="form-label">Role</label><select class="form-input" id="empRole"><option value="cashier">Cashier</option><option value="manager">Manager</option></select></div>
+<div class="form-group"><label class="form-label">PIN</label><input type="password" class="form-input" id="empPin" maxlength="4" style="text-align:center;letter-spacing:8px"></div>
+<button class="btn btn-green" onclick="addEmployee()">Add</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('employeeModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="barcodeModal"><div class="modal"><h3>📷 Scan Barcode</h3>
 <div id="barcodeReader"></div>
-<div class="form-group"><label class="form-label">Or enter barcode manually</label><input class="form-input" id="manualBarcode" placeholder="Enter barcode number"></div>
+<div class="form-group"><label class="form-label">Or enter manually</label><input class="form-input" id="manualBarcode"></div>
 <button class="btn btn-green" onclick="lookupBarcode()">Find Product</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="stopBarcode();closeModal('barcodeModal')">Cancel</button>
-</div></div>
-
-<!-- First-Time Wizard Modal -->
-<div class="modal-overlay" id="wizardModal"><div class="modal">
-<h3>🧙 Setup Wizard</h3>
-<div class="wizard-progress">
-<div class="wizard-dot done" id="wizDot1"></div>
-<div class="wizard-dot" id="wizDot2"></div>
-<div class="wizard-dot" id="wizDot3"></div>
-</div>
-<div class="wizard-step active" id="wizStep1">
-<h3 style="margin-bottom:12px">Welcome! Let's add your first product.</h3>
-<p style="color:var(--muted);font-size:13px;margin-bottom:16px">You can scan a barcode or enter details manually.</p>
-<button class="btn btn-green" onclick="wizardNext(2)">Let's Go →</button>
-</div>
+<button class="btn btn-outline" style="margin-top:8px" onclick="stopBarcode();closeModal('barcodeModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="wizardModal"><div class="modal"><h3>🧙 Setup Wizard</h3>
+<div class="wizard-progress"><div class="wizard-dot done" id="wizDot1"></div><div class="wizard-dot" id="wizDot2"></div><div class="wizard-dot" id="wizDot3"></div></div>
+<div class="wizard-step active" id="wizStep1"><h3 style="margin-bottom:12px">Welcome! Let's add your first product.</h3><button class="btn btn-green" onclick="wizardNext(2)">Let's Go →</button></div>
 <div class="wizard-step" id="wizStep2">
-<div class="form-group"><label class="form-label">Product Name</label><input class="form-input" id="wizName" placeholder="e.g., Coca-Cola 500ml"></div>
-<div class="form-group"><label class="form-label">Cost Price</label><input type="number" class="form-input" id="wizCost" placeholder="e.g., 1500"></div>
-<div class="form-group"><label class="form-label">Selling Price</label><input type="number" class="form-input" id="wizPrice" placeholder="e.g., 2000"></div>
-<div class="form-group"><label class="form-label">Stock Quantity</label><input type="number" class="form-input" id="wizStock" placeholder="e.g., 24"></div>
-<button class="btn btn-green" onclick="wizardNext(3)">Next →</button>
-</div>
-<div class="wizard-step" id="wizStep3">
-<h3 style="margin-bottom:12px">🎉 You're all set!</h3>
-<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Your first product is saved. You can add more anytime from the Stock tab.</p>
-<button class="btn btn-green" onclick="finishWizard()">Start Using DukaFlow →</button>
-</div>
+<div class="form-group"><label class="form-label">Product Name</label><input class="form-input" id="wizName"></div>
+<div class="form-group"><label class="form-label">Cost</label><input type="number" class="form-input" id="wizCost"></div>
+<div class="form-group"><label class="form-label">Price</label><input type="number" class="form-input" id="wizPrice"></div>
+<div class="form-group"><label class="form-label">Stock</label><input type="number" class="form-input" id="wizStock"></div>
+<button class="btn btn-green" onclick="wizardNext(3)">Next →</button></div>
+<div class="wizard-step" id="wizStep3"><h3 style="margin-bottom:12px">🎉 You're all set!</h3><button class="btn btn-green" onclick="finishWizard()">Start Using DukaFlow →</button></div>
 </div></div>
-
-<!-- Refund Modal -->
-<div class="modal-overlay" id="refundModal"><div class="modal">
-<h3>↩️ Refund Sale</h3>
-<div class="form-group"><label class="form-label">Select Sale</label><select class="form-input" id="refundSale"></select></div>
-<div class="form-group"><label class="form-label">Reason</label><input class="form-input" id="refundReason" placeholder="e.g., Customer returned item"></div>
-<button class="btn btn-red" onclick="processRefund()">Process Refund</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('refundModal')">Cancel</button>
-</div></div>
-
-<!-- Write-Off Modal -->
-<div class="modal-overlay" id="writeoffModal"><div class="modal">
-<h3>🗑️ Write-Off Stock</h3>
-<div class="form-group"><label class="form-label">Select Product</label><select class="form-input" id="writeoffProduct"></select></div>
-<div class="form-group"><label class="form-label">Quantity to Remove</label><input type="number" class="form-input" id="writeoffQty" value="1"></div>
-<div class="form-group"><label class="form-label">Reason</label>
-<select class="form-input" id="writeoffReason"><option>Damaged</option><option>Expired</option><option>Lost/Stolen</option><option>Other</option></select></div>
+<div class="modal-overlay" id="seasonModal"><div class="modal"><h3>🌱 Create Season</h3>
+<div class="form-group"><label class="form-label">Season Name</label><input class="form-input" id="seasonName" placeholder="e.g., Maize Season 2026"></div>
+<div class="form-group"><label class="form-label">Farm Type</label>
+<select class="form-input" id="seasonType" onchange="updateSeasonUI()"><option value="crop">🌾 Crop Farming</option><option value="livestock">🐄 Livestock</option><option value="poultry">🐔 Poultry</option><option value="dairy">🥛 Dairy</option><option value="fish">🐟 Fish Farming</option></select></div>
+<div class="form-group"><label class="form-label">Crop / Animal</label><input class="form-input" id="seasonCrop" placeholder="e.g., Maize, Broilers, Goats"></div>
+<div class="form-group"><label class="form-label">Size Unit</label>
+<select class="form-input" id="seasonUnit"><option value="acres">Acres</option><option value="hectares">Hectares</option><option value="sqm">Square Meters</option><option value="plots">Plots</option><option value="animals">Animals</option><option value="birds">Birds</option><option value="pens">Pens / Coops</option></select></div>
+<div class="form-group"><label class="form-label">Start Date</label><input type="date" class="form-input" id="seasonStart"></div>
+<div class="form-group"><label class="form-label">End Date</label><input type="date" class="form-input" id="seasonEnd"></div>
+<button class="btn btn-green" onclick="createSeason()">Create Season</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('seasonModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="plotModal"><div class="modal"><h3 id="plotModalTitle">🗺️ Add Plot</h3>
+<div class="form-group"><label class="form-label">Season</label><select class="form-input" id="plotSeason"></select></div>
+<div class="form-group"><label class="form-label" id="plotNameLabel">Plot Name</label><input class="form-input" id="plotName" placeholder="e.g., Plot A, Coop 1"></div>
+<div class="form-group"><label class="form-label" id="plotSizeLabel">Size</label><input type="number" step="0.1" class="form-input" id="plotAcres"></div>
+<div class="form-group"><label class="form-label">Crop / Animal</label><input class="form-input" id="plotCrop"></div>
+<button class="btn btn-green" onclick="addPlot()">Add</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('plotModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="inputModal"><div class="modal"><h3>📦 Record Input</h3>
+<div class="form-group"><label class="form-label">Plot / Pen</label><select class="form-input" id="inputPlot"></select></div>
+<div class="form-group"><label class="form-label">Type</label>
+<select class="form-input" id="inputType"><option>Seed</option><option>Fertilizer</option><option>Pesticide</option><option>Feed</option><option>Labour</option><option>Land Prep</option><option>Irrigation</option><option>Transport</option><option>Storage</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Description</label><input class="form-input" id="inputDesc"></div>
+<div class="form-group"><label class="form-label">Qty</label><input type="number" class="form-input" id="inputQty" value="1"></div>
+<div class="form-group"><label class="form-label">Unit</label><select class="form-input" id="inputUnit"><option>kg</option><option>bags</option><option>litres</option><option>hours</option><option>days</option><option>pieces</option></select></div>
+<div class="form-group"><label class="form-label">Cost (UGX)</label><input type="number" class="form-input" id="inputCost"></div>
+<button class="btn btn-green" onclick="recordInput()">Record</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('inputModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="harvestModal"><div class="modal"><h3 id="harvestModalTitle">🌾 Record Harvest</h3>
+<div class="form-group"><label class="form-label">Plot / Pen</label><select class="form-input" id="harvestPlot"></select></div>
+<div class="form-group"><label class="form-label" id="harvestQtyLabel">Quantity</label><input type="number" class="form-input" id="harvestQty"></div>
+<div class="form-group"><label class="form-label">Unit</label>
+<select class="form-input" id="harvestUnit"><option>kg</option><option>bags</option><option>tonnes</option><option>bunches</option><option>crates</option><option>pieces</option><option>litres</option><option>eggs</option><option>trays</option><option>animals</option></select></div>
+<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="harvestNotes"></div>
+<button class="btn btn-green" onclick="recordHarvest()">Record</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('harvestModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="refundModal"><div class="modal"><h3>↩️ Refund</h3>
+<div class="form-group"><label class="form-label">Sale</label><select class="form-input" id="refundSale"></select></div>
+<div class="form-group"><label class="form-label">Reason</label><input class="form-input" id="refundReason"></div>
+<button class="btn btn-red" onclick="processRefund()">Refund</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('refundModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="writeoffModal"><div class="modal"><h3>🗑️ Write-Off</h3>
+<div class="form-group"><label class="form-label">Product</label><select class="form-input" id="writeoffProduct"></select></div>
+<div class="form-group"><label class="form-label">Qty</label><input type="number" class="form-input" id="writeoffQty" value="1"></div>
+<div class="form-group"><label class="form-label">Reason</label><select class="form-input" id="writeoffReason"><option>Damaged</option><option>Expired</option><option>Lost/Stolen</option><option>Other</option></select></div>
 <button class="btn btn-red" onclick="processWriteoff()">Write Off</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('writeoffModal')">Cancel</button>
-</div></div>
-
-<!-- Drawdown Modal -->
-<div class="modal-overlay" id="drawdownModal"><div class="modal">
-<h3>💰 Cash Drawdown</h3>
-<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="drawdownAmount"></div>
-<div class="form-group"><label class="form-label">Reason</label><input class="form-input" id="drawdownReason" placeholder="e.g., Owner withdrawal"></div>
-<button class="btn btn-blue" onclick="processDrawdown()">Record Drawdown</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('drawdownModal')">Cancel</button>
-</div></div>
-
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('writeoffModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="drawdownModal"><div class="modal"><h3>💰 Drawdown</h3>
+<div class="form-group"><label class="form-label">Amount</label><input type="number" class="form-input" id="drawdownAmount"></div>
+<div class="form-group"><label class="form-label">Reason</label><input class="form-input" id="drawdownReason"></div>
+<button class="btn btn-blue" onclick="processDrawdown()">Record</button>
+<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('drawdownModal')">Cancel</button></div></div>
 <div class="toast" id="toast"></div>
 <script>
 // ============================================
-// DUKAFLOW COMPLETE - ALL FEATURES
+// DUKAFLOW COMPLETE - ALL FEATURES + AGRICULTURE
 // ============================================
 
 var CLOUD_URL = 'https://mrkawvyaybphbfpqrvqb.supabase.co';
@@ -407,9 +318,10 @@ function switchScreen(name) {
     document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
     var scr = $('screen-' + name); if (scr) scr.classList.add('active');
     var navItems = document.querySelectorAll('.nav-item');
-    var idx = { dashboard: 0, products: 1, sales: 2, reports: 3, credits: 4, settings: 5 }[name];
+    var idx = { dashboard: 0, farm: 1, products: 2, sales: 3, reports: 4, credits: 5, settings: 6 }[name];
     if (idx !== undefined && navItems[idx]) navItems[idx].classList.add('active');
     if (name === 'dashboard') renderDashboard();
+    if (name === 'farm') renderFarm();
     if (name === 'products') renderProducts();
     if (name === 'sales') renderSales();
     if (name === 'reports') renderReports();
@@ -510,6 +422,7 @@ function startApp() {
     var p = DB.getObj('profile');
     $('shopNameDisplay').textContent = p.shopName || 'My Shop';
     $('sectorBadge').textContent = p.sector || 'Retail';
+    initAgriculture();
     renderAll();
 }
 
@@ -881,6 +794,257 @@ function processDrawdown() {
 }
 
 // ============================================
+// AGRICULTURE MODULE
+// ============================================
+var FARM_TYPES = {
+    crop: { plotLabel: 'Plot', harvestLabel: 'Harvest', yieldLabel: 'Yield', icon: '🌾' },
+    livestock: { plotLabel: 'Pen / Herd', harvestLabel: 'Production', yieldLabel: 'Output', icon: '🐄' },
+    poultry: { plotLabel: 'Coop', harvestLabel: 'Egg Collection', yieldLabel: 'Eggs', icon: '🐔' },
+    dairy: { plotLabel: 'Herd', harvestLabel: 'Milk Collection', yieldLabel: 'Milk (L)', icon: '🥛' },
+    fish: { plotLabel: 'Pond', harvestLabel: 'Harvest', yieldLabel: 'Fish (kg)', icon: '🐟' }
+};
+
+function getFarmType(seasonId) {
+    var seasons = DB.get('seasons');
+    var s = seasons.find(function(x) { return x.id === seasonId; });
+    return (s && s.farmType) ? s.farmType : 'crop';
+}
+
+function getFarmConfig(seasonId) {
+    return FARM_TYPES[getFarmType(seasonId)] || FARM_TYPES.crop;
+}
+
+function updateSeasonUI() {
+    var type = $('seasonType').value;
+    var cropEl = $('seasonCrop');
+    if (type === 'crop') { cropEl.placeholder = 'e.g., Maize, Coffee, Beans'; }
+    else if (type === 'poultry') { cropEl.placeholder = 'e.g., Broilers, Layers'; }
+    else if (type === 'dairy') { cropEl.placeholder = 'e.g., Friesian, Jersey'; }
+    else if (type === 'livestock') { cropEl.placeholder = 'e.g., Goats, Pigs, Cattle'; }
+    else if (type === 'fish') { cropEl.placeholder = 'e.g., Tilapia, Catfish'; }
+}
+
+function initAgriculture() {
+    var sector = (DB.getObj('profile') || {}).sector;
+    if (sector === 'Agriculture') {
+        var navFarm = $('navFarm');
+        if (navFarm) navFarm.style.display = 'flex';
+        renderFarm();
+    }
+}
+
+function renderFarm() {
+    renderFarmKPIs();
+    renderSeasons();
+    renderPlots();
+    renderActivities();
+}
+
+function renderFarmKPIs() {
+    var seasons = DB.get('seasons');
+    var plots = DB.get('plots');
+    var activities = DB.get('activities');
+    var harvests = activities.filter(function(a) { return a.type === 'harvest'; });
+    var inputs = activities.filter(function(a) { return a.type === 'input' || a.type === 'labour'; });
+    var totalYield = harvests.reduce(function(a, h) { return a + (h.quantity || 0); }, 0);
+    var totalInputCost = inputs.reduce(function(a, i) { return a + (i.cost || 0); }, 0);
+    var totalSize = plots.reduce(function(a, p) { return a + (p.acres || 0); }, 0);
+    var yieldPerUnit = totalSize > 0 ? Math.round(totalYield / totalSize) : totalYield;
+    var el = $('farmKPIs'); if (!el) return;
+    el.innerHTML = '<div class="kpi-card"><div class="kpi-label">Active Seasons</div><div class="kpi-value">' + seasons.filter(function(s) { return s.status === 'active'; }).length + '</div></div>' +
+        '<div class="kpi-card"><div class="kpi-label">Total Output</div><div class="kpi-value stat-green">' + fmt(totalYield) + '</div></div>' +
+        '<div class="kpi-card"><div class="kpi-label">Farm Costs</div><div class="kpi-value stat-red">UGX ' + fmt(totalInputCost) + '</div></div>' +
+        '<div class="kpi-card"><div class="kpi-label">Output/Unit</div><div class="kpi-value stat-blue">' + fmt(yieldPerUnit) + '</div></div>';
+}
+
+function renderSeasons() {
+    var seasons = DB.get('seasons');
+    var el = $('seasonList'); if (!el) return;
+    if (seasons.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No seasons yet. Create your first season!</div>'; return; }
+    var html = '';
+    seasons.forEach(function(s) {
+        var cfg = FARM_TYPES[s.farmType] || FARM_TYPES.crop;
+        var statusColor = s.status === 'active' ? 'var(--green)' : s.status === 'harvesting' ? 'var(--yellow)' : 'var(--muted)';
+        var plots = DB.get('plots').filter(function(p) { return p.seasonId === s.id; });
+        var activities = DB.get('activities').filter(function(a) { return a.seasonId === s.id; });
+        var totalCost = activities.filter(function(a) { return a.type === 'input' || a.type === 'labour'; }).reduce(function(a, b) { return a + (b.cost || 0); }, 0);
+        var totalHarvest = activities.filter(function(a) { return a.type === 'harvest'; }).reduce(function(a, b) { return a + (b.quantity || 0); }, 0);
+        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + cfg.icon + ' ' + s.name + '</div>';
+        html += '<div class="item-meta">' + s.crop + ' • ' + plots.length + ' ' + cfg.plotLabel.toLowerCase() + (plots.length !== 1 ? 's' : '') + ' • Cost: UGX ' + fmt(totalCost) + '</div>';
+        html += '<div class="item-meta">' + cfg.yieldLabel + ': ' + fmt(totalHarvest) + '</div></div>';
+        html += '<div class="item-right"><div style="font-size:11px;font-weight:700;color:' + statusColor + '">' + s.status.toUpperCase() + '</div>';
+        html += '<div style="display:flex;gap:4px;margin-top:6px">';
+        html += '<button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openPlotModal(\'' + s.id + '\')">+ ' + cfg.plotLabel + '</button>';
+        html += '<button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openInputModal(\'' + s.id + '\')">+ Input</button>';
+        html += '<button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openHarvestModal(\'' + s.id + '\')">+ ' + cfg.harvestLabel + '</button>';
+        html += '</div></div></div>';
+    });
+    el.innerHTML = html;
+}
+
+function renderPlots() {
+    var plots = DB.get('plots');
+    var el = $('plotList'); if (!el) return;
+    if (plots.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No plots/pens yet.</div>'; return; }
+    var html = '';
+    plots.forEach(function(p) {
+        var season = DB.get('seasons').find(function(s) { return s.id === p.seasonId; });
+        var cfg = season ? (FARM_TYPES[season.farmType] || FARM_TYPES.crop) : FARM_TYPES.crop;
+        var activities = DB.get('activities').filter(function(a) { return a.plotId === p.id; });
+        var plotCost = activities.filter(function(a) { return a.type === 'input' || a.type === 'labour'; }).reduce(function(a, b) { return a + (b.cost || 0); }, 0);
+        var plotHarvest = activities.filter(function(a) { return a.type === 'harvest'; }).reduce(function(a, b) { return a + (b.quantity || 0); }, 0);
+        var sizeUnit = (season && season.sizeUnit) ? season.sizeUnit : 'acres';
+        var sizeDisplay = p.acres + ' ' + sizeUnit;
+        var costPerUnit = p.acres > 0 ? Math.round(plotCost / p.acres) : plotCost;
+        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + p.name + ' <span style="color:var(--muted);font-size:11px">(' + (season ? season.name : '') + ')</span></div>';
+        html += '<div class="item-meta">' + p.crop + ' • ' + sizeDisplay + ' • Cost: UGX ' + fmt(plotCost) + '</div>';
+        html += '<div class="item-meta">' + cfg.yieldLabel + ': ' + fmt(plotHarvest) + ' • Cost/unit: UGX ' + fmt(costPerUnit) + '</div></div>';
+        html += '<div class="item-right"><div style="font-size:11px;font-weight:700;color:' + (p.status === 'harvested' ? 'var(--green)' : p.status === 'planted' ? 'var(--yellow)' : 'var(--muted)') + '">' + p.status.toUpperCase() + '</div></div></div>';
+    });
+    el.innerHTML = html;
+}
+
+function renderActivities() {
+    var activities = DB.get('activities');
+    var el = $('activityList'); if (!el) return;
+    if (activities.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No activities recorded.</div>'; return; }
+    var html = '';
+    activities.slice(0, 15).forEach(function(a) {
+        var icon = a.type === 'harvest' ? '🌾' : a.type === 'input' ? '📦' : '👷';
+        var plot = DB.get('plots').find(function(p) { return p.id === a.plotId; });
+        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + icon + ' ' + (a.description || a.category || a.type) + '</div>';
+        html += '<div class="item-meta">' + (plot ? plot.name : 'Unknown') + ' • ' + String(a.date).slice(0, 10) + '</div></div>';
+        html += '<div class="item-right">';
+        if (a.type === 'harvest') { html += '<div class="item-price stat-green">' + fmt(a.quantity) + ' ' + (a.unit || 'kg') + '</div>'; }
+        else { html += '<div class="item-price stat-red">UGX ' + fmt(a.cost || 0) + '</div>'; }
+        html += '</div></div>';
+    });
+    el.innerHTML = html;
+}
+
+function createSeason() {
+    var name = $('seasonName').value.trim();
+    var farmType = $('seasonType').value;
+    var crop = $('seasonCrop').value.trim();
+    var sizeUnit = $('seasonUnit').value;
+    var start = $('seasonStart').value;
+    var end = $('seasonEnd').value;
+    if (!name || !crop) return showToast('Enter season name and crop/animal', true);
+    var seasons = DB.get('seasons');
+    seasons.unshift({ id: genId(), name: name, farmType: farmType, crop: crop, sizeUnit: sizeUnit, startDate: start, endDate: end, status: 'active', createdAt: iso() });
+    DB.set('seasons', seasons);
+    logAudit('SEASON', 'Created: ' + name + ' (' + crop + ', ' + farmType + ')');
+    closeModal('seasonModal');
+    showToast('Season created: ' + name);
+    $('seasonName').value = ''; $('seasonCrop').value = ''; $('seasonStart').value = ''; $('seasonEnd').value = '';
+    renderFarm();
+}
+
+function openPlotModal(seasonId) {
+    var seasons = DB.get('seasons');
+    var el = $('plotSeason'); if (!el) return;
+    el.innerHTML = '';
+    seasons.forEach(function(s) {
+        el.innerHTML += '<option value="' + s.id + '"' + (s.id === seasonId ? ' selected' : '') + '>' + s.name + '</option>';
+    });
+    var cfg = getFarmConfig(seasonId);
+    var season = seasons.find(function(s) { return s.id === seasonId; });
+    var sizeUnit = (season && season.sizeUnit) ? season.sizeUnit : 'acres';
+    $('plotModalTitle').textContent = '🗺️ Add ' + cfg.plotLabel;
+    $('plotNameLabel').textContent = cfg.plotLabel + ' Name';
+    $('plotName').placeholder = 'e.g., ' + cfg.plotLabel + ' A, Coop 1, Herd 1';
+    if (['plots', 'animals', 'birds', 'pens'].indexOf(sizeUnit) !== -1) {
+        $('plotSizeLabel').textContent = 'Count (' + sizeUnit + ')';
+        $('plotAcres').placeholder = 'e.g., 50';
+    } else {
+        $('plotSizeLabel').textContent = 'Size (' + sizeUnit + ')';
+        $('plotAcres').placeholder = 'e.g., 2.5';
+    }
+    openModal('plotModal');
+}
+
+function addPlot() {
+    var seasonId = $('plotSeason').value;
+    var name = $('plotName').value.trim();
+    var acres = parseFloat($('plotAcres').value) || 0;
+    var crop = $('plotCrop').value.trim();
+    if (!seasonId || !name) return showToast('Fill season and name', true);
+    var plots = DB.get('plots');
+    plots.unshift({ id: genId(), seasonId: seasonId, name: name, acres: acres, crop: crop, status: 'planted', plantedDate: today(), createdAt: iso() });
+    DB.set('plots', plots);
+    var cfg = getFarmConfig(seasonId);
+    logAudit('PLOT', 'Added ' + cfg.plotLabel + ': ' + name);
+    closeModal('plotModal');
+    showToast(cfg.plotLabel + ' added: ' + name);
+    $('plotName').value = ''; $('plotAcres').value = ''; $('plotCrop').value = '';
+    renderFarm();
+}
+
+function openInputModal(seasonId) {
+    var plots = DB.get('plots').filter(function(p) { return p.seasonId === seasonId; });
+    var el = $('inputPlot'); if (!el) return;
+    el.innerHTML = plots.length ? '' : '<option value="">No plots/pens in this season</option>';
+    plots.forEach(function(p) { el.innerHTML += '<option value="' + p.id + '">' + p.name + '</option>'; });
+    openModal('inputModal');
+}
+
+function recordInput() {
+    var plotId = $('inputPlot').value;
+    var type = $('inputType').value;
+    var desc = $('inputDesc').value.trim();
+    var qty = parseInt($('inputQty').value) || 1;
+    var unit = $('inputUnit').value;
+    var cost = parseInt($('inputCost').value) || 0;
+    if (!plotId) return showToast('Select a plot/pen', true);
+    if (cost <= 0) return showToast('Enter cost', true);
+    var plot = DB.get('plots').find(function(p) { return p.id === plotId; });
+    if (!plot) return showToast('Plot not found', true);
+    var activities = DB.get('activities');
+    activities.unshift({ id: genId(), plotId: plotId, seasonId: plot.seasonId, type: type === 'Labour' ? 'labour' : 'input', category: type, description: desc || type, quantity: qty, unit: unit, cost: cost, date: iso(), createdAt: iso() });
+    DB.set('activities', activities);
+    logAudit('FARM_INPUT', type + ' — UGX ' + fmt(cost));
+    closeModal('inputModal');
+    showToast('Input recorded: UGX ' + fmt(cost));
+    $('inputDesc').value = ''; $('inputQty').value = '1'; $('inputCost').value = '';
+    renderFarm();
+}
+
+function openHarvestModal(seasonId) {
+    var plots = DB.get('plots').filter(function(p) { return p.seasonId === seasonId; });
+    var el = $('harvestPlot'); if (!el) return;
+    el.innerHTML = plots.length ? '' : '<option value="">No plots/pens</option>';
+    plots.forEach(function(p) { el.innerHTML += '<option value="' + p.id + '">' + p.name + ' (' + p.crop + ')</option>'; });
+    var cfg = getFarmConfig(seasonId);
+    $('harvestModalTitle').textContent = cfg.icon + ' Record ' + cfg.harvestLabel;
+    $('harvestQtyLabel').textContent = cfg.yieldLabel;
+    openModal('harvestModal');
+}
+
+function recordHarvest() {
+    var plotId = $('harvestPlot').value;
+    var qty = parseInt($('harvestQty').value) || 0;
+    var unit = $('harvestUnit').value;
+    var notes = $('harvestNotes').value.trim();
+    if (!plotId) return showToast('Select a plot/pen', true);
+    if (qty <= 0) return showToast('Enter quantity', true);
+    var plot = DB.get('plots').find(function(p) { return p.id === plotId; });
+    if (!plot) return showToast('Plot not found', true);
+    var activities = DB.get('activities');
+    activities.unshift({ id: genId(), plotId: plotId, seasonId: plot.seasonId, type: 'harvest', description: 'Harvest: ' + plot.crop + (notes ? ' — ' + notes : ''), quantity: qty, unit: unit, cost: 0, date: iso(), createdAt: iso() });
+    DB.set('activities', activities);
+    plot.status = 'harvested';
+    var plots = DB.get('plots');
+    var idx = plots.findIndex(function(p) { return p.id === plotId; });
+    if (idx !== -1) { plots[idx] = plot; DB.set('plots', plots); }
+    var cfg = getFarmConfig(plot.seasonId);
+    logAudit('HARVEST', plot.crop + ' — ' + fmt(qty) + ' ' + unit);
+    closeModal('harvestModal');
+    showToast(cfg.harvestLabel + ' recorded: ' + fmt(qty) + ' ' + unit);
+    $('harvestQty').value = ''; $('harvestNotes').value = '';
+    renderFarm();
+}
+
+// ============================================
 // RENDER FUNCTIONS
 // ============================================
 function renderAll() {
@@ -966,12 +1130,7 @@ function switchReportTab(tab, btn) {
         var momoSales = todaySales.filter(function(s) { return s.payment === 'MTN MoMo' || s.payment === 'Airtel Money'; }).reduce(function(a, s) { return a + s.total; }, 0);
         var drawdowns = ex.filter(function(e) { return e.category === 'Drawdown' && String(e.date || '').indexOf(today()) === 0; }).reduce(function(a, e) { return a + e.amount; }, 0);
         var expected = cashSales - drawdowns;
-        el.innerHTML = '<div class="card"><div class="card-title">Today\'s Reconciliation</div>' +
-            '<div class="list-item"><div class="item-info"><div class="item-name">Cash Sales</div></div><div class="item-right"><div class="item-price stat-green">UGX ' + fmt(cashSales) + '</div></div></div>' +
-            '<div class="list-item"><div class="item-info"><div class="item-name">Mobile Money</div></div><div class="item-right"><div class="item-price stat-blue">UGX ' + fmt(momoSales) + '</div></div></div>' +
-            '<div class="list-item"><div class="item-info"><div class="item-name">Drawdowns</div></div><div class="item-right"><div class="item-price stat-red">- UGX ' + fmt(drawdowns) + '</div></div></div>' +
-            '<div class="list-item"><div class="item-info"><div class="item-name"><b>Expected Cash</b></div></div><div class="item-right"><div class="item-price" style="font-size:18px"><b>UGX ' + fmt(expected) + '</b></div></div></div>' +
-            '</div>';
+        el.innerHTML = '<div class="card"><div class="card-title">Today\'s Reconciliation</div><div class="list-item"><div class="item-info"><div class="item-name">Cash Sales</div></div><div class="item-right"><div class="item-price stat-green">UGX ' + fmt(cashSales) + '</div></div></div><div class="list-item"><div class="item-info"><div class="item-name">Mobile Money</div></div><div class="item-right"><div class="item-price stat-blue">UGX ' + fmt(momoSales) + '</div></div></div><div class="list-item"><div class="item-info"><div class="item-name">Drawdowns</div></div><div class="item-right"><div class="item-price stat-red">- UGX ' + fmt(drawdowns) + '</div></div></div><div class="list-item"><div class="item-info"><div class="item-name"><b>Expected Cash</b></div></div><div class="item-right"><div class="item-price" style="font-size:18px"><b>UGX ' + fmt(expected) + '</b></div></div></div></div>';
     }
 }
 
@@ -1015,8 +1174,7 @@ function saveProduct() {
     if (!name) return showToast('Enter product name', true);
     if (price <= 0) return showToast('Enter selling price', true);
     var ps = DB.get('products');
-    var prod = { id: genId(), name: name, barcode: barcode, cost: cost, price: price, stock: stock, reorderPoint: 5, createdAt: iso() };
-    ps.unshift(prod);
+    ps.unshift({ id: genId(), name: name, barcode: barcode, cost: cost, price: price, stock: stock, reorderPoint: 5, createdAt: iso() });
     DB.set('products', ps);
     logAudit('ADD_PRODUCT', name + ' — UGX ' + fmt(price));
     closeModal('productModal');
@@ -1036,8 +1194,7 @@ function recordSale() {
     prod.stock -= qty;
     DB.set('products', ps);
     var sales = DB.get('sales');
-    var sale = { id: genId(), productId: pid, quantity: qty, total: total, payment: payment, date: iso() };
-    sales.unshift(sale);
+    sales.unshift({ id: genId(), productId: pid, quantity: qty, total: total, payment: payment, date: iso() });
     DB.set('sales', sales);
     logAudit('SALE', prod.name + ' ×' + qty + ' — UGX ' + fmt(total) + ' (' + payment + ')');
     closeModal('saleModal');
@@ -1181,8 +1338,13 @@ setTimeout(function() {
         setTimeout(function() {
             splash.style.display = 'none';
             var p = DB.getObj('profile');
-            if (p && p.shopName) { startApp(); showWizard(); }
-            else { $('authFlow').style.display = 'flex'; showAuth('welcome'); }
+            if (p && p.shopName) {
+                startApp();
+                showWizard();
+            } else {
+                $('authFlow').style.display = 'flex';
+                showAuth('welcome');
+            }
         }, 500);
     }
 }, 2000);
