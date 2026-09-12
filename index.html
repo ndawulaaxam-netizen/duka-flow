@@ -7,7 +7,7 @@
 <title>DukaFlow</title>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
-:root{--bg:#09090B;--card:#18181B;--border:#27272A;--green:#10B981;--green2:#34D399;--text:#F4F4F5;--muted:#A1A1AA;--blue:#3B82F6;--yellow:#F59E0B;--red:#EF4444;--purple:#8B5CF6;--gold:#F59E0B}
+:root{--bg:#09090B;--card:#18181B;--border:#27272A;--green:#10B981;--green2:#34D399;--text:#F4F4F5;--muted:#A1A1AA;--blue:#3B82F6;--yellow:#F59E0B;--red:#EF4444;--purple:#8B5CF6;--gold:#F59E0B;--orange:#F97316;--cyan:#06B6D4}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s}
@@ -38,8 +38,8 @@ select.form-input{appearance:none}
 .header h1{font-size:18px;font-weight:900}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-left:6px}
 .sync-dot.pending{background:var(--yellow)}
-.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 env(safe-area-inset-bottom)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 4px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:600}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 env(safe-area-inset-bottom);overflow-x:auto}
+.nav-item{flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;padding:8px 4px;cursor:pointer;color:var(--muted);font-size:10px;font-weight:600}
 .nav-item.active{color:var(--green)}
 .nav-item.quick{background:var(--green);color:#052e22;border-radius:12px;margin:4px}
 .nav-item svg{width:22px;height:22px;margin-bottom:3px}
@@ -57,7 +57,7 @@ select.form-input{appearance:none}
 .item-meta{font-size:12px;color:var(--muted);margin-top:2px}
 .item-right{text-align:right}.item-price{font-size:14px;font-weight:800}
 .item-stock{font-size:11px;color:var(--muted)}
-.stat-green{color:var(--green)}.stat-red{color:var(--red)}.stat-yellow{color:var(--yellow)}.stat-blue{color:var(--blue)}
+.stat-green{color:var(--green)}.stat-red{color:var(--red)}.stat-yellow{color:var(--yellow)}.stat-blue{color:var(--blue)}.stat-purple{color:var(--purple)}.stat-orange{color:var(--orange)}.stat-cyan{color:var(--cyan)}
 .empty-state{text-align:center;padding:30px 20px;color:var(--muted)}
 .empty-state .icon{font-size:36px;margin-bottom:8px}
 .empty-state p{font-size:13px}
@@ -86,6 +86,9 @@ select.form-input{appearance:none}
 .wizard-dot{width:100%;height:4px;border-radius:2px;background:var(--border)}
 .wizard-dot.done{background:var(--green)}
 #barcodeReader{width:100%;margin-bottom:12px}
+.progress-bar{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;border-radius:4px;transition:width .3s}
+.gauge{position:relative;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900}
 @media(min-width:768px){.kpi-grid{grid-template-columns:repeat(4,1fr)}.modal{border-radius:20px;margin-bottom:40px}}
 </style>
 </head>
@@ -129,6 +132,73 @@ select.form-input{appearance:none}
 <div class="card"><div class="card-title">⚡ Smart Alerts</div><div id="sectorAlerts"></div></div>
 <div class="card"><div class="card-title">🔔 Needs Attention</div><div id="attentionList"></div></div>
 </div>
+<!-- TRANSPORT SCREEN -->
+<div class="screen" id="screen-transport">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">🚚 Transport Hub</h2>
+<div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="openModal('vehicleModal')">+ Vehicle</button><button class="btn btn-outline btn-sm" onclick="openModal('tripModal')">+ Trip</button></div></div>
+<div class="kpi-grid" id="transportKPIs"></div>
+<div class="tab-row" id="transportTabs">
+<div class="tab-btn active" onclick="switchTransportTab('vehicles',this)">🚗 Fleet</div>
+<div class="tab-btn" onclick="switchTransportTab('trips',this)">🛣️ Trips</div>
+<div class="tab-btn" onclick="switchTransportTab('fuel',this)">⛽ Fuel</div>
+<div class="tab-btn" onclick="switchTransportTab('maintenance',this)">🔧 Maintenance</div>
+<div class="tab-btn" onclick="switchTransportTab('remittance',this)">💰 Remit</div>
+</div>
+<div id="transportContent"></div>
+</div>
+<!-- FOOD SCREEN -->
+<div class="screen" id="screen-food">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">🍲 Kitchen Hub</h2>
+<div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="openModal('recipeModal')">+ Recipe</button><button class="btn btn-outline btn-sm" onclick="openModal('wasteModal')">+ Waste</button></div></div>
+<div class="kpi-grid" id="foodKPIs"></div>
+<div class="tab-row" id="foodTabs">
+<div class="tab-btn active" onclick="switchFoodTab('recipes',this)">📖 Recipes</div>
+<div class="tab-btn" onclick="switchFoodTab('ingredients',this)">🥬 Ingredients</div>
+<div class="tab-btn" onclick="switchFoodTab('menu',this)">📋 Menu</div>
+<div class="tab-btn" onclick="switchFoodTab('waste',this)">🗑️ Waste</div>
+</div>
+<div id="foodContent"></div>
+</div>
+<!-- MANUFACTURING SCREEN -->
+<div class="screen" id="screen-manufacturing">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">🏭 Production Hub</h2>
+<div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="openModal('bomModal')">+ BOM</button><button class="btn btn-outline btn-sm" onclick="openModal('prodOrderModal')">+ Order</button></div></div>
+<div class="kpi-grid" id="mfgKPIs"></div>
+<div class="tab-row" id="mfgTabs">
+<div class="tab-btn active" onclick="switchMfgTab('bom',this)">📦 BOM</div>
+<div class="tab-btn" onclick="switchMfgTab('orders',this)">📋 Orders</div>
+<div class="tab-btn" onclick="switchMfgTab('raw',this)">🧱 Raw Materials</div>
+<div class="tab-btn" onclick="switchMfgTab('finished',this)">✅ Finished</div>
+</div>
+<div id="mfgContent"></div>
+</div>
+<!-- SERVICES SCREEN -->
+<div class="screen" id="screen-services">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">✂️ Service Hub</h2>
+<div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="openModal('apptModal')">+ Booking</button><button class="btn btn-outline btn-sm" onclick="openModal('servicePkgModal')">+ Package</button></div></div>
+<div class="kpi-grid" id="servicesKPIs"></div>
+<div class="tab-row" id="servicesTabs">
+<div class="tab-btn active" onclick="switchServicesTab('appointments',this)">📅 Bookings</div>
+<div class="tab-btn" onclick="switchServicesTab('staff',this)">👥 Staff</div>
+<div class="tab-btn" onclick="switchServicesTab('packages',this)">📦 Packages</div>
+<div class="tab-btn" onclick="switchServicesTab('turnover',this)">📊 Turnover</div>
+</div>
+<div id="servicesContent"></div>
+</div>
+<!-- ENERGY SCREEN -->
+<div class="screen" id="screen-energy">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">⛽ Energy Hub</h2>
+<div style="display:flex;gap:6px"><button class="btn btn-green btn-sm" onclick="openModal('tankModal')">+ Tank</button><button class="btn btn-outline btn-sm" onclick="openModal('dispenseModal')">+ Dispense</button></div></div>
+<div class="kpi-grid" id="energyKPIs"></div>
+<div class="tab-row" id="energyTabs">
+<div class="tab-btn active" onclick="switchEnergyTab('tanks',this)">🛢️ Tanks</div>
+<div class="tab-btn" onclick="switchEnergyTab('dispensing',this)">⛽ Dispensing</div>
+<div class="tab-btn" onclick="switchEnergyTab('reconciliation',this)">📊 Reconcile</div>
+<div class="tab-btn" onclick="switchEnergyTab('cylinders',this)">🔵 Cylinders</div>
+</div>
+<div id="energyContent"></div>
+</div>
+<!-- AGRICULTURE SCREEN -->
 <div class="screen" id="screen-farm">
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:20px;font-weight:900">🌾 Farm Manager</h2><button class="btn btn-green btn-sm" onclick="openModal('seasonModal')">+ New Season</button></div>
 <div class="kpi-grid" id="farmKPIs"></div>
@@ -164,9 +234,9 @@ select.form-input{appearance:none}
 <div class="card"><div class="card-title">📋 Audit Trail</div><div id="auditList"></div></div>
 <button class="btn btn-outline" style="margin-top:12px" onclick="logout()">🚪 Log Out</button>
 </div>
-<div class="nav">
+<div class="nav" id="mainNav">
 <div class="nav-item active" onclick="switchScreen('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home</div>
-<div class="nav-item" id="navFarm" style="display:none" onclick="switchScreen('farm')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Farm</div>
+<div class="nav-item" id="navSector" style="display:none" onclick="switchScreen(getSectorScreen())"><span id="navSectorIcon" style="font-size:20px">🏭</span><span id="navSectorLabel">Hub</span></div>
 <div class="nav-item" onclick="switchScreen('products')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><span id="stockTab">Stock</span></div>
 <div class="nav-item quick" onclick="openModal('saleModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Sale</div>
 <div class="nav-item" onclick="openModal('expenseModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Expense</div>
@@ -174,6 +244,7 @@ select.form-input{appearance:none}
 <div class="nav-item" onclick="switchScreen('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</div>
 </div>
 </div>
+<!-- ALL MODALS -->
 <div class="modal-overlay" id="productModal"><div class="modal"><h3 id="prodModalTitle">Add Product</h3>
 <div class="form-group"><label class="form-label">Name</label><input class="form-input" id="prodName"></div>
 <div class="form-group"><label class="form-label">Barcode</label><input class="form-input" id="prodBarcode"></div>
@@ -218,1130 +289,284 @@ select.form-input{appearance:none}
 <button class="btn btn-green" onclick="wizardNext(3)">Next →</button></div>
 <div class="wizard-step" id="wizStep3"><h3 style="margin-bottom:12px">🎉 You're all set!</h3><button class="btn btn-green" onclick="finishWizard()">Start Using DukaFlow →</button></div>
 </div></div>
+<!-- TRANSPORT MODALS -->
+<div class="modal-overlay" id="vehicleModal"><div class="modal"><h3>🚗 Add Vehicle</h3>
+<div class="form-group"><label class="form-label">Name / Plate</label><input class="form-input" id="vehName" placeholder="e.g., UAA 123A"></div>
+<div class="form-group"><label class="form-label">Type</label><select class="form-input" id="vehType"><option>Bus</option><option>Taxi</option><option>Boda</option><option>Truck</option><option>Van</option><option>Special</option></select></div>
+<div class="form-group"><label class="form-label">Capacity (seats/tonnes)</label><input type="number" class="form-input" id="vehCapacity"></div>
+<div class="form-group"><label class="form-label">Driver</label><input class="form-input" id="vehDriver"></div>
+<div class="form-group"><label class="form-label">Route</label><input class="form-input" id="vehRoute" placeholder="e.g., Kampala-Jinja"></div>
+<button class="btn btn-green" onclick="addVehicle()">Add Vehicle</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('vehicleModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="tripModal"><div class="modal"><h3>🛣️ Record Trip</h3>
+<div class="form-group"><label class="form-label">Vehicle</label><select class="form-input" id="tripVehicle"></select></div>
+<div class="form-group"><label class="form-label">Distance (km)</label><input type="number" class="form-input" id="tripDistance"></div>
+<div class="form-group"><label class="form-label">Fuel Used (litres)</label><input type="number" step="0.1" class="form-input" id="tripFuel"></div>
+<div class="form-group"><label class="form-label">Revenue (UGX)</label><input type="number" class="form-input" id="tripRevenue"></div>
+<div class="form-group"><label class="form-label">Expenses (UGX)</label><input type="number" class="form-input" id="tripExpenses" value="0"></div>
+<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="tripNotes"></div>
+<button class="btn btn-green" onclick="recordTrip()">Record Trip</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('tripModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="fuelModal"><div class="modal"><h3>⛽ Record Fuel Purchase</h3>
+<div class="form-group"><label class="form-label">Vehicle</label><select class="form-input" id="fuelVehicle"></select></div>
+<div class="form-group"><label class="form-label">Litres</label><input type="number" step="0.1" class="form-input" id="fuelLitres"></div>
+<div class="form-group"><label class="form-label">Cost per Litre (UGX)</label><input type="number" class="form-input" id="fuelPricePerL"></div>
+<div class="form-group"><label class="form-label">Station</label><input class="form-input" id="fuelStation"></div>
+<button class="btn btn-green" onclick="recordFuel()">Save</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('fuelModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="maintModal"><div class="modal"><h3>🔧 Record Maintenance</h3>
+<div class="form-group"><label class="form-label">Vehicle</label><select class="form-input" id="maintVehicle"></select></div>
+<div class="form-group"><label class="form-label">Type</label><select class="form-input" id="maintType"><option>Oil Change</option><option>Tyre Replacement</option><option>Brake Service</option><option>Engine Repair</option><option>Body Work</option><option>Inspection</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Cost (UGX)</label><input type="number" class="form-input" id="maintCost"></div>
+<div class="form-group"><label class="form-label">Odometer (km)</label><input type="number" class="form-input" id="maintOdometer"></div>
+<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="maintNotes"></div>
+<button class="btn btn-green" onclick="recordMaintenance()">Save</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('maintModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="remittanceModal"><div class="modal"><h3>💰 Record Remittance</h3>
+<div class="form-group"><label class="form-label">Vehicle / Driver</label><select class="form-input" id="remVehicle"></select></div>
+<div class="form-group"><label class="form-label">Amount (UGX)</label><input type="number" class="form-input" id="remAmount"></div>
+<div class="form-group"><label class="form-label">Type</label><select class="form-input" id="remType"><option>Daily Collection</option><option>Target Surplus</option><option>Shortfall</option></select></div>
+<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="remNotes"></div>
+<button class="btn btn-green" onclick="recordRemittance()">Save</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('remittanceModal')">Cancel</button></div></div>
+<!-- FOOD MODALS -->
+<div class="modal-overlay" id="recipeModal"><div class="modal"><h3>📖 Add Recipe</h3>
+<div class="form-group"><label class="form-label">Recipe Name</label><input class="form-input" id="recipeName"></div>
+<div class="form-group"><label class="form-label">Category</label><select class="form-input" id="recipeCategory"><option>Main Course</option><option>Starter</option><option>Dessert</option><option>Drink</option><option>Snack</option><option>Side</option></select></div>
+<div class="form-group"><label class="form-label">Selling Price (UGX)</label><input type="number" class="form-input" id="recipePrice"></div>
+<div class="form-group"><label class="form-label">Servings</label><input type="number" class="form-input" id="recipeServings" value="1"></div>
+<div class="form-group"><label class="form-label">Ingredients (one per line: name, qty, unit, cost)</label><textarea class="form-input" id="recipeIngredients" rows="5" placeholder="Rice, 2, kg, 5000&#10;Chicken, 1, kg, 15000&#10;Oil, 0.5, litres, 3000"></textarea></div>
+<button class="btn btn-green" onclick="saveRecipe()">Save Recipe</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('recipeModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="wasteModal"><div class="modal"><h3>🗑️ Record Waste</h3>
+<div class="form-group"><label class="form-label">Item</label><input class="form-input" id="wasteItem"></div>
+<div class="form-group"><label class="form-label">Quantity</label><input type="number" step="0.1" class="form-input" id="wasteQty"></div>
+<div class="form-group"><label class="form-label">Unit</label><select class="form-input" id="wasteUnit"><option>kg</option><option>litres</option><option>pieces</option><option>plates</option></select></div>
+<div class="form-group"><label class="form-label">Cost Lost (UGX)</label><input type="number" class="form-input" id="wasteCost"></div>
+<div class="form-group"><label class="form-label">Reason</label><select class="form-input" id="wasteReason"><option>Spoiled</option><option>Overcooked</option><option>Dropped</option><option>Expired</option><option>Customer Return</option><option>Other</option></select></div>
+<button class="btn btn-red" onclick="recordWaste()">Record Waste</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('wasteModal')">Cancel</button></div></div>
+<!-- MANUFACTURING MODALS -->
+<div class="modal-overlay" id="bomModal"><div class="modal"><h3>📦 Bill of Materials</h3>
+<div class="form-group"><label class="form-label">Product Name</label><input class="form-input" id="bomProduct"></div>
+<div class="form-group"><label class="form-label">Batch Size</label><input type="number" class="form-input" id="bomBatchSize" value="1"></div>
+<div class="form-group"><label class="form-label">Selling Price (UGX)</label><input type="number" class="form-input" id="bomPrice"></div>
+<div class="form-group"><label class="form-label">Raw Materials (one per line: name, qty, unit, cost)</label><textarea class="form-input" id="bomMaterials" rows="5" placeholder="Wood, 2, pieces, 10000&#10;Nails, 0.5, kg, 3000&#10;Paint, 0.2, litres, 5000"></textarea></div>
+<button class="btn btn-green" onclick="saveBOM()">Save BOM</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('bomModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="prodOrderModal"><div class="modal"><h3>📋 Production Order</h3>
+<div class="form-group"><label class="form-label">Product (BOM)</label><select class="form-input" id="poProduct"></select></div>
+<div class="form-group"><label class="form-label">Batch Quantity</label><input type="number" class="form-input" id="poQty" value="1"></div>
+<div class="form-group"><label class="form-label">Labour Cost (UGX)</label><input type="number" class="form-input" id="poLabour" value="0"></div>
+<div class="form-group"><label class="form-label">Overhead (UGX)</label><input type="number" class="form-input" id="poOverhead" value="0"></div>
+<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="poNotes"></div>
+<button class="btn btn-green" onclick="createProdOrder()">Start Production</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('prodOrderModal')">Cancel</button></div></div>
+<!-- SERVICES MODALS -->
+<div class="modal-overlay" id="apptModal"><div class="modal"><h3>📅 New Booking</h3>
+<div class="form-group"><label class="form-label">Client Name</label><input class="form-input" id="apptClient"></div>
+<div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="apptPhone"></div>
+<div class="form-group"><label class="form-label">Service</label><select class="form-input" id="apptService"><option>Haircut</option><option>Beard Trim</option><option>Full Grooming</option><option>Manicure</option><option>Pedicure</option><option>Massage</option><option>Facial</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Staff</label><select class="form-input" id="apptStaff"></select></div>
+<div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="apptDate"></div>
+<div class="form-group"><label class="form-label">Time</label><input type="time" class="form-input" id="apptTime"></div>
+<div class="form-group"><label class="form-label">Price (UGX)</label><input type="number" class="form-input" id="apptPrice"></div>
+<button class="btn btn-green" onclick="bookAppointment()">Book</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('apptModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="servicePkgModal"><div class="modal"><h3>📦 Service Package</h3>
+<div class="form-group"><label class="form-label">Package Name</label><input class="form-input" id="pkgName"></div>
+<div class="form-group"><label class="form-label">Services (comma separated)</label><input class="form-input" id="pkgServices" placeholder="Haircut, Beard Trim, Facial"></div>
+<div class="form-group"><label class="form-label">Package Price (UGX)</label><input type="number" class="form-input" id="pkgPrice"></div>
+<div class="form-group"><label class="form-label">Duration (minutes)</label><input type="number" class="form-input" id="pkgDuration" value="60"></div>
+<button class="btn btn-green" onclick="savePackage()">Save Package</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('servicePkgModal')">Cancel</button></div></div>
+<!-- ENERGY MODALS -->
+<div class="modal-overlay" id="tankModal"><div class="modal"><h3>🛢️ Add Tank</h3>
+<div class="form-group"><label class="form-label">Tank Name</label><input class="form-input" id="tankName" placeholder="e.g., Tank A - Petrol"></div>
+<div class="form-group"><label class="form-label">Fuel Type</label><select class="form-input" id="tankFuelType"><option>Petrol</option><option>Diesel</option><option>Kerosene</option><option>LPG</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Capacity (litres)</label><input type="number" class="form-input" id="tankCapacity"></div>
+<div class="form-group"><label class="form-label">Current Level (litres)</label><input type="number" class="form-input" id="tankLevel"></div>
+<div class="form-group"><label class="form-label">Cost per Litre (UGX)</label><input type="number" class="form-input" id="tankCostPerL"></div>
+<button class="btn btn-green" onclick="addTank()">Add Tank</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('tankModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="dispenseModal"><div class="modal"><h3>⛽ Record Dispensing</h3>
+<div class="form-group"><label class="form-label">Tank</label><select class="form-input" id="dispTank"></select></div>
+<div class="form-group"><label class="form-label">Litres Dispensed</label><input type="number" step="0.1" class="form-input" id="dispLitres"></div>
+<div class="form-group"><label class="form-label">Price per Litre (UGX)</label><input type="number" class="form-input" id="dispPrice"></div>
+<div class="form-group"><label class="form-label">Payment</label><select class="form-input" id="dispPayment"><option>Cash</option><option>MTN MoMo</option><option>Airtel Money</option><option>Credit</option></select></div>
+<div class="form-group"><label class="form-label">Customer / Vehicle</label><input class="form-input" id="dispCustomer"></div>
+<button class="btn btn-green" onclick="recordDispensing()">Record</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('dispenseModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="dipModal"><div class="modal"><h3>📏 Update Tank Level (Dip)</h3>
+<div class="form-group"><label class="form-label">Tank</label><select class="form-input" id="dipTank"></select></div>
+<div class="form-group"><label class="form-label">Current Level (litres)</label><input type="number" class="form-input" id="dipLevel"></div>
+<div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="dipNotes"></div>
+<button class="btn btn-green" onclick="recordDip()">Update Level</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('dipModal')">Cancel</button></div></div>
+<div class="modal-overlay" id="cylinderModal"><div class="modal"><h3>🔵 Cylinder Transaction</h3>
+<div class="form-group"><label class="form-label">Type</label><select class="form-input" id="cylType"><option>Refill Sold</option><option>New Cylinder Sold</option><option>Cylinder Received</option><option>Cylinder Returned</option></select></div>
+<div class="form-group"><label class="form-label">Size</label><select class="form-input" id="cylSize"><option>6 kg</option><option>12 kg</option><option>25 kg</option><option>38 kg</option><option>50 kg</option></select></div>
+<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="cylQty" value="1"></div>
+<div class="form-group"><label class="form-label">Price per unit (UGX)</label><input type="number" class="form-input" id="cylPrice"></div>
+<div class="form-group"><label class="form-label">Customer</label><input class="form-input" id="cylCustomer"></div>
+<button class="btn btn-green" onclick="recordCylinder()">Record</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('cylinderModal')">Cancel</button></div></div>
+<!-- AGRICULTURE MODALS -->
 <div class="modal-overlay" id="seasonModal"><div class="modal"><h3>🌱 Create Season</h3>
-<div class="form-group"><label class="form-label">Season Name</label><input class="form-input" id="seasonName" placeholder="e.g., Maize Season 2026"></div>
-<div class="form-group"><label class="form-label">Farm Type</label>
-<select class="form-input" id="seasonType" onchange="updateSeasonUI()"><option value="crop">🌾 Crop Farming</option><option value="livestock">🐄 Livestock</option><option value="poultry">🐔 Poultry</option><option value="dairy">🥛 Dairy</option><option value="fish">🐟 Fish Farming</option></select></div>
-<div class="form-group"><label class="form-label">Crop / Animal</label><input class="form-input" id="seasonCrop" placeholder="e.g., Maize, Broilers, Goats"></div>
-<div class="form-group"><label class="form-label">Size Unit</label>
-<select class="form-input" id="seasonUnit"><option value="acres">Acres</option><option value="hectares">Hectares</option><option value="sqm">Square Meters</option><option value="plots">Plots</option><option value="animals">Animals</option><option value="birds">Birds</option><option value="pens">Pens / Coops</option></select></div>
+<div class="form-group"><label class="form-label">Season Name</label><input class="form-input" id="seasonName"></div>
+<div class="form-group"><label class="form-label">Farm Type</label><select class="form-input" id="seasonType"><option value="crop">🌾 Crop</option><option value="livestock">🐄 Livestock</option><option value="poultry">🐔 Poultry</option><option value="dairy">🥛 Dairy</option><option value="fish">🐟 Fish</option></select></div>
+<div class="form-group"><label class="form-label">Crop / Animal</label><input class="form-input" id="seasonCrop"></div>
+<div class="form-group"><label class="form-label">Size Unit</label><select class="form-input" id="seasonUnit"><option value="acres">Acres</option><option value="hectares">Hectares</option><option value="animals">Animals</option><option value="birds">Birds</option><option value="pens">Pens</option></select></div>
 <div class="form-group"><label class="form-label">Start Date</label><input type="date" class="form-input" id="seasonStart"></div>
 <div class="form-group"><label class="form-label">End Date</label><input type="date" class="form-input" id="seasonEnd"></div>
-<button class="btn btn-green" onclick="createSeason()">Create Season</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('seasonModal')">Cancel</button></div></div>
+<button class="btn btn-green" onclick="createSeason()">Create</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('seasonModal')">Cancel</button></div></div>
 <div class="modal-overlay" id="plotModal"><div class="modal"><h3 id="plotModalTitle">🗺️ Add Plot</h3>
 <div class="form-group"><label class="form-label">Season</label><select class="form-input" id="plotSeason"></select></div>
-<div class="form-group"><label class="form-label" id="plotNameLabel">Plot Name</label><input class="form-input" id="plotName" placeholder="e.g., Plot A, Coop 1"></div>
+<div class="form-group"><label class="form-label" id="plotNameLabel">Name</label><input class="form-input" id="plotName"></div>
 <div class="form-group"><label class="form-label" id="plotSizeLabel">Size</label><input type="number" step="0.1" class="form-input" id="plotAcres"></div>
 <div class="form-group"><label class="form-label">Crop / Animal</label><input class="form-input" id="plotCrop"></div>
-<button class="btn btn-green" onclick="addPlot()">Add</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('plotModal')">Cancel</button></div></div>
+<button class="btn btn-green" onclick="addPlot()">Add</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('plotModal')">Cancel</button></div></div>
 <div class="modal-overlay" id="inputModal"><div class="modal"><h3>📦 Record Input</h3>
-<div class="form-group"><label class="form-label">Plot / Pen</label><select class="form-input" id="inputPlot"></select></div>
-<div class="form-group"><label class="form-label">Type</label>
-<select class="form-input" id="inputType"><option>Seed</option><option>Fertilizer</option><option>Pesticide</option><option>Feed</option><option>Labour</option><option>Land Prep</option><option>Irrigation</option><option>Transport</option><option>Storage</option><option>Other</option></select></div>
+<div class="form-group"><label class="form-label">Plot</label><select class="form-input" id="inputPlot"></select></div>
+<div class="form-group"><label class="form-label">Type</label><select class="form-input" id="inputType"><option>Seed</option><option>Fertilizer</option><option>Pesticide</option><option>Feed</option><option>Labour</option><option>Other</option></select></div>
 <div class="form-group"><label class="form-label">Description</label><input class="form-input" id="inputDesc"></div>
 <div class="form-group"><label class="form-label">Qty</label><input type="number" class="form-input" id="inputQty" value="1"></div>
-<div class="form-group"><label class="form-label">Unit</label><select class="form-input" id="inputUnit"><option>kg</option><option>bags</option><option>litres</option><option>hours</option><option>days</option><option>pieces</option></select></div>
 <div class="form-group"><label class="form-label">Cost (UGX)</label><input type="number" class="form-input" id="inputCost"></div>
-<button class="btn btn-green" onclick="recordInput()">Record</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('inputModal')">Cancel</button></div></div>
+<button class="btn btn-green" onclick="recordInput()">Record</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('inputModal')">Cancel</button></div></div>
 <div class="modal-overlay" id="harvestModal"><div class="modal"><h3 id="harvestModalTitle">🌾 Record Harvest</h3>
-<div class="form-group"><label class="form-label">Plot / Pen</label><select class="form-input" id="harvestPlot"></select></div>
-<div class="form-group"><label class="form-label" id="harvestQtyLabel">Quantity</label><input type="number" class="form-input" id="harvestQty"></div>
-<div class="form-group"><label class="form-label">Unit</label>
-<select class="form-input" id="harvestUnit"><option>kg</option><option>bags</option><option>tonnes</option><option>bunches</option><option>crates</option><option>pieces</option><option>litres</option><option>eggs</option><option>trays</option><option>animals</option></select></div>
+<div class="form-group"><label class="form-label">Plot</label><select class="form-input" id="harvestPlot"></select></div>
+<div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="harvestQty"></div>
+<div class="form-group"><label class="form-label">Unit</label><select class="form-input" id="harvestUnit"><option>kg</option><option>bags</option><option>tonnes</option><option>litres</option><option>eggs</option><option>pieces</option></select></div>
 <div class="form-group"><label class="form-label">Notes</label><input class="form-input" id="harvestNotes"></div>
-<button class="btn btn-green" onclick="recordHarvest()">Record</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('harvestModal')">Cancel</button></div></div>
+<button class="btn btn-green" onclick="recordHarvest()">Record</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('harvestModal')">Cancel</button></div></div>
+<!-- CONTROL CENTER MODALS -->
 <div class="modal-overlay" id="refundModal"><div class="modal"><h3>↩️ Refund</h3>
 <div class="form-group"><label class="form-label">Sale</label><select class="form-input" id="refundSale"></select></div>
 <div class="form-group"><label class="form-label">Reason</label><input class="form-input" id="refundReason"></div>
-<button class="btn btn-red" onclick="processRefund()">Refund</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('refundModal')">Cancel</button></div></div>
+<button class="btn btn-red" onclick="processRefund()">Refund</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('refundModal')">Cancel</button></div></div>
 <div class="modal-overlay" id="writeoffModal"><div class="modal"><h3>🗑️ Write-Off</h3>
 <div class="form-group"><label class="form-label">Product</label><select class="form-input" id="writeoffProduct"></select></div>
 <div class="form-group"><label class="form-label">Qty</label><input type="number" class="form-input" id="writeoffQty" value="1"></div>
 <div class="form-group"><label class="form-label">Reason</label><select class="form-input" id="writeoffReason"><option>Damaged</option><option>Expired</option><option>Lost/Stolen</option><option>Other</option></select></div>
-<button class="btn btn-red" onclick="processWriteoff()">Write Off</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('writeoffModal')">Cancel</button></div></div>
+<button class="btn btn-red" onclick="processWriteoff()">Write Off</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('writeoffModal')">Cancel</button></div></div>
 <div class="modal-overlay" id="drawdownModal"><div class="modal"><h3>💰 Drawdown</h3>
 <div class="form-group"><label class="form-label">Amount</label><input type="number" class="form-input" id="drawdownAmount"></div>
 <div class="form-group"><label class="form-label">Reason</label><input class="form-input" id="drawdownReason"></div>
-<button class="btn btn-blue" onclick="processDrawdown()">Record</button>
-<button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('drawdownModal')">Cancel</button></div></div>
+<button class="btn btn-blue" onclick="processDrawdown()">Record</button><button class="btn btn-outline" style="margin-top:8px" onclick="closeModal('drawdownModal')">Cancel</button></div></div>
 <div class="toast" id="toast"></div>
 <script>
-// ============================================
-// DUKAFLOW COMPLETE - ALL FEATURES + AGRICULTURE
-// ============================================
-
-var CLOUD_URL = 'https://mrkawvyaybphbfpqrvqb.supabase.co';
-var API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
-var SESSION = { role: 'owner', user: null };
-var barcodeScanner = null;
-
-// ============================================
-// UTILITIES
-// ============================================
-function $(id) { return document.getElementById(id); }
-function fmt(n) { return (n || 0).toLocaleString(); }
-function iso() { return new Date().toISOString(); }
-function today() { return new Date().toISOString().split('T')[0]; }
-function genId() { return 'df_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
-function isLow(p) { return p.stock <= (p.reorderPoint || 5); }
-function isOut(p) { return p.stock <= 0; }
-function costOf(pid) { var ps = DB.get('products'); var p = ps.find(function(x) { return x.id === pid; }); return p ? (p.cost || 0) : 0; }
-
-function showToast(msg, isError) {
-    var t = $('toast'); if (!t) return;
-    t.textContent = msg;
-    t.className = 'toast show' + (isError ? ' error' : '');
-    setTimeout(function() { t.className = 'toast'; }, 2500);
-}
-
-function openModal(id) {
-    $(id).classList.add('active');
-    if (id === 'saleModal') populateSaleProducts();
-    if (id === 'refundModal') populateRefundSales();
-    if (id === 'writeoffModal') populateWriteoffProducts();
-    if (id === 'barcodeModal') startBarcode();
-}
-
-function closeModal(id) {
-    $(id).classList.remove('active');
-    if (id === 'barcodeModal') stopBarcode();
-}
-
-function switchScreen(name) {
-    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-    document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
-    var scr = $('screen-' + name); if (scr) scr.classList.add('active');
-    var navItems = document.querySelectorAll('.nav-item');
-    var idx = { dashboard: 0, farm: 1, products: 2, sales: 3, reports: 4, credits: 5, settings: 6 }[name];
-    if (idx !== undefined && navItems[idx]) navItems[idx].classList.add('active');
-    if (name === 'dashboard') renderDashboard();
-    if (name === 'farm') renderFarm();
-    if (name === 'products') renderProducts();
-    if (name === 'sales') renderSales();
-    if (name === 'reports') renderReports();
-    if (name === 'credits') renderCredits();
-    if (name === 'settings') renderSettings();
-}
-
-// ============================================
-// LOCAL DATABASE
-// ============================================
-var DB = {
-    get: function(key) { try { return JSON.parse(localStorage.getItem('df_' + key)) || []; } catch (e) { return []; } },
-    set: function(key, val) { localStorage.setItem('df_' + key, JSON.stringify(val)); },
-    getObj: function(key) { try { return JSON.parse(localStorage.getItem('df_' + key)) || {}; } catch (e) { return {}; } },
-    setObj: function(key, val) { localStorage.setItem('df_' + key, JSON.stringify(val)); }
-};
-
-// ============================================
-// AUDIT TRAIL
-// ============================================
-function logAudit(action, details) {
-    var audit = DB.get('audit');
-    audit.unshift({ id: genId(), action: action, details: details, user: (SESSION.user ? SESSION.user.name : 'System'), date: iso() });
-    if (audit.length > 50) audit = audit.slice(0, 50);
-    DB.set('audit', audit);
-}
-
-function renderAudit() {
-    var audit = DB.get('audit');
-    var el = $('auditList'); if (!el) return;
-    if (audit.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No activity yet</div>'; return; }
-    var html = '';
-    audit.slice(0, 10).forEach(function(a) {
-        html += '<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px">';
-        html += '<span style="color:var(--muted)">' + String(a.date).slice(0, 16) + '</span> ';
-        html += '<b>' + a.action + '</b> — ' + a.details + ' <span style="color:var(--muted)">(' + a.user + ')</span>';
-        html += '</div>';
-    });
-    el.innerHTML = html;
-}
-
-// ============================================
-// AUTH
-// ============================================
-function showAuth(screen) {
-    document.querySelectorAll('.auth-screen').forEach(function(x) { x.classList.remove('active'); });
-    var el = $('screen-' + screen); if (el) el.classList.add('active');
-}
-
-function doRegister() {
-    var shop = $('regShop').value.trim(), name = $('regName').value.trim(), phone = $('regPhone').value.trim();
-    var loc = $('regLocation').value.trim(), sector = $('regSector').value, pin = $('regPin').value.trim();
-    if (!shop || !name || !phone || !pin) return showToast('Fill all fields', true);
-    if (pin.length !== 4) return showToast('PIN must be 4 digits', true);
-    hashPin(pin).then(function(h) {
-        DB.setObj('profile', { shopName: shop, owner: name, phone: phone, location: loc, sector: sector, createdAt: iso(), pinHash: h, shopKey: genId() });
-        logAudit('REGISTER', 'Shop created: ' + shop);
-        showToast('Welcome, ' + name + '! 🎉');
-        startApp();
-        showWizard();
-    }).catch(function() { showToast('Error creating shop', true); });
-}
-
-function doLogin() {
-    var phone = $('logPhone').value.trim(), pin = $('logPin').value.trim();
-    if (!phone || !pin) return showToast('Enter phone and PIN', true);
-    showToast('Verifying...');
-    hashPin(pin).then(function(h) {
-        var p = DB.getObj('profile');
-        if (p && p.phone === phone && p.pinHash === h) {
-            SESSION = { role: 'owner', user: { name: p.owner } };
-            logAudit('LOGIN', 'Owner logged in');
-            showToast('Welcome back, ' + p.owner + '!');
-            startApp();
-        } else { showToast('Wrong phone or PIN', true); }
-    }).catch(function() { showToast('Error', true); });
-}
-
-function doEmployeeLogin() {
-    var phone = $('empLogPhone').value.trim(), pin = $('empLogPin').value.trim();
-    if (!phone || !pin) return showToast('Enter phone and PIN', true);
-    showToast('Verifying...');
-    hashPin(pin).then(function(h) {
-        var emps = DB.get('employees');
-        var emp = emps.find(function(e) { return e.phone === phone && e.pinHash === h && e.status === 'active'; });
-        if (emp) {
-            SESSION = { role: emp.role, user: { name: emp.name } };
-            logAudit('LOGIN', 'Employee logged in: ' + emp.name);
-            showToast('Welcome, ' + emp.name + '!');
-            startApp();
-        } else { showToast('Wrong phone, PIN, or suspended', true); }
-    }).catch(function() { showToast('Error', true); });
-}
-
-function startApp() {
-    $('authFlow').style.display = 'none';
-    $('app').style.display = 'block';
-    var p = DB.getObj('profile');
-    $('shopNameDisplay').textContent = p.shopName || 'My Shop';
-    $('sectorBadge').textContent = p.sector || 'Retail';
-    initAgriculture();
-    renderAll();
-}
-
-function logout() {
-    logAudit('LOGOUT', 'User logged out');
-    SESSION = { role: 'owner', user: null };
-    $('app').style.display = 'none';
-    $('authFlow').style.display = 'flex';
-    showAuth('welcome');
-}
-
-// ============================================
-// CLOUD API
-// ============================================
-function markPending() { var d = $('syncDot'); if (d) d.classList.add('pending'); }
-
-function api(path, opts) {
-    opts = opts || {};
-    opts.headers = Object.assign({ 'apikey': API_KEY, 'Content-Type': 'application/json' }, opts.headers || {});
-    return fetch(CLOUD_URL + path, opts);
-}
-
-function j(r) { return r.json(); }
-
-function hashPin(pin) {
-    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(pin)).then(function(buf) {
-        return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-    });
-}
-
-function syncAll() {
-    showToast('Syncing...');
-    var p = DB.getObj('profile');
-    if (!p || !p.shopKey) { showToast('No cloud connection', true); return; }
-    Promise.all([
-        api('/rest/v1/rpc/sync_products', { method: 'POST', body: JSON.stringify({ p_shop_key: p.shopKey, p_products: DB.get('products') }) }).catch(function() {}),
-        api('/rest/v1/rpc/sync_sales', { method: 'POST', body: JSON.stringify({ p_shop_key: p.shopKey, p_sales: DB.get('sales') }) }).catch(function() {}),
-        api('/rest/v1/rpc/sync_expenses', { method: 'POST', body: JSON.stringify({ p_shop_key: p.shopKey, p_expenses: DB.get('expenses') }) }).catch(function() {}),
-        api('/rest/v1/rpc/sync_credits', { method: 'POST', body: JSON.stringify({ p_shop_key: p.shopKey, p_credits: DB.get('credits') }) }).catch(function() {})
-    ]).then(function() {
-        var d = $('syncDot'); if (d) d.classList.remove('pending');
-        logAudit('SYNC', 'Cloud sync completed');
-        showToast('Synced ✓');
-    }).catch(function() { showToast('Sync failed', true); });
-}
-
-function restore() {
-    showToast('Restoring...');
-    var p = DB.getObj('profile');
-    if (!p || !p.cloudId) { showToast('No cloud data found', true); return; }
-    api('/rest/v1/rpc/restore_shop', { method: 'POST', body: JSON.stringify({ p_shop_id: p.cloudId }) }).then(j).then(function(res) {
-        if (res && res.ok) {
-            if (res.products) DB.set('products', res.products);
-            if (res.sales) DB.set('sales', res.sales);
-            if (res.expenses) DB.set('expenses', res.expenses);
-            if (res.credits) DB.set('credits', res.credits);
-            logAudit('RESTORE', 'Data restored from cloud');
-            renderAll();
-            showToast('Restored ✓');
-        } else { showToast('Restore failed', true); }
-    }).catch(function() { showToast('Connection error', true); });
-}
-
-// ============================================
-// HEALTH SCORE & INTELLIGENCE
-// ============================================
-function calcHealthScore() {
-    var sales = DB.get('sales'), ps = DB.get('products'), creds = DB.get('credits'), ex = DB.get('expenses');
-    var todayStr = today();
-    var weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
-    var todaySales = sales.filter(function(s) { return String(s.date || '').indexOf(todayStr) === 0; });
-    var weekSales = sales.filter(function(s) { return new Date(s.date) >= weekStart; });
-    var weekRevenue = weekSales.reduce(function(a, b) { return a + b.total; }, 0);
-    var weekCost = weekSales.reduce(function(a, b) { return a + (costOf(b.productId) * b.quantity); }, 0);
-    var grossMargin = weekRevenue > 0 ? ((weekRevenue - weekCost) / weekRevenue * 100) : 0;
-    var lowStock = ps.filter(function(p) { return isLow(p) || isOut(p); }).length;
-    var stockHealth = ps.length > 0 ? Math.max(0, 100 - Math.round((lowStock / ps.length) * 100)) : 100;
-    var totalCredit = creds.reduce(function(a, b) { return a + (b.totalAmount || b.amount || 0); }, 0);
-    var totalCollected = creds.reduce(function(a, b) { return a + (b.paidAmount || 0); }, 0);
-    var debtScore = totalCredit > 0 ? Math.round((totalCollected / totalCredit) * 100) : 100;
-    var weekExp = ex.filter(function(e) { return new Date(e.date) >= weekStart; });
-    var weekExpTotal = weekExp.reduce(function(a, b) { return a + b.amount; }, 0);
-    var expenseScore = weekExpTotal > weekRevenue * 0.5 ? 50 : 100;
-    var activeDays = {};
-    sales.forEach(function(s) { var d = String(s.date || '').split('T')[0]; if (d) activeDays[d] = true; });
-    var consistency = Math.min(100, Math.round((Object.keys(activeDays).length / 7) * 100));
-    var salesScore = todaySales.length > 0 ? 100 : (weekSales.length > 0 ? 70 : 40);
-    var profitScore = Math.min(100, Math.round(grossMargin * 2));
-    var cashScore = 80;
-    var score = Math.round((salesScore * 0.2) + (profitScore * 0.2) + (stockHealth * 0.15) + (debtScore * 0.15) + (cashScore * 0.1) + (expenseScore * 0.1) + (consistency * 0.1));
-    score = Math.max(0, Math.min(100, score));
-    var alerts = genSectorAlerts(ps, sales, creds, ex, grossMargin);
-    return { score: score, components: { sales: salesScore, profit: profitScore, stock: stockHealth, debt: debtScore, cash: cashScore, expense: expenseScore, consistency: consistency }, alerts: alerts, grossMargin: grossMargin };
-}
-
-function genSectorAlerts(ps, sales, creds, ex, grossMargin) {
-    var alerts = [];
-    var sector = (DB.getObj('profile').sector) || 'Retail';
-    var cfg = SECTOR_CONFIG[sector] || SECTOR_CONFIG['Retail'];
-    var now = Date.now(), dayMs = 86400000;
-    var velocity = {};
-    sales.forEach(function(s) {
-        if (!s.productId) return;
-        var d = new Date(s.date).getTime();
-        if (now - d > 7 * dayMs) return;
-        if (!velocity[s.productId]) velocity[s.productId] = { qty: 0, days: 0 };
-        velocity[s.productId].qty += s.quantity;
-        velocity[s.productId].days = Math.max(velocity[s.productId].days, (now - d) / dayMs);
-    });
-    ps.forEach(function(p) {
-        if (p.stock <= 0) return;
-        var v = velocity[p.id];
-        if (v && v.qty > 0) {
-            var daily = v.qty / Math.max(v.days, 1);
-            var daysLeft = Math.floor(p.stock / daily);
-            if (daysLeft <= 3) alerts.push({ type: 'urgent', icon: '📦', title: p.name + ' running out', desc: '~' + daysLeft + ' day' + (daysLeft !== 1 ? 's' : '') + ' left.' });
-            else if (daysLeft <= 7) alerts.push({ type: 'warning', icon: '📦', title: p.name + ' low soon', desc: '~' + daysLeft + ' days remaining.' });
-        }
-    });
-    if (grossMargin < 15 && grossMargin > 0) alerts.push({ type: 'warning', icon: '📉', title: 'Thin margins', desc: 'Gross margin ' + grossMargin.toFixed(1) + '%. Review pricing.' });
-    var overdue = creds.filter(function(c) { if (c.status === 'paid') return false; return (new Date() - new Date(c.date)) / dayMs > 7; });
-    if (overdue.length > 0) alerts.push({ type: 'urgent', icon: '⏰', title: overdue.length + ' overdue credit' + (overdue.length > 1 ? 's' : ''), desc: 'UGX ' + fmt(overdue.reduce(function(a, b) { return a + ((b.totalAmount || b.amount || 0) - (b.paidAmount || 0)); }, 0)) + ' outstanding.' });
-    if (cfg.sectorAlerts) cfg.sectorAlerts.forEach(function(a) { alerts.push(a); });
-    return alerts;
-}
-
-function renderHealthScore() {
-    var hs = calcHealthScore();
-    var el = $('healthScoreCard'); if (!el) return;
-    var color = hs.score >= 70 ? 'var(--green)' : hs.score >= 40 ? 'var(--yellow)' : 'var(--red)';
-    var label = hs.score >= 70 ? 'Healthy' : hs.score >= 40 ? 'Needs Attention' : 'At Risk';
-    var html = '<div style="display:flex;align-items:center;gap:16px">';
-    html += '<div class="health-ring" style="border:4px solid ' + color + '"><div class="score" style="color:' + color + '">' + hs.score + '</div><div class="label">/100</div></div>';
-    html += '<div style="flex:1"><div style="font-size:16px;font-weight:800;color:' + color + '">' + label + '</div>';
-    html += '<div style="font-size:12px;color:var(--muted);margin-top:4px">Sales ' + hs.components.sales + ' • Profit ' + hs.components.profit + ' • Stock ' + hs.components.stock + '</div>';
-    html += '<div style="font-size:12px;color:var(--muted)">Debt ' + hs.components.debt + ' • Cash ' + hs.components.cash + ' • Expenses ' + hs.components.expense + '</div></div></div>';
-    el.innerHTML = html;
-    var p = DB.getObj('profile');
-    if (navigator.onLine && p && p.shopKey) {
-        api('/rest/v1/rpc/save_health_score', { method: 'POST', body: JSON.stringify({ p_shop_key: p.shopKey, p_score: hs.score, p_sales_activity: hs.components.sales, p_profit_health: hs.components.profit, p_stock_health: hs.components.stock, p_debt_collection: hs.components.debt, p_cash_control: hs.components.cash, p_expense_control: hs.components.expense, p_consistency: hs.components.consistency, p_alerts: hs.alerts }) }).catch(function() {});
-    }
-}
-
-// ============================================
-// SECTOR CONFIG
-// ============================================
-var SECTOR_CONFIG = {
-    'Retail': { productLabel: 'Stock', saleLabel: 'Sale', stockLabel: 'Stock', customerLabel: 'Customer', expenseLabel: 'Expense', kpis: [{ id: 'stockValue', label: 'Stock Value' }, { id: 'dailyCash', label: 'Daily Cash' }, { id: 'fastMovers', label: 'Fast Movers' }, { id: 'lowStock', label: 'Low Stock' }], sectorAlerts: [{ type: 'warning', icon: '📦', title: 'Supplier price watch', desc: 'Track supplier prices' }] },
-    'Agriculture': { productLabel: 'Produce', saleLabel: 'Harvest Sold', stockLabel: 'Stored Produce', customerLabel: 'Buyer', expenseLabel: 'Farm Cost', kpis: [{ id: 'yieldPerAcre', label: 'Total Produce' }, { id: 'pricePerKg', label: 'Avg Price/kg' }, { id: 'inputCost', label: 'Input Cost' }, { id: 'transportCost', label: 'Transport Cost' }], sectorAlerts: [{ type: 'urgent', icon: '🌾', title: 'Harvest price risk', desc: 'Consider storage' }] },
-    'Transport': { productLabel: 'Vehicle', saleLabel: 'Trip', stockLabel: 'Fuel & Parts', customerLabel: 'Passenger', expenseLabel: 'Operating Cost', kpis: [{ id: 'revenuePerTrip', label: 'Revenue/Trip' }, { id: 'fuelCost', label: 'Fuel Cost' }, { id: 'netPerTrip', label: 'Net/Trip' }, { id: 'dailyRemittance', label: 'Daily Collection' }], sectorAlerts: [{ type: 'urgent', icon: '⛽', title: 'Fuel price watch', desc: 'Fuel affects margins' }] },
-    'Food': { productLabel: 'Menu Item', saleLabel: 'Order', stockLabel: 'Ingredients', customerLabel: 'Customer', expenseLabel: 'Kitchen Cost', kpis: [{ id: 'dailySales', label: 'Daily Sales' }, { id: 'foodCostPct', label: 'Food Cost %' }, { id: 'outputVsWaste', label: 'Orders Today' }, { id: 'bestSellers', label: 'Best Seller' }], sectorAlerts: [{ type: 'warning', icon: '🍳', title: 'Ingredient price watch', desc: 'Costs may have changed' }] },
-    'Services': { productLabel: 'Service', saleLabel: 'Appointment', stockLabel: 'Supplies', customerLabel: 'Client', expenseLabel: 'Business Cost', kpis: [{ id: 'customersPerDay', label: 'Customers Today' }, { id: 'revenuePerJob', label: 'Revenue/Job' }, { id: 'chairTurnover', label: 'Jobs Today' }, { id: 'ordersPerWeek', label: 'Jobs This Week' }], sectorAlerts: [{ type: 'warning', icon: '📅', title: 'Appointment follow-up', desc: 'Confirm bookings' }] },
-    'Manufacturing': { productLabel: 'Product', saleLabel: 'Order', stockLabel: 'Raw Materials', customerLabel: 'Customer', expenseLabel: 'Production Cost', kpis: [{ id: 'productionCost', label: 'Production Cost' }, { id: 'marginPerPiece', label: 'Margin/Piece' }, { id: 'outputPerDay', label: 'Output Today' }, { id: 'materialCost', label: 'Material Cost' }], sectorAlerts: [{ type: 'urgent', icon: '🏭', title: 'Material price watch', desc: 'Costs changed since quote' }] },
-    'Energy': { productLabel: 'Fuel', saleLabel: 'Sale', stockLabel: 'Tank Stock', customerLabel: 'Customer', expenseLabel: 'Operating Cost', kpis: [{ id: 'litresSold', label: 'Litres Sold' }, { id: 'variance', label: 'Variance' }, { id: 'cylindersPerDay', label: 'Sales Today' }, { id: 'unitsInstalled', label: 'Units Today' }], sectorAlerts: [{ type: 'urgent', icon: '⛽', title: 'Stock reconciliation', desc: 'Check dip vs meter' }] }
-};
-
-function sectorLabel(key) { var s = (DB.getObj('profile') || {}).sector || 'Retail'; var cfg = SECTOR_CONFIG[s] || SECTOR_CONFIG['Retail']; return cfg[key] || key; }
-
-function calcKPI(id) {
-    var sales = DB.get('sales'), ps = DB.get('products'), ex = DB.get('expenses') || [];
-    var todayStr = today();
-    var todaySales = sales.filter(function(s) { return String(s.date || '').indexOf(todayStr) === 0; });
-    var weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
-    var weekSales = sales.filter(function(s) { return new Date(s.date) >= weekStart; });
-    switch (id) {
-        case 'stockValue': return ps.reduce(function(a, p) { return a + (p.stock * (p.cost || 0)); }, 0);
-        case 'dailyCash': return todaySales.reduce(function(a, s) { return a + s.total; }, 0);
-        case 'fastMovers': var sold = {}; weekSales.forEach(function(s) { sold[s.productId] = (sold[s.productId] || 0) + 1; }); return Object.keys(sold).filter(function(k) { return sold[k] >= 3; }).length;
-        case 'lowStock': return ps.filter(function(p) { return isLow(p); }).length;
-        case 'yieldPerAcre': return ps.reduce(function(a, p) { return a + p.stock; }, 0);
-        case 'pricePerKg': if (!ps.length) return 0; return Math.round(ps.reduce(function(a, p) { return a + (p.price || 0); }, 0) / ps.length);
-        case 'inputCost': return ex.filter(function(e) { return e.category === 'Supplies' || e.category === 'Labour'; }).reduce(function(a, e) { return a + e.amount; }, 0);
-        case 'transportCost': return ex.filter(function(e) { return e.category === 'Transport'; }).reduce(function(a, e) { return a + e.amount; }, 0);
-        case 'revenuePerTrip': if (!sales.length) return 0; return Math.round(sales.reduce(function(a, s) { return a + s.total; }, 0) / sales.length);
-        case 'fuelCost': return ex.filter(function(e) { return e.category === 'Transport' || e.category === 'Utilities'; }).reduce(function(a, e) { return a + e.amount; }, 0);
-        case 'netPerTrip': var rev = sales.reduce(function(a, s) { return a + s.total; }, 0); var fuel = ex.filter(function(e) { return e.category === 'Transport'; }).reduce(function(a, e) { return a + e.amount; }, 0); return Math.max(0, rev - fuel);
-        case 'dailyRemittance': return todaySales.reduce(function(a, s) { return a + s.total; }, 0);
-        case 'dailySales': return todaySales.reduce(function(a, s) { return a + s.total; }, 0);
-        case 'foodCostPct': var wr = weekSales.reduce(function(a, s) { return a + s.total; }, 0); var wc = weekSales.reduce(function(a, s) { return a + (costOf(s.productId) * s.quantity); }, 0); return wr > 0 ? Math.round((wc / wr) * 100) : 0;
-        case 'outputVsWaste': return todaySales.length;
-        case 'bestSellers': var pc = {}; weekSales.forEach(function(s) { pc[s.productId] = (pc[s.productId] || 0) + s.quantity; }); var top = Object.keys(pc).sort(function(a, b) { return pc[b] - pc[a]; })[0]; var tp = ps.find(function(p) { return p.id === top; }); return tp ? tp.name : '—';
-        case 'customersPerDay': return todaySales.length;
-        case 'revenuePerJob': if (!todaySales.length) return 0; return Math.round(todaySales.reduce(function(a, s) { return a + s.total; }, 0) / todaySales.length);
-        case 'chairTurnover': return todaySales.length;
-        case 'ordersPerWeek': return weekSales.length;
-        case 'productionCost': return ex.reduce(function(a, e) { return a + e.amount; }, 0);
-        case 'marginPerPiece': if (!ps.length) return 0; return Math.round(ps.reduce(function(a, p) { return a + ((p.price || 0) - (p.cost || 0)); }, 0) / ps.length);
-        case 'outputPerDay': return todaySales.length;
-        case 'materialCost': return ex.filter(function(e) { return e.category === 'Supplies'; }).reduce(function(a, e) { return a + e.amount; }, 0);
-        case 'litresSold': return todaySales.reduce(function(a, s) { return a + s.quantity; }, 0);
-        case 'variance': return 0;
-        case 'cylindersPerDay': return todaySales.length;
-        case 'unitsInstalled': return todaySales.length;
-        default: return 0;
-    }
-}
-
-function renderSectorKPIs() {
-    var sector = (DB.getObj('profile') || {}).sector || 'Retail';
-    var cfg = SECTOR_CONFIG[sector] || SECTOR_CONFIG['Retail'];
-    var el = $('sectorKPIs'); if (!el) return;
-    var html = '';
-    cfg.kpis.forEach(function(kpi) {
-        var val = calcKPI(kpi.id);
-        var display = typeof val === 'number' ? 'UGX ' + fmt(val) : val;
-        if (['fastMovers', 'lowStock', 'customersPerDay', 'chairTurnover', 'ordersPerWeek', 'outputPerDay', 'outputVsWaste', 'cylindersPerDay', 'unitsInstalled', 'litresSold', 'yieldPerAcre'].indexOf(kpi.id) !== -1) display = fmt(val);
-        if (kpi.id === 'foodCostPct') display = val + '%';
-        if (kpi.id === 'bestSellers') display = val;
-        html += '<div class="kpi-card"><div class="kpi-label">' + kpi.label + '</div><div class="kpi-value">' + display + '</div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderSectorAlerts() {
-    var hs = calcHealthScore();
-    var el = $('sectorAlerts'); if (!el) return;
-    if (hs.alerts.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">✅ No alerts. Business is on track.</div>'; return; }
-    var html = '';
-    hs.alerts.slice(0, 5).forEach(function(a) {
-        var borderColor = a.type === 'urgent' ? 'var(--red)' : 'var(--yellow)';
-        html += '<div class="insight-row" style="border-left-color:' + borderColor + '"><div class="insight-icon">' + a.icon + '</div><div class="insight-text"><div class="insight-title">' + a.title + '</div><div class="insight-desc">' + a.desc + '</div></div></div>';
-    });
-    el.innerHTML = html;
-}
-
-// ============================================
-// BARCODE SCANNER
-// ============================================
-function startBarcode() {
-    if (typeof Html5Qrcode === 'undefined') { showToast('Camera not available', true); return; }
-    try {
-        barcodeScanner = new Html5Qrcode('barcodeReader');
-        barcodeScanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 250, height: 250 } },
-            function(decodedText) { onBarcodeScanned(decodedText); },
-            function() {}
-        );
-    } catch (e) { showToast('Camera access denied', true); }
-}
-
-function stopBarcode() {
-    if (barcodeScanner) { try { barcodeScanner.stop().then(function() { barcodeScanner = null; }).catch(function() {}); } catch (e) { barcodeScanner = null; } }
-}
-
-function onBarcodeScanned(code) {
-    stopBarcode();
-    closeModal('barcodeModal');
-    var ps = DB.get('products');
-    var found = ps.find(function(p) { return p.barcode === code; });
-    if (found) {
-        showToast('Found: ' + found.name);
-        openModal('saleModal');
-        setTimeout(function() { $('saleProduct').value = found.id; }, 300);
-    } else {
-        showToast('Barcode not found. Adding new product...');
-        openModal('productModal');
-        $('prodBarcode').value = code;
-        $('prodName').focus();
-    }
-}
-
-function lookupBarcode() {
-    var code = $('manualBarcode').value.trim();
-    if (!code) return showToast('Enter barcode', true);
-    onBarcodeScanned(code);
-}
-
-// ============================================
-// FIRST-TIME WIZARD
-// ============================================
-function showWizard() {
-    var ps = DB.get('products');
-    if (ps.length === 0) { openModal('wizardModal'); }
-}
-
-function wizardNext(step) {
-    document.querySelectorAll('.wizard-step').forEach(function(s) { s.classList.remove('active'); });
-    $('wizStep' + step).classList.add('active');
-    for (var i = 1; i <= 3; i++) {
-        var dot = $('wizDot' + i);
-        if (dot) { dot.className = 'wizard-dot' + (i <= step ? ' done' : ''); }
-    }
-}
-
-function finishWizard() {
-    var name = $('wizName').value.trim();
-    var cost = parseInt($('wizCost').value) || 0;
-    var price = parseInt($('wizPrice').value) || 0;
-    var stock = parseInt($('wizStock').value) || 0;
-    if (name && price > 0) {
-        var ps = DB.get('products');
-        ps.unshift({ id: genId(), name: name, cost: cost, price: price, stock: stock, reorderPoint: 5, createdAt: iso() });
-        DB.set('products', ps);
-        logAudit('WIZARD', 'First product added: ' + name);
-        showToast('Product saved! 🎉');
-    }
-    closeModal('wizardModal');
-    renderAll();
-}
-
-// ============================================
-// CONTROL CENTER
-// ============================================
-function populateRefundSales() {
-    var sales = DB.get('sales');
-    var el = $('refundSale'); if (!el) return;
-    el.innerHTML = sales.length ? '' : '<option value="">No sales to refund</option>';
-    sales.slice(0, 20).forEach(function(s) {
-        var prod = DB.get('products').find(function(p) { return p.id === s.productId; });
-        el.innerHTML += '<option value="' + s.id + '">' + (prod ? prod.name : 'Item') + ' ×' + s.quantity + ' — UGX ' + fmt(s.total) + '</option>';
-    });
-}
-
-function populateWriteoffProducts() {
-    var ps = DB.get('products');
-    var el = $('writeoffProduct'); if (!el) return;
-    el.innerHTML = ps.length ? '' : '<option value="">No products</option>';
-    ps.forEach(function(p) {
-        el.innerHTML += '<option value="' + p.id + '">' + p.name + ' (' + p.stock + ' in stock)</option>';
-    });
-}
-
-function processRefund() {
-    var saleId = $('refundSale').value;
-    var reason = $('refundReason').value.trim();
-    if (!saleId) return showToast('Select a sale', true);
-    var sales = DB.get('sales');
-    var sale = sales.find(function(s) { return s.id === saleId; });
-    if (!sale) return showToast('Sale not found', true);
-    var ps = DB.get('products');
-    var prod = ps.find(function(p) { return p.id === sale.productId; });
-    if (prod) { prod.stock += sale.quantity; DB.set('products', ps); }
-    DB.set('sales', sales.filter(function(s) { return s.id !== saleId; }));
-    logAudit('REFUND', 'Refunded UGX ' + fmt(sale.total) + ' — ' + (reason || 'No reason'));
-    closeModal('refundModal');
-    showToast('Refund processed: UGX ' + fmt(sale.total));
-    renderAll();
-}
-
-function processWriteoff() {
-    var prodId = $('writeoffProduct').value;
-    var qty = parseInt($('writeoffQty').value) || 1;
-    var reason = $('writeoffReason').value;
-    if (!prodId) return showToast('Select a product', true);
-    var ps = DB.get('products');
-    var prod = ps.find(function(p) { return p.id === prodId; });
-    if (!prod) return showToast('Product not found', true);
-    if (qty > prod.stock) return showToast('Only ' + prod.stock + ' in stock', true);
-    prod.stock -= qty;
-    DB.set('products', ps);
-    logAudit('WRITE-OFF', prod.name + ' ×' + qty + ' — ' + reason);
-    closeModal('writeoffModal');
-    showToast('Write-off recorded: ' + prod.name + ' ×' + qty);
-    renderAll();
-}
-
-function processDrawdown() {
-    var amount = parseInt($('drawdownAmount').value) || 0;
-    var reason = $('drawdownReason').value.trim();
-    if (amount <= 0) return showToast('Enter amount', true);
-    var ex = DB.get('expenses');
-    ex.unshift({ id: genId(), category: 'Drawdown', amount: amount, note: reason || 'Owner withdrawal', date: iso() });
-    DB.set('expenses', ex);
-    logAudit('DRAWDOWN', 'UGX ' + fmt(amount) + ' — ' + (reason || 'Owner withdrawal'));
-    closeModal('drawdownModal');
-    showToast('Drawdown recorded: UGX ' + fmt(amount));
-    $('drawdownAmount').value = '';
-    $('drawdownReason').value = '';
-    renderAll();
-}
-
-// ============================================
-// AGRICULTURE MODULE
-// ============================================
-var FARM_TYPES = {
-    crop: { plotLabel: 'Plot', harvestLabel: 'Harvest', yieldLabel: 'Yield', icon: '🌾' },
-    livestock: { plotLabel: 'Pen / Herd', harvestLabel: 'Production', yieldLabel: 'Output', icon: '🐄' },
-    poultry: { plotLabel: 'Coop', harvestLabel: 'Egg Collection', yieldLabel: 'Eggs', icon: '🐔' },
-    dairy: { plotLabel: 'Herd', harvestLabel: 'Milk Collection', yieldLabel: 'Milk (L)', icon: '🥛' },
-    fish: { plotLabel: 'Pond', harvestLabel: 'Harvest', yieldLabel: 'Fish (kg)', icon: '🐟' }
-};
-
-function getFarmType(seasonId) {
-    var seasons = DB.get('seasons');
-    var s = seasons.find(function(x) { return x.id === seasonId; });
-    return (s && s.farmType) ? s.farmType : 'crop';
-}
-
-function getFarmConfig(seasonId) {
-    return FARM_TYPES[getFarmType(seasonId)] || FARM_TYPES.crop;
-}
-
-function updateSeasonUI() {
-    var type = $('seasonType').value;
-    var cropEl = $('seasonCrop');
-    if (type === 'crop') { cropEl.placeholder = 'e.g., Maize, Coffee, Beans'; }
-    else if (type === 'poultry') { cropEl.placeholder = 'e.g., Broilers, Layers'; }
-    else if (type === 'dairy') { cropEl.placeholder = 'e.g., Friesian, Jersey'; }
-    else if (type === 'livestock') { cropEl.placeholder = 'e.g., Goats, Pigs, Cattle'; }
-    else if (type === 'fish') { cropEl.placeholder = 'e.g., Tilapia, Catfish'; }
-}
-
-function initAgriculture() {
-    var sector = (DB.getObj('profile') || {}).sector;
-    if (sector === 'Agriculture') {
-        var navFarm = $('navFarm');
-        if (navFarm) navFarm.style.display = 'flex';
-        renderFarm();
-    }
-}
-
-function renderFarm() {
-    renderFarmKPIs();
-    renderSeasons();
-    renderPlots();
-    renderActivities();
-}
-
-function renderFarmKPIs() {
-    var seasons = DB.get('seasons');
-    var plots = DB.get('plots');
-    var activities = DB.get('activities');
-    var harvests = activities.filter(function(a) { return a.type === 'harvest'; });
-    var inputs = activities.filter(function(a) { return a.type === 'input' || a.type === 'labour'; });
-    var totalYield = harvests.reduce(function(a, h) { return a + (h.quantity || 0); }, 0);
-    var totalInputCost = inputs.reduce(function(a, i) { return a + (i.cost || 0); }, 0);
-    var totalSize = plots.reduce(function(a, p) { return a + (p.acres || 0); }, 0);
-    var yieldPerUnit = totalSize > 0 ? Math.round(totalYield / totalSize) : totalYield;
-    var el = $('farmKPIs'); if (!el) return;
-    el.innerHTML = '<div class="kpi-card"><div class="kpi-label">Active Seasons</div><div class="kpi-value">' + seasons.filter(function(s) { return s.status === 'active'; }).length + '</div></div>' +
-        '<div class="kpi-card"><div class="kpi-label">Total Output</div><div class="kpi-value stat-green">' + fmt(totalYield) + '</div></div>' +
-        '<div class="kpi-card"><div class="kpi-label">Farm Costs</div><div class="kpi-value stat-red">UGX ' + fmt(totalInputCost) + '</div></div>' +
-        '<div class="kpi-card"><div class="kpi-label">Output/Unit</div><div class="kpi-value stat-blue">' + fmt(yieldPerUnit) + '</div></div>';
-}
-
-function renderSeasons() {
-    var seasons = DB.get('seasons');
-    var el = $('seasonList'); if (!el) return;
-    if (seasons.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No seasons yet. Create your first season!</div>'; return; }
-    var html = '';
-    seasons.forEach(function(s) {
-        var cfg = FARM_TYPES[s.farmType] || FARM_TYPES.crop;
-        var statusColor = s.status === 'active' ? 'var(--green)' : s.status === 'harvesting' ? 'var(--yellow)' : 'var(--muted)';
-        var plots = DB.get('plots').filter(function(p) { return p.seasonId === s.id; });
-        var activities = DB.get('activities').filter(function(a) { return a.seasonId === s.id; });
-        var totalCost = activities.filter(function(a) { return a.type === 'input' || a.type === 'labour'; }).reduce(function(a, b) { return a + (b.cost || 0); }, 0);
-        var totalHarvest = activities.filter(function(a) { return a.type === 'harvest'; }).reduce(function(a, b) { return a + (b.quantity || 0); }, 0);
-        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + cfg.icon + ' ' + s.name + '</div>';
-        html += '<div class="item-meta">' + s.crop + ' • ' + plots.length + ' ' + cfg.plotLabel.toLowerCase() + (plots.length !== 1 ? 's' : '') + ' • Cost: UGX ' + fmt(totalCost) + '</div>';
-        html += '<div class="item-meta">' + cfg.yieldLabel + ': ' + fmt(totalHarvest) + '</div></div>';
-        html += '<div class="item-right"><div style="font-size:11px;font-weight:700;color:' + statusColor + '">' + s.status.toUpperCase() + '</div>';
-        html += '<div style="display:flex;gap:4px;margin-top:6px">';
-        html += '<button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openPlotModal(\'' + s.id + '\')">+ ' + cfg.plotLabel + '</button>';
-        html += '<button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openInputModal(\'' + s.id + '\')">+ Input</button>';
-        html += '<button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openHarvestModal(\'' + s.id + '\')">+ ' + cfg.harvestLabel + '</button>';
-        html += '</div></div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderPlots() {
-    var plots = DB.get('plots');
-    var el = $('plotList'); if (!el) return;
-    if (plots.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No plots/pens yet.</div>'; return; }
-    var html = '';
-    plots.forEach(function(p) {
-        var season = DB.get('seasons').find(function(s) { return s.id === p.seasonId; });
-        var cfg = season ? (FARM_TYPES[season.farmType] || FARM_TYPES.crop) : FARM_TYPES.crop;
-        var activities = DB.get('activities').filter(function(a) { return a.plotId === p.id; });
-        var plotCost = activities.filter(function(a) { return a.type === 'input' || a.type === 'labour'; }).reduce(function(a, b) { return a + (b.cost || 0); }, 0);
-        var plotHarvest = activities.filter(function(a) { return a.type === 'harvest'; }).reduce(function(a, b) { return a + (b.quantity || 0); }, 0);
-        var sizeUnit = (season && season.sizeUnit) ? season.sizeUnit : 'acres';
-        var sizeDisplay = p.acres + ' ' + sizeUnit;
-        var costPerUnit = p.acres > 0 ? Math.round(plotCost / p.acres) : plotCost;
-        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + p.name + ' <span style="color:var(--muted);font-size:11px">(' + (season ? season.name : '') + ')</span></div>';
-        html += '<div class="item-meta">' + p.crop + ' • ' + sizeDisplay + ' • Cost: UGX ' + fmt(plotCost) + '</div>';
-        html += '<div class="item-meta">' + cfg.yieldLabel + ': ' + fmt(plotHarvest) + ' • Cost/unit: UGX ' + fmt(costPerUnit) + '</div></div>';
-        html += '<div class="item-right"><div style="font-size:11px;font-weight:700;color:' + (p.status === 'harvested' ? 'var(--green)' : p.status === 'planted' ? 'var(--yellow)' : 'var(--muted)') + '">' + p.status.toUpperCase() + '</div></div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderActivities() {
-    var activities = DB.get('activities');
-    var el = $('activityList'); if (!el) return;
-    if (activities.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">No activities recorded.</div>'; return; }
-    var html = '';
-    activities.slice(0, 15).forEach(function(a) {
-        var icon = a.type === 'harvest' ? '🌾' : a.type === 'input' ? '📦' : '👷';
-        var plot = DB.get('plots').find(function(p) { return p.id === a.plotId; });
-        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + icon + ' ' + (a.description || a.category || a.type) + '</div>';
-        html += '<div class="item-meta">' + (plot ? plot.name : 'Unknown') + ' • ' + String(a.date).slice(0, 10) + '</div></div>';
-        html += '<div class="item-right">';
-        if (a.type === 'harvest') { html += '<div class="item-price stat-green">' + fmt(a.quantity) + ' ' + (a.unit || 'kg') + '</div>'; }
-        else { html += '<div class="item-price stat-red">UGX ' + fmt(a.cost || 0) + '</div>'; }
-        html += '</div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function createSeason() {
-    var name = $('seasonName').value.trim();
-    var farmType = $('seasonType').value;
-    var crop = $('seasonCrop').value.trim();
-    var sizeUnit = $('seasonUnit').value;
-    var start = $('seasonStart').value;
-    var end = $('seasonEnd').value;
-    if (!name || !crop) return showToast('Enter season name and crop/animal', true);
-    var seasons = DB.get('seasons');
-    seasons.unshift({ id: genId(), name: name, farmType: farmType, crop: crop, sizeUnit: sizeUnit, startDate: start, endDate: end, status: 'active', createdAt: iso() });
-    DB.set('seasons', seasons);
-    logAudit('SEASON', 'Created: ' + name + ' (' + crop + ', ' + farmType + ')');
-    closeModal('seasonModal');
-    showToast('Season created: ' + name);
-    $('seasonName').value = ''; $('seasonCrop').value = ''; $('seasonStart').value = ''; $('seasonEnd').value = '';
-    renderFarm();
-}
-
-function openPlotModal(seasonId) {
-    var seasons = DB.get('seasons');
-    var el = $('plotSeason'); if (!el) return;
-    el.innerHTML = '';
-    seasons.forEach(function(s) {
-        el.innerHTML += '<option value="' + s.id + '"' + (s.id === seasonId ? ' selected' : '') + '>' + s.name + '</option>';
-    });
-    var cfg = getFarmConfig(seasonId);
-    var season = seasons.find(function(s) { return s.id === seasonId; });
-    var sizeUnit = (season && season.sizeUnit) ? season.sizeUnit : 'acres';
-    $('plotModalTitle').textContent = '🗺️ Add ' + cfg.plotLabel;
-    $('plotNameLabel').textContent = cfg.plotLabel + ' Name';
-    $('plotName').placeholder = 'e.g., ' + cfg.plotLabel + ' A, Coop 1, Herd 1';
-    if (['plots', 'animals', 'birds', 'pens'].indexOf(sizeUnit) !== -1) {
-        $('plotSizeLabel').textContent = 'Count (' + sizeUnit + ')';
-        $('plotAcres').placeholder = 'e.g., 50';
-    } else {
-        $('plotSizeLabel').textContent = 'Size (' + sizeUnit + ')';
-        $('plotAcres').placeholder = 'e.g., 2.5';
-    }
-    openModal('plotModal');
-}
-
-function addPlot() {
-    var seasonId = $('plotSeason').value;
-    var name = $('plotName').value.trim();
-    var acres = parseFloat($('plotAcres').value) || 0;
-    var crop = $('plotCrop').value.trim();
-    if (!seasonId || !name) return showToast('Fill season and name', true);
-    var plots = DB.get('plots');
-    plots.unshift({ id: genId(), seasonId: seasonId, name: name, acres: acres, crop: crop, status: 'planted', plantedDate: today(), createdAt: iso() });
-    DB.set('plots', plots);
-    var cfg = getFarmConfig(seasonId);
-    logAudit('PLOT', 'Added ' + cfg.plotLabel + ': ' + name);
-    closeModal('plotModal');
-    showToast(cfg.plotLabel + ' added: ' + name);
-    $('plotName').value = ''; $('plotAcres').value = ''; $('plotCrop').value = '';
-    renderFarm();
-}
-
-function openInputModal(seasonId) {
-    var plots = DB.get('plots').filter(function(p) { return p.seasonId === seasonId; });
-    var el = $('inputPlot'); if (!el) return;
-    el.innerHTML = plots.length ? '' : '<option value="">No plots/pens in this season</option>';
-    plots.forEach(function(p) { el.innerHTML += '<option value="' + p.id + '">' + p.name + '</option>'; });
-    openModal('inputModal');
-}
-
-function recordInput() {
-    var plotId = $('inputPlot').value;
-    var type = $('inputType').value;
-    var desc = $('inputDesc').value.trim();
-    var qty = parseInt($('inputQty').value) || 1;
-    var unit = $('inputUnit').value;
-    var cost = parseInt($('inputCost').value) || 0;
-    if (!plotId) return showToast('Select a plot/pen', true);
-    if (cost <= 0) return showToast('Enter cost', true);
-    var plot = DB.get('plots').find(function(p) { return p.id === plotId; });
-    if (!plot) return showToast('Plot not found', true);
-    var activities = DB.get('activities');
-    activities.unshift({ id: genId(), plotId: plotId, seasonId: plot.seasonId, type: type === 'Labour' ? 'labour' : 'input', category: type, description: desc || type, quantity: qty, unit: unit, cost: cost, date: iso(), createdAt: iso() });
-    DB.set('activities', activities);
-    logAudit('FARM_INPUT', type + ' — UGX ' + fmt(cost));
-    closeModal('inputModal');
-    showToast('Input recorded: UGX ' + fmt(cost));
-    $('inputDesc').value = ''; $('inputQty').value = '1'; $('inputCost').value = '';
-    renderFarm();
-}
-
-function openHarvestModal(seasonId) {
-    var plots = DB.get('plots').filter(function(p) { return p.seasonId === seasonId; });
-    var el = $('harvestPlot'); if (!el) return;
-    el.innerHTML = plots.length ? '' : '<option value="">No plots/pens</option>';
-    plots.forEach(function(p) { el.innerHTML += '<option value="' + p.id + '">' + p.name + ' (' + p.crop + ')</option>'; });
-    var cfg = getFarmConfig(seasonId);
-    $('harvestModalTitle').textContent = cfg.icon + ' Record ' + cfg.harvestLabel;
-    $('harvestQtyLabel').textContent = cfg.yieldLabel;
-    openModal('harvestModal');
-}
-
-function recordHarvest() {
-    var plotId = $('harvestPlot').value;
-    var qty = parseInt($('harvestQty').value) || 0;
-    var unit = $('harvestUnit').value;
-    var notes = $('harvestNotes').value.trim();
-
-    if (!plotId) return showToast('Select a plot/pen', true);
-    if (qty <= 0) return showToast('Enter quantity', true);
-
-    var plot = DB.get('plots').find(function(p) { return p.id === plotId; });
-    if (!plot) return showToast('Plot not found', true);
-
-    // Record the harvest activity
-    var activities = DB.get('activities');
-    activities.unshift({
-        id: genId(), plotId: plotId, seasonId: plot.seasonId,
-        type: 'harvest',
-        description: 'Harvest: ' + plot.crop + (notes ? ' — ' + notes : ''),
-        quantity: qty, unit: unit, cost: 0, date: iso(), createdAt: iso()
-    });
-    DB.set('activities', activities);
-
-    // Update plot status
-    plot.status = 'harvested';
-    var plots = DB.get('plots');
-    var idx = plots.findIndex(function(p) { return p.id === plotId; });
-    if (idx !== -1) { plots[idx] = plot; DB.set('plots', plots); }
-
-    // ADD HARVEST TO STOCK (products)
-    var season = DB.get('seasons').find(function(s) { return s.id === plot.seasonId; });
-    var cropName = plot.crop || (season ? season.crop : 'Harvest');
-    var ps = DB.get('products');
-
-    // Check if product already exists
-    var existing = ps.find(function(p) { return p.name === cropName; });
-    if (existing) {
-        existing.stock += qty;
-        DB.set('products', ps);
-    } else {
-        // Calculate cost per unit from farm inputs
-        var plotActivities = DB.get('activities').filter(function(a) { return a.plotId === plotId; });
-        var totalInputCost = plotActivities.filter(function(a) { return a.type === 'input' || a.type === 'labour'; }).reduce(function(a, b) { return a + (b.cost || 0); }, 0);
-        var totalHarvestQty = plotActivities.filter(function(a) { return a.type === 'harvest'; }).reduce(function(a, b) { return a + (b.quantity || 0); }, 0);
-        var costPerUnit = totalHarvestQty > 0 ? Math.round(totalInputCost / totalHarvestQty) : 0;
-
-        ps.unshift({
-            id: genId(),
-            name: cropName,
-            barcode: '',
-            cost: costPerUnit,
-            price: 0,
-            stock: qty,
-            reorderPoint: 5,
-            source: 'harvest',
-            createdAt: iso()
-        });
-        DB.set('products', ps);
-    }
-
-    var cfg = getFarmConfig(plot.seasonId);
-    logAudit('HARVEST', cropName + ' — ' + fmt(qty) + ' ' + unit + ' → added to stock');
-    closeModal('harvestModal');
-    showToast(cfg.harvestLabel + ' recorded: ' + fmt(qty) + ' ' + unit + ' → Stock updated');
-    $('harvestQty').value = '';
-    $('harvestNotes').value = '';
-    renderFarm();
-}
-
-// ============================================
-// RENDER FUNCTIONS
-// ============================================
-function renderAll() {
-    renderDashboard(); renderProducts(); renderSales(); renderReports(); renderCredits(); renderSettings(); applySectorLabels();
-}
-
-function applySectorLabels() {
-    var sector = (DB.getObj('profile') || {}).sector || 'Retail';
-    var cfg = SECTOR_CONFIG[sector] || SECTOR_CONFIG['Retail'];
-    if ($('prodTitle')) $('prodTitle').textContent = cfg.productLabel;
-    if ($('saleBtn')) $('saleBtn').textContent = '+ New ' + cfg.saleLabel;
-    if ($('stockTab')) $('stockTab').textContent = cfg.stockLabel;
-    if ($('saleModalTitle')) $('saleModalTitle').textContent = 'New ' + cfg.saleLabel;
-    if ($('saleProdLabel')) $('saleProdLabel').textContent = cfg.productLabel;
-    if ($('prodModalTitle')) $('prodModalTitle').textContent = 'Add ' + cfg.productLabel;
-}
-
-function renderDashboard() {
-    renderHealthScore(); renderSectorKPIs(); renderSectorAlerts(); renderAttention();
-}
-
-function renderAttention() {
-    var el = $('attentionList'); if (!el) return;
-    var ps = DB.get('products');
-    var low = ps.filter(function(p) { return isLow(p) || isOut(p); });
-    if (low.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">✅ All good. Nothing needs attention.</div>'; return; }
-    var html = '';
-    low.slice(0, 5).forEach(function(p) {
-        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + p.name + '</div><div class="item-meta">' + (isOut(p) ? 'Out of stock' : 'Low stock: ' + p.stock + ' left') + '</div></div><div class="' + (isOut(p) ? 'stat-red' : 'stat-yellow') + '" style="font-weight:700;font-size:12px">' + (isOut(p) ? 'OUT' : 'LOW') + '</div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderProducts() {
-    var ps = DB.get('products');
-    var search = ($('prodSearch') ? $('prodSearch').value : '').toLowerCase();
-    var filtered = ps.filter(function(p) { return p.name.toLowerCase().indexOf(search) !== -1; });
-    var el = $('productList'); if (!el) return;
-    if (filtered.length === 0) { el.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No ' + (sectorLabel('productLabel') || 'products').toLowerCase() + ' yet.</p></div>'; return; }
-    var html = '';
-    filtered.forEach(function(p) {
-        var stockCls = isOut(p) ? 'stat-red' : isLow(p) ? 'stat-yellow' : 'stat-green';
-        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + p.name + '</div><div class="item-meta">UGX ' + fmt(p.price) + ' • Cost: UGX ' + fmt(p.cost || 0) + '</div></div><div class="item-right"><div class="item-price">' + p.stock + '</div><div class="item-stock ' + stockCls + '">' + (isOut(p) ? 'OUT' : isLow(p) ? 'LOW' : 'OK') + '</div></div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderSales() {
-    var sales = DB.get('sales');
-    var el = $('salesList'); if (!el) return;
-    if (sales.length === 0) { el.innerHTML = '<div class="empty-state"><div class="icon">🛒</div><p>No sales yet.</p></div>'; return; }
-    var html = '';
-    sales.slice(0, 20).forEach(function(s) {
-        var prod = DB.get('products').find(function(p) { return p.id === s.productId; });
-        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + (prod ? prod.name : 'Item') + ' ×' + s.quantity + '</div><div class="item-meta">' + s.payment + ' • ' + String(s.date).slice(0, 10) + '</div></div><div class="item-right"><div class="item-price stat-green">UGX ' + fmt(s.total) + '</div></div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderReports() { switchReportTab('overview', document.querySelector('#reportTabs .tab-btn.active')); }
-
-function switchReportTab(tab, btn) {
-    document.querySelectorAll('#reportTabs .tab-btn').forEach(function(t) { t.classList.remove('active'); });
-    if (btn) btn.classList.add('active');
-    var el = $('reportContent'); if (!el) return;
-    var sales = DB.get('sales'), ex = DB.get('expenses'), ps = DB.get('products');
-    var weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
-    var weekSales = sales.filter(function(s) { return new Date(s.date) >= weekStart; });
-    var weekRevenue = weekSales.reduce(function(a, s) { return a + s.total; }, 0);
-    var weekCost = weekSales.reduce(function(a, s) { return a + (costOf(s.productId) * s.quantity); }, 0);
-    var weekExp = ex.filter(function(e) { return new Date(e.date) >= weekStart; }).reduce(function(a, e) { return a + e.amount; }, 0);
-    var profit = weekRevenue - weekCost - weekExp;
-    if (tab === 'overview') {
-        el.innerHTML = '<div class="kpi-grid"><div class="kpi-card"><div class="kpi-label">Revenue (7d)</div><div class="kpi-value stat-green">UGX ' + fmt(weekRevenue) + '</div></div><div class="kpi-card"><div class="kpi-label">Cost of Goods</div><div class="kpi-value stat-yellow">UGX ' + fmt(weekCost) + '</div></div><div class="kpi-card"><div class="kpi-label">Expenses (7d)</div><div class="kpi-value stat-red">UGX ' + fmt(weekExp) + '</div></div><div class="kpi-card"><div class="kpi-label">Net Profit</div><div class="kpi-value ' + (profit >= 0 ? 'stat-green' : 'stat-red') + '">UGX ' + fmt(profit) + '</div></div></div><button class="btn btn-green btn-sm" style="margin-top:12px" onclick="openModal(\'expenseModal\')">+ Add Expense</button>';
-    } else if (tab === 'expenses') {
-        var html = '<button class="btn btn-green btn-sm" style="margin-bottom:12px" onclick="openModal(\'expenseModal\')">+ Add Expense</button>';
-        if (ex.length === 0) { html += '<div class="empty-state"><p>No expenses recorded.</p></div>'; }
-        else { ex.slice(0, 20).forEach(function(e) { html += '<div class="list-item"><div class="item-info"><div class="item-name">' + e.category + '</div><div class="item-meta">' + String(e.date).slice(0, 10) + (e.note ? ' • ' + e.note : '') + '</div></div><div class="item-right"><div class="item-price stat-red">UGX ' + fmt(e.amount) + '</div></div></div>'; }); }
-        el.innerHTML = html;
-    } else if (tab === 'reconciliation') {
-        var todaySales = sales.filter(function(s) { return String(s.date || '').indexOf(today()) === 0; });
-        var cashSales = todaySales.filter(function(s) { return s.payment === 'Cash'; }).reduce(function(a, s) { return a + s.total; }, 0);
-        var momoSales = todaySales.filter(function(s) { return s.payment === 'MTN MoMo' || s.payment === 'Airtel Money'; }).reduce(function(a, s) { return a + s.total; }, 0);
-        var drawdowns = ex.filter(function(e) { return e.category === 'Drawdown' && String(e.date || '').indexOf(today()) === 0; }).reduce(function(a, e) { return a + e.amount; }, 0);
-        var expected = cashSales - drawdowns;
-        el.innerHTML = '<div class="card"><div class="card-title">Today\'s Reconciliation</div><div class="list-item"><div class="item-info"><div class="item-name">Cash Sales</div></div><div class="item-right"><div class="item-price stat-green">UGX ' + fmt(cashSales) + '</div></div></div><div class="list-item"><div class="item-info"><div class="item-name">Mobile Money</div></div><div class="item-right"><div class="item-price stat-blue">UGX ' + fmt(momoSales) + '</div></div></div><div class="list-item"><div class="item-info"><div class="item-name">Drawdowns</div></div><div class="item-right"><div class="item-price stat-red">- UGX ' + fmt(drawdowns) + '</div></div></div><div class="list-item"><div class="item-info"><div class="item-name"><b>Expected Cash</b></div></div><div class="item-right"><div class="item-price" style="font-size:18px"><b>UGX ' + fmt(expected) + '</b></div></div></div></div>';
-    }
-}
-
-function renderCredits() {
-    var creds = DB.get('credits');
-    var el = $('creditList'); if (!el) return;
-    if (creds.length === 0) { el.innerHTML = '<div class="empty-state"><div class="icon">💳</div><p>No credit sales yet.</p></div>'; return; }
-    var html = '';
-    creds.forEach(function(c) {
-        var remaining = (c.totalAmount || c.amount || 0) - (c.paidAmount || 0);
-        var statusCls = remaining <= 0 ? 'stat-green' : (new Date() - new Date(c.date)) / 86400000 > 7 ? 'stat-red' : 'stat-yellow';
-        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + c.name + '</div><div class="item-meta">' + String(c.date).slice(0, 10) + ' • Paid: UGX ' + fmt(c.paidAmount || 0) + '</div></div><div class="item-right"><div class="item-price ' + statusCls + '">UGX ' + fmt(remaining) + '</div><div class="item-stock">' + (remaining <= 0 ? 'PAID' : 'OWED') + '</div></div></div>';
-    });
-    el.innerHTML = html;
-}
-
-function renderSettings() {
-    var p = DB.getObj('profile');
-    var el = $('shopInfoDisplay'); if (!el) return;
-    el.innerHTML = '<div style="font-size:13px;color:var(--muted)">Owner: <b style="color:var(--text)">' + (p.owner || '—') + '</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Phone: <b style="color:var(--text)">' + (p.phone || '—') + '</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Sector: <b style="color:var(--text)">' + (p.sector || 'Retail') + '</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Location: <b style="color:var(--text)">' + (p.location || '—') + '</b></div>';
-    renderEmployees(); renderAudit();
-}
-
-function renderEmployees() {
-    var emps = DB.get('employees');
-    var el = $('employeeList'); if (!el) return;
-    if (emps.length === 0) { el.innerHTML = '<div style="font-size:13px;color:var(--muted)">No employees yet.</div>'; return; }
-    var html = '';
-    emps.forEach(function(e) {
-        html += '<div class="list-item"><div class="item-info"><div class="item-name">' + e.name + '</div><div class="item-meta">' + e.role + ' • ' + e.phone + '</div></div><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" onclick="toggleEmployeeStatus(\'' + e.id + '\')">' + (e.status === 'active' ? 'Suspend' : 'Activate') + '</button><button class="btn btn-red btn-sm" onclick="deleteEmployee(\'' + e.id + '\')">✕</button></div></div>';
-    });
-    el.innerHTML = html;
-}
-
-// ============================================
-// CRUD FUNCTIONS
-// ============================================
-function saveProduct() {
-    var name = $('prodName').value.trim(), barcode = $('prodBarcode').value.trim();
-    var cost = parseInt($('prodCost').value) || 0, price = parseInt($('prodPrice').value) || 0, stock = parseInt($('prodStock').value) || 0;
-    if (!name) return showToast('Enter product name', true);
-    if (price <= 0) return showToast('Enter selling price', true);
-    var ps = DB.get('products');
-    ps.unshift({ id: genId(), name: name, barcode: barcode, cost: cost, price: price, stock: stock, reorderPoint: 5, createdAt: iso() });
-    DB.set('products', ps);
-    logAudit('ADD_PRODUCT', name + ' — UGX ' + fmt(price));
-    closeModal('productModal');
-    showToast((sectorLabel('productLabel') || 'Product') + ' added ✓');
-    $('prodName').value = ''; $('prodBarcode').value = ''; $('prodCost').value = ''; $('prodPrice').value = ''; $('prodStock').value = '';
-    markPending(); renderAll();
-}
-
-function recordSale() {
-    var pid = $('saleProduct').value, qty = parseInt($('saleQty').value) || 1, payment = $('salePayment').value;
-    if (!pid) return showToast('Select a product', true);
-    var ps = DB.get('products');
-    var prod = ps.find(function(x) { return x.id === pid; });
-    if (!prod) return showToast('Product not found', true);
-    if (qty > prod.stock) return showToast('Only ' + prod.stock + ' in stock', true);
-    var total = prod.price * qty;
-    prod.stock -= qty;
-    DB.set('products', ps);
-    var sales = DB.get('sales');
-    sales.unshift({ id: genId(), productId: pid, quantity: qty, total: total, payment: payment, date: iso() });
-    DB.set('sales', sales);
-    logAudit('SALE', prod.name + ' ×' + qty + ' — UGX ' + fmt(total) + ' (' + payment + ')');
-    closeModal('saleModal');
-    showToast((sectorLabel('saleLabel') || 'Sale') + ' recorded: UGX ' + fmt(total));
-    $('saleQty').value = '1';
-    markPending(); renderAll();
-}
-
-function recordExpense() {
-    var category = $('expCategory').value, amount = parseInt($('expAmount').value) || 0, note = $('expNote').value.trim();
-    if (amount <= 0) return showToast('Enter amount', true);
-    var ex = DB.get('expenses');
-    ex.unshift({ id: genId(), category: category, amount: amount, note: note, date: iso() });
-    DB.set('expenses', ex);
-    logAudit('EXPENSE', category + ' — UGX ' + fmt(amount));
-    closeModal('expenseModal');
-    showToast('Expense recorded: UGX ' + fmt(amount));
-    $('expAmount').value = ''; $('expNote').value = '';
-    markPending(); renderAll();
-}
-
-function addCredit() {
-    var name = $('credName').value.trim(), amount = parseInt($('credAmount').value) || 0, note = $('credNote').value.trim();
-    if (!name) return showToast('Enter customer name', true);
-    if (amount <= 0) return showToast('Enter amount', true);
-    var creds = DB.get('credits');
-    creds.unshift({ id: genId(), name: name, totalAmount: amount, paidAmount: 0, note: note, date: iso(), status: 'unpaid' });
-    DB.set('credits', creds);
-    logAudit('CREDIT', name + ' — UGX ' + fmt(amount));
-    closeModal('creditModal');
-    showToast('Credit added: UGX ' + fmt(amount));
-    $('credName').value = ''; $('credAmount').value = ''; $('credNote').value = '';
-    markPending(); renderAll();
-}
-
-function addEmployee() {
-    var name = $('empName').value.trim(), phone = $('empPhone').value.trim(), role = $('empRole').value, pin = $('empPin').value.trim();
-    if (!name || !phone || !pin) return showToast('Fill all fields', true);
-    if (pin.length !== 4) return showToast('PIN must be 4 digits', true);
-    hashPin(pin).then(function(h) {
-        var emps = DB.get('employees');
-        emps.push({ id: genId(), name: name, phone: phone, role: role, pinHash: h, status: 'active', createdAt: iso() });
-        DB.set('employees', emps);
-        logAudit('ADD_EMPLOYEE', name + ' — ' + role);
-        closeModal('employeeModal');
-        showToast('Employee added ✓');
-        $('empName').value = ''; $('empPhone').value = ''; $('empPin').value = '';
-        var p = DB.getObj('profile');
-        if (p && p.shopKey && navigator.onLine) {
-            api('/rest/v1/rpc/create_cloud_employee', { method: 'POST', body: JSON.stringify({ p_shop_key: p.shopKey, p_name: name, p_phone: phone, p_role_name: role, p_branch: 'main', p_pin_hash: h }) }).catch(function() {});
-        }
-        renderSettings();
-    }).catch(function() { showToast('Error adding employee', true); });
-}
-
-function toggleEmployeeStatus(id) {
-    var emps = DB.get('employees');
-    var emp = emps.find(function(e) { return e.id === id; });
-    if (!emp) return;
-    emp.status = emp.status === 'active' ? 'suspended' : 'active';
-    DB.set('employees', emps);
-    logAudit('EMPLOYEE_STATUS', emp.name + ' — ' + emp.status);
-    showToast('Employee ' + (emp.status === 'active' ? 'activated' : 'suspended'));
-    renderSettings();
-}
-
-function deleteEmployee(id) {
-    if (!confirm('Delete this employee?')) return;
-    var emps = DB.get('employees');
-    var emp = emps.find(function(e) { return e.id === id; });
-    DB.set('employees', emps.filter(function(e) { return e.id !== id; }));
-    if (emp) logAudit('DELETE_EMPLOYEE', emp.name);
-    showToast('Employee deleted');
-    renderSettings();
-}
-
-function populateSaleProducts() {
-    var ps = DB.get('products').filter(function(p) { return p.stock > 0; });
-    var el = $('saleProduct'); if (!el) return;
-    el.innerHTML = ps.length ? '' : '<option value="">No stock available</option>';
-    ps.forEach(function(p) { el.innerHTML += '<option value="' + p.id + '">' + p.name + ' (' + p.stock + ' left)</option>'; });
-}
-
-// ============================================
-// STARTUP
-// ============================================
-setTimeout(function() {
-    var splash = $('splash');
-    if (splash && !splash.classList.contains('hide')) {
-        splash.classList.add('hide');
-        setTimeout(function() {
-            splash.style.display = 'none';
-            var p = DB.getObj('profile');
-            if (p && p.shopName) {
-                startApp();
-                showWizard();
-            } else {
-                $('authFlow').style.display = 'flex';
-                showAuth('welcome');
-            }
-        }, 500);
-    }
-}, 2000);
+var CLOUD_URL='https://mrkawvyaybphbfpqrvqb.supabase.co';
+var API_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1ya2F3dnlheWJwaGJmcHFydnFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NDQ3OTQsImV4cCI6MjEwMjEyMDc5NH0.CCUWP5HxpjPZI8TCoakKjHj0WDrdgg9UNXjbo6GEKzc';
+var SESSION={role:'owner',user:null};
+var barcodeScanner=null;
+function $(id){return document.getElementById(id)}
+function fmt(n){return(n||0).toLocaleString()}
+function iso(){return new Date().toISOString()}
+function today(){return new Date().toISOString().split('T')[0]}
+function genId(){return'df_'+Date.now()+'_'+Math.random().toString(36).substr(2,9)}
+function isLow(p){return p.stock<=(p.reorderPoint||5)}
+function isOut(p){return p.stock<=0}
+function costOf(pid){var ps=DB.get('products');var p=ps.find(function(x){return x.id===pid});return p?(p.cost||0):0}
+function showToast(msg,isError){var t=$('toast');if(!t)return;t.textContent=msg;t.className='toast show'+(isError?' error':'');setTimeout(function(){t.className='toast'},2500)}
+function openModal(id){$(id).classList.add('active');if(id==='saleModal')populateSaleProducts();if(id==='refundModal')populateRefundSales();if(id==='writeoffModal')populateWriteoffProducts();if(id==='barcodeModal')startBarcode();if(id==='tripModal')populateVehicleSelect('tripVehicle');if(id==='fuelModal')populateVehicleSelect('fuelVehicle');if(id==='maintModal')populateVehicleSelect('maintVehicle');if(id==='remittanceModal')populateVehicleSelect('remVehicle');if(id==='dispTank')populateTankSelect('dispTank');if(id==='dipModal')populateTankSelect('dipTank');if(id==='prodOrderModal')populateBOMSelect();if(id==='apptModal')populateStaffSelect()}
+function closeModal(id){$(id).classList.remove('active');if(id==='barcodeModal')stopBarcode()}
+function getSectorScreen(){var s=(DB.getObj('profile')||{}).sector;var map={'Transport':'transport','Food':'food','Manufacturing':'manufacturing','Services':'services','Energy':'energy','Agriculture':'farm'};return map[s]||'dashboard'}
+function switchScreen(name){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});var scr=$('screen-'+name);if(scr)scr.classList.add('active');var navItems=document.querySelectorAll('.nav-item');if(name==='dashboard'&&navItems[0])navItems[0].classList.add('active');if(name==='products'&&navItems[2])navItems[2].classList.add('active');if(name==='credits'&&navItems[5])navItems[5].classList.add('active');if(name==='settings'&&navItems[6])navItems[6].classList.add('active');if(name===getSectorScreen()&&navItems[1])navItems[1].classList.add('active');if(name==='dashboard')renderDashboard();if(name==='farm')renderFarm();if(name==='transport')renderTransport();if(name==='food')renderFood();if(name==='manufacturing')renderManufacturing();if(name==='services')renderServices();if(name==='energy')renderEnergy();if(name==='products')renderProducts();if(name==='sales')renderSales();if(name==='reports')renderReports();if(name==='credits')renderCredits();if(name==='settings')renderSettings()}
+var DB={get:function(k){try{return JSON.parse(localStorage.getItem('df_'+k))||[]}catch(e){return[]}},set:function(k,v){localStorage.setItem('df_'+k,JSON.stringify(v))},getObj:function(k){try{return JSON.parse(localStorage.getItem('df_'+k))||{}}catch(e){return{}}},setObj:function(k,v){localStorage.setItem('df_'+k,JSON.stringify(v))}}
+function logAudit(action,details){var a=DB.get('audit');a.unshift({id:genId(),action:action,details:details,user:(SESSION.user?SESSION.user.name:'System'),date:iso()});if(a.length>50)a=a.slice(0,50);DB.set('audit',a)}
+function renderAudit(){var a=DB.get('audit');var el=$('auditList');if(!el)return;if(a.length===0){el.innerHTML='<div style="color:var(--muted);font-size:13px">No activity yet</div>';return}var h='';a.slice(0,10).forEach(function(x){h+='<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--muted)">'+String(x.date).slice(0,16)+'</span> <b>'+x.action+'</b> — '+x.details+' <span style="color:var(--muted)">('+x.user+')</span></div>'});el.innerHTML=h}
+function showAuth(s){document.querySelectorAll('.auth-screen').forEach(function(x){x.classList.remove('active')});var el=$('screen-'+s);if(el)el.classList.add('active')}
+function doRegister(){var shop=$('regShop').value.trim(),name=$('regName').value.trim(),phone=$('regPhone').value.trim(),loc=$('regLocation').value.trim(),sector=$('regSector').value,pin=$('regPin').value.trim();if(!shop||!name||!phone||!pin)return showToast('Fill all fields',true);if(pin.length!==4)return showToast('PIN must be 4 digits',true);hashPin(pin).then(function(h){DB.setObj('profile',{shopName:shop,owner:name,phone:phone,location:loc,sector:sector,createdAt:iso(),pinHash:h,shopKey:genId()});logAudit('REGISTER','Shop created: '+shop);showToast('Welcome, '+name+'! 🎉');startApp();showWizard()}).catch(function(){showToast('Error',true)})}
+function doLogin(){var phone=$('logPhone').value.trim(),pin=$('logPin').value.trim();if(!phone||!pin)return showToast('Enter phone and PIN',true);showToast('Verifying...');hashPin(pin).then(function(h){var p=DB.getObj('profile');if(p&&p.phone===phone&&p.pinHash===h){SESSION={role:'owner',user:{name:p.owner}};logAudit('LOGIN','Owner logged in');showToast('Welcome back, '+p.owner+'!');startApp()}else{showToast('Wrong phone or PIN',true)}}).catch(function(){showToast('Error',true)})}
+function doEmployeeLogin(){var phone=$('empLogPhone').value.trim(),pin=$('empLogPin').value.trim();if(!phone||!pin)return showToast('Enter phone and PIN',true);showToast('Verifying...');hashPin(pin).then(function(h){var emps=DB.get('employees');var emp=emps.find(function(e){return e.phone===phone&&e.pinHash===h&&e.status==='active'});if(emp){SESSION={role:emp.role,user:{name:emp.name}};logAudit('LOGIN','Employee: '+emp.name);showToast('Welcome, '+emp.name+'!');startApp()}else{showToast('Wrong credentials or suspended',true)}}).catch(function(){showToast('Error',true)})}
+function startApp(){$('authFlow').style.display='none';$('app').style.display='block';var p=DB.getObj('profile');$('shopNameDisplay').textContent=p.shopName||'My Shop';$('sectorBadge').textContent=p.sector||'Retail';initSectorNav();renderAll()}
+function initSectorNav(){var sector=(DB.getObj('profile')||{}).sector;var nav=$('navSector');var icon=$('navSectorIcon');var label=$('navSectorLabel');var map={'Transport':{icon:'🚚',label:'Transport'},'Food':{icon:'🍲',label:'Kitchen'},'Manufacturing':{icon:'🏭',label:'Factory'},'Services':{icon:'✂️',label:'Services'},'Energy':{icon:'⛽',label:'Energy'},'Agriculture':{icon:'🌾',label:'Farm'}};if(sector&&map[sector]){nav.style.display='flex';icon.textContent=map[sector].icon;label.textContent=map[sector].label}else{nav.style.display='none'}}
+function logout(){logAudit('LOGOUT','User logged out');SESSION={role:'owner',user:null};$('app').style.display='none';$('authFlow').style.display='flex';showAuth('welcome')}
+function markPending(){var d=$('syncDot');if(d)d.classList.add('pending')}
+function api(path,opts){opts=opts||{};opts.headers=Object.assign({apikey:API_KEY,'Content-Type':'application/json'},opts.headers||{});return fetch(CLOUD_URL+path,opts)}
+function j(r){return r.json()}
+function hashPin(pin){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(pin)).then(function(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('')})}
+function syncAll(){showToast('Syncing...');var p=DB.getObj('profile');if(!p||!p.shopKey){showToast('No cloud connection',true);return}Promise.all([api('/rest/v1/rpc/sync_products',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_products:DB.get('products')})}).catch(function(){}),api('/rest/v1/rpc/sync_sales',{method:'POST',body:JSON.stringify({p_shop_key:p.shopKey,p_sales:DB.get('sales')})}).catch(function(){})]).then(function(){var d=$('syncDot');if(d)d.classList.remove('pending');logAudit('SYNC','Cloud sync completed');showToast('Synced ✓')}).catch(function(){showToast('Sync failed',true)})}
+function restore(){showToast('Restoring...');var p=DB.getObj('profile');if(!p||!p.cloudId){showToast('No cloud data',true);return}api('/rest/v1/rpc/restore_shop',{method:'POST',body:JSON.stringify({p_shop_id:p.cloudId})}).then(j).then(function(res){if(res&&res.ok){if(res.products)DB.set('products',res.products);if(res.sales)DB.set('sales',res.sales);logAudit('RESTORE','Data restored');renderAll();showToast('Restored ✓')}else{showToast('Restore failed',true)}}).catch(function(){showToast('Error',true)})}
+function calcHealthScore(){var sales=DB.get('sales'),ps=DB.get('products'),creds=DB.get('credits'),ex=DB.get('expenses');var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);var weekSales=sales.filter(function(s){return new Date(s.date)>=weekStart});var weekRevenue=weekSales.reduce(function(a,s){return a+s.total},0);var weekCost=weekSales.reduce(function(a,s){return a+(costOf(s.productId)*s.quantity)},0);var grossMargin=weekRevenue>0?((weekRevenue-weekCost)/weekRevenue*100):0;var lowStock=ps.filter(function(p){return isLow(p)||isOut(p)}).length;var stockHealth=ps.length>0?Math.max(0,100-Math.round((lowStock/ps.length)*100)):100;var salesScore=sales.length>0?100:40;var profitScore=Math.min(100,Math.round(grossMargin*2));return{score:Math.round((salesScore*0.3)+(profitScore*0.3)+(stockHealth*0.4)),components:{sales:salesScore,profit:profitScore,stock:stockHealth},alerts:[]}}
+function renderHealthScore(){var hs=calcHealthScore();var el=$('healthScoreCard');if(!el)return;var color=hs.score>=70?'var(--green)':hs.score>=40?'var(--yellow)':'var(--red)';var label=hs.score>=70?'Healthy':hs.score>=40?'Needs Attention':'At Risk';el.innerHTML='<div style="display:flex;align-items:center;gap:16px"><div class="health-ring" style="border:4px solid '+color+'"><div class="score" style="color:'+color+'">'+hs.score+'</div><div class="label">/100</div></div><div style="flex:1"><div style="font-size:16px;font-weight:800;color:'+color+'">'+label+'</div><div style="font-size:12px;color:var(--muted);margin-top:4px">Sales '+hs.components.sales+' • Profit '+hs.components.profit+' • Stock '+hs.components.stock+'</div></div></div>'}
+function renderAttention(){var el=$('attentionList');if(!el)return;var ps=DB.get('products');var low=ps.filter(function(p){return isLow(p)||isOut(p)});if(low.length===0){el.innerHTML='<div style="color:var(--muted);font-size:13px">✅ All good.</div>';return}var h='';low.slice(0,5).forEach(function(p){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+(isOut(p)?'Out of stock':'Low: '+p.stock+' left')+'</div></div><div class="'+(isOut(p)?'stat-red':'stat-yellow')+'" style="font-weight:700;font-size:12px">'+(isOut(p)?'OUT':'LOW')+'</div></div>'});el.innerHTML=h}
+function renderSectorKPIs(){var sector=(DB.getObj('profile')||{}).sector||'Retail';var el=$('sectorKPIs');if(!el)return;var kpis=getSectorKPIs(sector);var h='';kpis.forEach(function(k){h+='<div class="kpi-card"><div class="kpi-label">'+k.label+'</div><div class="kpi-value '+k.cls+'">'+k.value+'</div></div>'});el.innerHTML=h}
+function getSectorKPIs(sector){var sales=DB.get('sales'),ps=DB.get('products'),ex=DB.get('expenses');var todayStr=today();var todaySales=sales.filter(function(s){return String(s.date||'').indexOf(todayStr)===0});var todayRev=todaySales.reduce(function(a,s){return a+s.total},0);switch(sector){case'Transport':var trips=DB.get('trips');var totalKm=trips.reduce(function(a,t){return a+(t.distance||0)},0);var totalFuel=trips.reduce(function(a,t){return a+(t.fuel||0)},0);var fuelCost=DB.get('fuel').reduce(function(a,f){return a+(f.litres*f.pricePerL)},0);var tripRev=trips.reduce(function(a,t){return a+(t.revenue||0)},0);var costPerKm=totalKm>0?Math.round((fuelCost+ex.reduce(function(a,e){return a+e.amount},0))/totalKm):0;return[{label:'Today Revenue',value:'UGX '+fmt(todayRev),cls:'stat-green'},{label:'Total km (7d)',value:fmt(totalKm),cls:'stat-blue'},{label:'Cost/km',value:'UGX '+fmt(costPerKm),cls:'stat-yellow'},{label:'Trips Today',value:trips.filter(function(t){return String(t.date||'').indexOf(todayStr)===0}).length,cls:'stat-purple'}];case'Food':var recipes=DB.get('recipes');var waste=DB.get('foodWaste');var wasteCost=waste.reduce(function(a,w){return a+(w.cost||0)},0);var avgRecipeCost=recipes.length>0?Math.round(recipes.reduce(function(a,r){return a+(r.totalCost||0)},0)/recipes.length):0;return[{label:'Today Sales',value:'UGX '+fmt(todayRev),cls:'stat-green'},{label:'Recipes',value:recipes.length,cls:'stat-blue'},{label:'Waste Cost',value:'UGX '+fmt(wasteCost),cls:'stat-red'},{label:'Avg Recipe Cost',value:'UGX '+fmt(avgRecipeCost),cls:'stat-yellow'}];case'Manufacturing':var boms=DB.get('boms');var prodOrders=DB.get('prodOrders');var completed=prodOrders.filter(function(o){return o.status==='completed'});var totalProdCost=prodOrders.reduce(function(a,o){return a+(o.totalCost||0)},0);return[{label:'Today Sales',value:'UGX '+fmt(todayRev),cls:'stat-green'},{label:'BOMs',value:boms.length,cls:'stat-blue'},{label:'Active Orders',value:prodOrders.filter(function(o){return o.status!=='completed'}).length,cls:'stat-yellow'},{label:'Production Cost',value:'UGX '+fmt(totalProdCost),cls:'stat-red'}];case'Services':var appts=DB.get('appointments');var todayAppts=appts.filter(function(a){return a.date===todayStr});var completedAppts=todayAppts.filter(function(a){return a.status==='completed'});var packages=DB.get('servicePackages');return[{label:'Today Revenue',value:'UGX '+fmt(todayRev),cls:'stat-green'},{label:'Bookings Today',value:todayAppts.length,cls:'stat-blue'},{label:'Completed',value:completedAppts.length,cls:'stat-green'},{label:'Packages',value:packages.length,cls:'stat-purple'}];case'Energy':var tanks=DB.get('tanks');var dispenses=DB.get('dispenses');var totalDispensed=dispenses.reduce(function(a,d){return a+(d.litres||0)},0);var dispRevenue=dispenses.reduce(function(a,d){return a+(d.litres*d.price)},0);var totalTankLevel=tanks.reduce(function(a,t){return a+(t.currentLevel||0)},0);var totalCapacity=tanks.reduce(function(a,t){return a+(t.capacity||0)},0);return[{label:'Dispensed (L)',value:fmt(totalDispensed),cls:'stat-blue'},{label:'Revenue',value:'UGX '+fmt(dispRevenue),cls:'stat-green'},{label:'Tank Level',value:fmt(totalTankLevel)+'L',cls:totalTankLevel<totalCapacity*0.2?'stat-red':'stat-green'},{label:'Cylinders',value:DB.get('cylinders').length,cls:'stat-purple'}];default:return[{label:'Today Revenue',value:'UGX '+fmt(todayRev),cls:'stat-green'},{label:'Products',value:ps.length,cls:'stat-blue'},{label:'Low Stock',value:ps.filter(function(p){return isLow(p)}).length,cls:ps.filter(function(p){return isLow(p)}).length>0?'stat-red':'stat-green'},{label:'Orders',value:sales.length,cls:'stat-purple'}]}}
+function renderSectorAlerts(){var el=$('sectorAlerts');if(!el)return;var sector=(DB.getObj('profile')||{}).sector||'Retail';var alerts=getSectorAlerts(sector);if(alerts.length===0){el.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">✅ No alerts.</div>';return}var h='';alerts.slice(0,5).forEach(function(a){var bc=a.type==='urgent'?'var(--red)':'var(--yellow)';h+='<div class="insight-row" style="border-left-color:'+bc+'"><div class="insight-icon">'+a.icon+'</div><div class="insight-text"><div class="insight-title">'+a.title+'</div><div class="insight-desc">'+a.desc+'</div></div></div>'});el.innerHTML=h}
+function getSectorAlerts(sector){var alerts=[];var ps=DB.get('products');switch(sector){case'Transport':var trips=DB.get('trips');var vehicles=DB.get('vehicles');var fuels=DB.get('fuel');var maints=DB.get('maintenance');vehicles.forEach(function(v){var lastMaint=maints.filter(function(m){return m.vehicleId===v.id}).sort(function(a,b){return new Date(b.date)-new Date(a.date)})[0];if(lastMaint&&(new Date()-new Date(lastMaint.date))/86400000>90)alerts.push({type:'warning',icon:'🔧',title:v.name+' needs service',desc:'Last serviced '+(lastMaint.type||'')});var vTrips=trips.filter(function(t){return t.vehicleId===v.id});var avgKmL=vTrips.length>0?vTrips.reduce(function(a,t){return a+(t.distance||0)},0)/Math.max(vTrips.reduce(function(a,t){return a+(t.fuel||0)},0),0.1):0;if(avgKmL<5)alerts.push({type:'urgent',icon:'⛽',title:v.name+' high fuel consumption',desc:avgKmL.toFixed(1)+' km/L — check engine'})});break;case'Food':var waste=DB.get('foodWaste');var totalWaste=waste.reduce(function(a,w){return a+(w.cost||0)},0);if(totalWaste>50000)alerts.push({type:'urgent',icon:'🗑️',title:'High waste cost',desc:'UGX '+fmt(totalWaste)+' lost this period'});var recipes=DB.get('recipes');recipes.forEach(function(r){if(r.totalCost>0&&r.price>0){var margin=((r.price-r.totalCost)/r.price)*100;if(margin<30)alerts.push({type:'warning',icon:'📉',title:r.name+' low margin',desc:'Only '+margin.toFixed(0)+'% margin — consider price increase'})}});break;case'Manufacturing':var prodOrders=DB.get('prodOrders');var overdue=prodOrders.filter(function(o){return o.status==='in_progress'&&(new Date()-new Date(o.date))/86400000>7});if(overdue.length>0)alerts.push({type:'urgent',icon:'⏰',title:overdue.length+' overdue production order(s)',desc:'Check production floor'});break;case'Services':var appts=DB.get('appointments');var noShow=appts.filter(function(a){return a.status==='no_show'});if(noShow.length>3)alerts.push({type:'warning',icon:'👻',title:noShow.length+' no-shows',desc:'Consider deposit policy'});var todayAppts=appts.filter(function(a){return a.date===todayStr&&a.status==='pending'});if(todayAppts.length>0)alerts.push({type:'warning',icon:'📅',title:todayAppts.length+' pending today',desc:'Confirm appointments'});break;case'Energy':var tanks=DB.get('tanks');tanks.forEach(function(t){var pct=t.capacity>0?(t.currentLevel/t.capacity)*100:0;if(pct<20)alerts.push({type:'urgent',icon:'🛢️',title:t.name+' critically low',desc:'Only '+Math.round(pct)+'% remaining — reorder now!'});else if(pct<40)alerts.push({type:'warning',icon:'🛢️',title:t.name+' getting low',desc:Math.round(pct)+'% — plan refill'})});break}return alerts}
+// ========== TRANSPORT MODULE ==========
+function populateVehicleSelect(selectId){var vehicles=DB.get('vehicles');var el=$(selectId);if(!el)return;el.innerHTML=vehicles.length?'':'<option value="">No vehicles</option>';vehicles.forEach(function(v){el.innerHTML+='<option value="'+v.id+'">'+v.name+' ('+v.type+')</option>'})}
+function addVehicle(){var name=$('vehName').value.trim(),type=$('vehType').value,cap=parseInt($('vehCapacity').value)||0,driver=$('vehDriver').value.trim(),route=$('vehRoute').value.trim();if(!name)return showToast('Enter vehicle name/plate',true);var v=DB.get('vehicles');v.push({id:genId(),name:name,type:type,capacity:cap,driver:driver,route:route,status:'active',createdAt:iso()});DB.set('vehicles',v);logAudit('ADD_VEHICLE',name+' — '+type);closeModal('vehicleModal');showToast('Vehicle added ✓');$('vehName').value='';$('vehDriver').value='';$('vehRoute').value='';renderTransport()}
+function recordTrip(){var vid=$('tripVehicle').value,dist=parseInt($('tripDistance').value)||0,fuel=parseFloat($('tripFuel').value)||0,rev=parseInt($('tripRevenue').value)||0,exp=parseInt($('tripExpenses').value)||0,notes=$('tripNotes').value.trim();if(!vid)return showToast('Select vehicle',true);if(dist<=0)return showToast('Enter distance',true);var trips=DB.get('trips');trips.unshift({id:genId(),vehicleId:vid,distance:dist,fuel:fuel,revenue:rev,expenses:exp,notes:notes,date:iso()});DB.set('trips',trips);var veh=DB.get('vehicles').find(function(v){return v.id===vid});logAudit('TRIP',(veh?veh.name:'Vehicle')+' — '+dist+'km, UGX '+fmt(rev));closeModal('tripModal');showToast('Trip recorded ✓');renderTransport()}
+function recordFuel(){var vid=$('fuelVehicle').value,litres=parseFloat($('fuelLitres').value)||0,ppL=parseInt($('fuelPricePerL').value)||0,station=$('fuelStation').value.trim();if(!vid||litres<=0)return showToast('Fill all fields',true);var fuels=DB.get('fuel');fuels.unshift({id:genId(),vehicleId:vid,litres:litres,pricePerL:ppL,totalCost:litres*ppL,station:station,date:iso()});DB.set('fuel',fuels);logAudit('FUEL',litres+'L — UGX '+fmt(litres*ppL));closeModal('fuelModal');showToast('Fuel recorded ✓');renderTransport()}
+function recordMaintenance(){var vid=$('maintVehicle').value,type=$('maintType').value,cost=parseInt($('maintCost').value)||0,odo=parseInt($('maintOdometer').value)||0,notes=$('maintNotes').value.trim();if(!vid||cost<=0)return showToast('Fill fields',true);var m=DB.get('maintenance');m.unshift({id:genId(),vehicleId:vid,type:type,cost:cost,odometer:odo,notes:notes,date:iso()});DB.set('maintenance',m);logAudit('MAINTENANCE',type+' — UGX '+fmt(cost));closeModal('maintModal');showToast('Maintenance recorded ✓');renderTransport()}
+function recordRemittance(){var vid=$('remVehicle').value,amount=parseInt($('remAmount').value)||0,type=$('remType').value,notes=$('remNotes').value.trim();if(!vid||amount<=0)return showToast('Fill fields',true);var r=DB.get('remittances');r.unshift({id:genId(),vehicleId:vid,amount:amount,type:type,notes:notes,date:iso()});DB.set('remittances',r);logAudit('REMITTANCE',type+' — UGX '+fmt(amount));closeModal('remittanceModal');showToast('Remittance recorded ✓');renderTransport()}
+function switchTransportTab(tab,btn){document.querySelectorAll('#transportTabs .tab-btn').forEach(function(t){t.classList.remove('active')});if(btn)btn.classList.add('active');renderTransportContent(tab)}
+function renderTransport(){renderTransportContent('vehicles')}
+function renderTransportContent(tab){var el=$('transportContent');if(!el)return;var h='';switch(tab){case'vehicles':var vehicles=DB.get('vehicles');if(vehicles.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🚗</div><p>No vehicles yet</p></div>';return}vehicles.forEach(function(v){var trips=DB.get('trips').filter(function(t){return t.vehicleId===v.id});var totalKm=trips.reduce(function(a,t){return a+t.distance},0);var totalRev=trips.reduce(function(a,t){return a+t.revenue},0);h+='<div class="list-item"><div class="item-info"><div class="item-name">'+v.name+'</div><div class="item-meta">'+v.type+' • Driver: '+(v.driver||'—')+' • Route: '+(v.route||'—')+'</div><div class="item-meta">'+trips.length+' trips • '+fmt(totalKm)+'km • UGX '+fmt(totalRev)+'</div></div><div class="item-right"><div class="item-stock stat-green">'+v.status.toUpperCase()+'</div></div></div>'});break;case'trips':var trips=DB.get('trips');if(trips.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛣️</div><p>No trips recorded</p></div>';return}trips.slice(0,20).forEach(function(t){var veh=DB.get('vehicles').find(function(v){return v.id===t.vehicleId});var kmL=t.fuel>0?(t.distance/t.fuel).toFixed(1):'—';h+='<div class="list-item"><div class="item-info"><div class="item-name">'+(veh?veh.name:'Unknown')+'</div><div class="item-meta">'+t.distance+'km • '+t.fuel+'L fuel • '+kmL+' km/L • '+String(t.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(t.revenue)+'</div><div class="item-stock">Net: UGX '+fmt(t.revenue-t.expenses)+'</div></div></div>'});break;case'fuel':var fuels=DB.get('fuel');if(fuels.length===0){el.innerHTML='<div class="empty-state"><div class="icon">⛽</div><p>No fuel records</p></div>';return}fuels.slice(0,20).forEach(function(f){var veh=DB.get('vehicles').find(function(v){return v.id===f.vehicleId});h+='<div class="list-item"><div class="item-info"><div class="item-name">'+(veh?veh.name:'Unknown')+'</div><div class="item-meta">'+f.litres+'L × UGX '+fmt(f.pricePerL)+'/L • '+(f.station||'')+' • '+String(f.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price stat-red">UGX '+fmt(f.totalCost)+'</div></div></div>'});break;case'maintenance':var maints=DB.get('maintenance');if(maints.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🔧</div><p>No maintenance records</p></div>';return}maints.slice(0,20).forEach(function(m){var veh=DB.get('vehicles').find(function(v){return v.id===m.vehicleId});h+='<div class="list-item"><div class="item-info"><div class="item-name">'+(veh?veh.name:'Unknown')+' — '+m.type+'</div><div class="item-meta">'+(m.odometer?m.odometer+'km • ':'')+String(m.date).slice(0,10)+(m.notes?' • '+m.notes:'')+'</div></div><div class="item-right"><div class="item-price stat-red">UGX '+fmt(m.cost)+'</div></div></div>'});break;case'remittance':var rems=DB.get('remittances');if(rems.length===0){el.innerHTML='<div class="empty-state"><div class="icon">💰</div><p>No remittances</p></div>';return}rems.slice(0,20).forEach(function(r){var veh=DB.get('vehicles').find(function(v){return v.id===r.vehicleId});var cls=r.type==='Shortfall'?'stat-red':'stat-green';h+='<div class="list-item"><div class="item-info"><div class="item-name">'+(veh?veh.name:'Unknown')+'</div><div class="item-meta">'+r.type+' • '+String(r.date).slice(0,10)+(r.notes?' • '+r.notes:'')+'</div></div><div class="item-right"><div class="item-price '+cls+'">UGX '+fmt(r.amount)+'</div></div></div>'});break}el.innerHTML=h}
+// ========== FOOD MODULE ==========
+function saveRecipe(){var name=$('recipeName').value.trim(),cat=$('recipeCategory').value,price=parseInt($('recipePrice').value)||0,servings=parseInt($('recipeServings').value)||1,ingText=$('recipeIngredients').value.trim();if(!name)return showToast('Enter recipe name',true);var ingredients=[];var totalCost=0;ingText.split('\n').forEach(function(line){var parts=line.split(',').map(function(s){return s.trim()});if(parts.length>=4){var cost=parseInt(parts[3])||0;ingredients.push({name:parts[0],qty:parseFloat(parts[1])||0,unit:parts[2],cost:cost});totalCost+=cost}});var recipes=DB.get('recipes');recipes.unshift({id:genId(),name:name,category:cat,price:price,servings:servings,ingredients:ingredients,totalCost:totalCost,createdAt:iso()});DB.set('recipes',recipes);logAudit('RECIPE',name+' — Cost: UGX '+fmt(totalCost)+', Price: UGX '+fmt(price));closeModal('recipeModal');showToast('Recipe saved ✓');$('recipeName').value='';$('recipePrice').value='';$('recipeIngredients').value='';renderFood()}
+function recordWaste(){var item=$('wasteItem').value.trim(),qty=parseFloat($('wasteQty').value)||0,unit=$('wasteUnit').value,cost=parseInt($('wasteCost').value)||0,reason=$('wasteReason').value;if(!item)return showToast('Enter item',true);var w=DB.get('foodWaste');w.unshift({id:genId(),item:item,qty:qty,unit:unit,cost:cost,reason:reason,date:iso()});DB.set('foodWaste',w);logAudit('WASTE',item+' — UGX '+fmt(cost)+' ('+reason+')');closeModal('wasteModal');showToast('Waste recorded');$('wasteItem').value='';$('wasteQty').value='';$('wasteCost').value='';renderFood()}
+function switchFoodTab(tab,btn){document.querySelectorAll('#foodTabs .tab-btn').forEach(function(t){t.classList.remove('active')});if(btn)btn.classList.add('active');renderFoodContent(tab)}
+function renderFood(){renderFoodContent('recipes')}
+function renderFoodContent(tab){var el=$('foodContent');if(!el)return;var h='';switch(tab){case'recipes':var recipes=DB.get('recipes');if(recipes.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📖</div><p>No recipes yet</p></div>';return}recipes.forEach(function(r){var margin=r.price>0?Math.round(((r.price-r.totalCost)/r.price)*100):0;var cls=margin>=50?'stat-green':margin>=30?'stat-yellow':'stat-red';h+='<div class="list-item"><div class="item-info"><div class="item-name">'+r.name+'</div><div class="item-meta">'+r.category+' • '+r.ingredients.length+' ingredients • Cost: UGX '+fmt(r.totalCost)+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(r.price)+'</div><div class="item-stock '+cls+'">'+margin+'% margin</div></div></div>'});break;case'ingredients':var recipes=DB.get('recipes');var allIng={};recipes.forEach(function(r){r.ingredients.forEach(function(i){if(!allIng[i.name])allIng[i.name]={name:i.name,unit:i.unit,totalCost:0,count:0};allIng[i.name].totalCost+=i.cost;allIng[i.name].count++})});var keys=Object.keys(allIng);if(keys.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🥬</div><p>No ingredients</p></div>';return}keys.forEach(function(k){var i=allIng[k];h+='<div class="list-item"><div class="item-info"><div class="item-name">'+i.name+'</div><div class="item-meta">Used in '+i.count+' recipe(s) • Unit: '+i.unit+'</div></div><div class="item-right"><div class="item-price">UGX '+fmt(i.totalCost)+'</div><div class="item-stock">total cost</div></div></div>'});break;case'menu':var recipes=DB.get('recipes');if(recipes.length===0){el.innerHTML='<div class="empty-state"><p>No menu items</p></div>';return}var sorted=recipes.slice().sort(function(a,b){var ma=a.price>0?((a.price-a.totalCost)/a.price):0;var mb=b.price>0?((b.price-b.totalCost)/b.price):0;return mb-ma});sorted.forEach(function(r){var margin=r.price>0?Math.round(((r.price-r.totalCost)/r.price)*100):0;var profit=r.price-r.totalCost;h+='<div class="list-item"><div class="item-info"><div class="item-name">'+r.name+'</div><div class="item-meta">'+r.category+' • Profit: UGX '+fmt(profit)+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(r.price)+'</div><div class="item-stock '+(margin>=50?'stat-green':'stat-yellow')+'">'+margin+'%</div></div></div>'});break;case'waste':var waste=DB.get('foodWaste');if(waste.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🗑️</div><p>No waste recorded</p></div>';return}var totalWaste=waste.reduce(function(a,w){return a+w.cost},0);h+='<div class="card" style="margin-bottom:12px"><div style="font-size:13px;color:var(--muted)">Total Waste Cost</div><div style="font-size:22px;font-weight:900;color:var(--red)">UGX '+fmt(totalWaste)+'</div></div>';waste.slice(0,20).forEach(function(w){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+w.item+'</div><div class="item-meta">'+w.qty+' '+w.unit+' • '+w.reason+' • '+String(w.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price stat-red">UGX '+fmt(w.cost)+'</div></div></div>'});break}el.innerHTML=h}
+// ========== MANUFACTURING MODULE ==========
+function saveBOM(){var name=$('bomProduct').value.trim(),batch=parseInt($('bomBatchSize').value)||1,price=parseInt($('bomPrice').value)||0,matText=$('bomMaterials').value.trim();if(!name)return showToast('Enter product name',true);var materials=[];var totalCost=0;matText.split('\n').forEach(function(line){var parts=line.split(',').map(function(s){return s.trim()});if(parts.length>=4){var cost=parseInt(parts[3])||0;materials.push({name:parts[0],qty:parseFloat(parts[1])||0,unit:parts[2],cost:cost});totalCost+=cost}});var boms=DB.get('boms');boms.unshift({id:genId(),name:name,batchSize:batch,price:price,materials:materials,totalCost:totalCost,costPerUnit:Math.round(totalCost/batch),createdAt:iso()});DB.set('boms',boms);logAudit('BOM',name+' — Cost: UGX '+fmt(totalCost));closeModal('bomModal');showToast('BOM saved ✓');$('bomProduct').value='';$('bomPrice').value='';$('bomMaterials').value='';renderManufacturing()}
+function populateBOMSelect(){var boms=DB.get('boms');var el=$('poProduct');if(!el)return;el.innerHTML=boms.length?'':'<option value="">No BOMs</option>';boms.forEach(function(b){el.innerHTML+='<option value="'+b.id+'">'+b.name+' (Cost: UGX '+fmt(b.costPerUnit)+'/unit)</option>'})}
+function createProdOrder(){var bomId=$('poProduct').value,qty=parseInt($('poQty').value)||1,labour=parseInt($('poLabour').value)||0,overhead=parseInt($('poOverhead').value)||0,notes=$('poNotes').value.trim();if(!bomId)return showToast('Select product',true);var bom=DB.get('boms').find(function(b){return b.id===bomId});if(!bom)return showToast('BOM not found',true);var materialCost=bom.totalCost*qty;var totalCost=materialCost+labour+overhead;var orders=DB.get('prodOrders');orders.unshift({id:genId(),bomId:bomId,productName:bom.name,qty:qty,materialCost:materialCost,labourCost:labour,overheadCost:overhead,totalCost:totalCost,status:'in_progress',notes:notes,date:iso()});DB.set('prodOrders',orders);logAudit('PROD_ORDER',bom.name+' ×'+qty+' — UGX '+fmt(totalCost));closeModal('prodOrderModal');showToast('Production started ✓');renderManufacturing()}
+function completeProdOrder(id){var orders=DB.get('prodOrders');var order=orders.find(function(o){return o.id===id});if(!order)return;order.status='completed';order.completedDate=iso();DB.set('prodOrders',orders);var ps=DB.get('products');var existing=ps.find(function(p){return p.name===order.productName});if(existing){existing.stock+=order.qty}else{var bom=DB.get('boms').find(function(b){return b.id===order.bomId});ps.unshift({id:genId(),name:order.productName,cost:Math.round(order.totalCost/order.qty),price:bom?bom.price:0,stock:order.qty,reorderPoint:5,source:'production',createdAt:iso()})}DB.set('products',ps);logAudit('PROD_COMPLETE',order.productName+' ×'+order.qty+' → Stock');showToast('Production complete! Stock updated ✓');renderManufacturing()}
+function switchMfgTab(tab,btn){document.querySelectorAll('#mfgTabs .tab-btn').forEach(function(t){t.classList.remove('active')});if(btn)btn.classList.add('active');renderMfgContent(tab)}
+function renderManufacturing(){renderMfgContent('bom')}
+function renderMfgContent(tab){var el=$('mfgContent');if(!el)return;var h='';switch(tab){case'bom':var boms=DB.get('boms');if(boms.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📦</div><p>No BOMs yet</p></div>';return}boms.forEach(function(b){var margin=b.price>0?Math.round(((b.price-b.costPerUnit)/b.price)*100):0;h+='<div class="list-item"><div class="item-info"><div class="item-name">'+b.name+'</div><div class="item-meta">Batch: '+b.batchSize+' • Materials: '+b.materials.length+' • Cost/unit: UGX '+fmt(b.costPerUnit)+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(b.price)+'</div><div class="item-stock '+(margin>=30?'stat-green':'stat-yellow')+'">'+margin+'% margin</div></div></div>'});break;case'orders':var orders=DB.get('prodOrders');if(orders.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📋</div><p>No production orders</p></div>';return}orders.forEach(function(o){var statusCls=o.status==='completed'?'stat-green':'stat-yellow';h+='<div class="list-item"><div class="item-info"><div class="item-name">'+o.productName+' ×'+o.qty+'</div><div class="item-meta">Material: UGX '+fmt(o.materialCost)+' + Labour: UGX '+fmt(o.labourCost)+' + OH: UGX '+fmt(o.overheadCost)+'</div><div class="item-meta">'+String(o.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price stat-red">UGX '+fmt(o.totalCost)+'</div><div class="item-stock '+statusCls+'">'+o.status.toUpperCase()+'</div>'+(o.status!=='completed'?'<button class="btn btn-green btn-sm" style="margin-top:4px;padding:4px 8px;font-size:10px" onclick="completeProdOrder(\''+o.id+'\')">✓ Complete</button>':'')+'</div></div>'});break;case'raw':var boms=DB.get('boms');var allMat={};boms.forEach(function(b){b.materials.forEach(function(m){if(!allMat[m.name])allMat[m.name]={name:m.name,unit:m.unit,totalCost:0,usedIn:[]};allMat[m.name].totalCost+=m.cost;if(allMat[m.name].usedIn.indexOf(b.name)===-1)allMat[m.name].usedIn.push(b.name)})});var keys=Object.keys(allMat);if(keys.length===0){el.innerHTML='<div class="empty-state"><p>No raw materials</p></div>';return}keys.forEach(function(k){var m=allMat[k];h+='<div class="list-item"><div class="item-info"><div class="item-name">'+m.name+'</div><div class="item-meta">Unit: '+m.unit+' • Used in: '+m.usedIn.join(', ')+'</div></div><div class="item-right"><div class="item-price">UGX '+fmt(m.totalCost)+'</div></div></div>'});break;case'finished':var ps=DB.get('products').filter(function(p){return p.source==='production'});if(ps.length===0){el.innerHTML='<div class="empty-state"><p>No finished goods</p></div>';return}ps.forEach(function(p){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">Cost: UGX '+fmt(p.cost)+' • Price: UGX '+fmt(p.price)+'</div></div><div class="item-right"><div class="item-price">'+p.stock+'</div><div class="item-stock '+(isOut(p)?'stat-red':isLow(p)?'stat-yellow':'stat-green')+'">'+(isOut(p)?'OUT':isLow(p)?'LOW':'OK')+'</div></div></div>'});break}el.innerHTML=h}
+// ========== SERVICES MODULE ==========
+function populateStaffSelect(){var emps=DB.get('employees').filter(function(e){return e.status==='active'});var el=$('apptStaff');if(!el)return;el.innerHTML='<option value="">Any Available</option>';emps.forEach(function(e){el.innerHTML+='<option value="'+e.id+'">'+e.name+' ('+e.role+')</option>'})}
+function bookAppointment(){var client=$('apptClient').value.trim(),phone=$('apptPhone').value.trim(),service=$('apptService').value,staff=$('apptStaff').value,date=$('apptDate').value,time=$('apptTime').value,price=parseInt($('apptPrice').value)||0;if(!client||!date)return showToast('Fill client and date',true);var a=DB.get('appointments');a.unshift({id:genId(),client:client,phone:phone,service:service,staffId:staff,date:date,time:time,price:price,status:'pending',createdAt:iso()});DB.set('appointments',a);logAudit('BOOKING',client+' — '+service);closeModal('apptModal');showToast('Booked ✓');$('apptClient').value='';$('apptPhone').value='';$('apptPrice').value='';renderServices()}
+function completeAppt(id){var appts=DB.get('appointments');var appt=appts.find(function(a){return a.id===id});if(!appt)return;appt.status='completed';DB.set('appointments',appts);if(appt.price>0){var sales=DB.get('sales');sales.unshift({id:genId(),productId:'',quantity:1,total:appt.price,payment:'Cash',date:iso(),note:appt.service+' — '+appt.client});DB.set('sales',sales)}logAudit('APPT_COMPLETE',appt.client+' — '+appt.service);showToast('Completed ✓');renderServices()}
+function savePackage(){var name=$('pkgName').value.trim(),services=$('pkgServices').value.trim(),price=parseInt($('pkgPrice').value)||0,duration=parseInt($('pkgDuration').value)||60;if(!name)return showToast('Enter package name',true);var pkgs=DB.get('servicePackages');pkgs.unshift({id:genId(),name:name,services:services.split(',').map(function(s){return s.trim()}),price:price,duration:duration,createdAt:iso()});DB.set('servicePackages',pkgs);logAudit('PACKAGE',name+' — UGX '+fmt(price));closeModal('servicePkgModal');showToast('Package saved ✓');$('pkgName').value='';$('pkgServices').value='';$('pkgPrice').value='';renderServices()}
+function switchServicesTab(tab,btn){document.querySelectorAll('#servicesTabs .tab-btn').forEach(function(t){t.classList.remove('active')});if(btn)btn.classList.add('active');renderServicesContent(tab)}
+function renderServices(){renderServicesContent('appointments')}
+function renderServicesContent(tab){var el=$('servicesContent');if(!el)return;var h='';switch(tab){case'appointments':var appts=DB.get('appointments');if(appts.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📅</div><p>No bookings</p></div>';return}appts.slice(0,20).forEach(function(a){var staff=a.staffId?DB.get('employees').find(function(e){return e.id===a.staffId}):null;var statusCls=a.status==='completed'?'stat-green':a.status==='cancelled'?'stat-red':'stat-yellow';h+='<div class="list-item"><div class="item-info"><div class="item-name">'+a.client+'</div><div class="item-meta">'+a.service+' • '+(staff?staff.name:'Any')+' • '+a.date+' '+(a.time||'')+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(a.price)+'</div><div class="item-stock '+statusCls+'">'+a.status.toUpperCase()+'</div>'+(a.status==='pending'?'<button class="btn btn-green btn-sm" style="margin-top:4px;padding:4px 8px;font-size:10px" onclick="completeAppt(\''+a.id+'\')">✓ Done</button>':'')+'</div></div>'});break;case'staff':var emps=DB.get('employees');if(emps.length===0){el.innerHTML='<div class="empty-state"><p>No staff. Add in Settings.</p></div>';return}emps.forEach(function(e){var appts=DB.get('appointments').filter(function(a){return a.staffId===e.id});var todayAppts=appts.filter(function(a){return a.date===today()});var completed=appts.filter(function(a){return a.status==='completed'});var revenue=completed.reduce(function(a,x){return a+x.price},0);h+='<div class="list-item"><div class="item-info"><div class="item-name">'+e.name+'</div><div class="item-meta">'+e.role+' • Today: '+todayAppts.length+' bookings • Total: '+completed.length+' jobs</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(revenue)+'</div><div class="item-stock '+(e.status==='active'?'stat-green':'stat-red')+'">'+e.status.toUpperCase()+'</div></div></div>'});break;case'packages':var pkgs=DB.get('servicePackages');if(pkgs.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📦</div><p>No packages</p></div>';return}pkgs.forEach(function(p){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+p.services.join(', ')+' • '+p.duration+' min</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(p.price)+'</div></div></div>'});break;case'turnover':var appts=DB.get('appointments');var todayAppts=appts.filter(function(a){return a.date===today()});var completed=todayAppts.filter(function(a){return a.status==='completed'});var totalSlots=8*60;var usedMinutes=completed.reduce(function(a,x){var svc=x.service;var dur=svc==='Haircut'?30:svc==='Full Grooming'?60:svc==='Massage'?60:30;return a+dur},0);var utilPct=Math.round((usedMinutes/totalSlots)*100);h+='<div class="card"><div class="card-title">📊 Today\'s Utilization</div><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:13px">Completed: '+completed.length+'/'+todayAppts.length+'</span><span style="font-size:13px;font-weight:700;color:'+(utilPct>=70?'var(--green)':utilPct>=40?'var(--yellow)':'var(--red)')+'">'+utilPct+'%</span></div><div class="progress-bar"><div class="progress-fill" style="width:'+utilPct+'%;background:'+(utilPct>=70?'var(--green)':utilPct>=40?'var(--yellow)':'var(--red)')+'"></div></div><div style="margin-top:12px;font-size:12px;color:var(--muted)">Revenue today: <b style="color:var(--green)">UGX '+fmt(completed.reduce(function(a,x){return a+x.price},0))+'</b></div></div>';var byService={};todayAppts.forEach(function(a){if(!byService[a.service])byService[a.service]={count:0,revenue:0};byService[a.service].count++;byService[a.service].revenue+=a.price});Object.keys(byService).forEach(function(svc){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+svc+'</div><div class="item-meta">'+byService[svc].count+' booking(s)</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(byService[svc].revenue)+'</div></div></div>'});break}el.innerHTML=h}
+// ========== ENERGY MODULE ==========
+function populateTankSelect(selectId){var tanks=DB.get('tanks');var el=$(selectId);if(!el)return;el.innerHTML=tanks.length?'':'<option value="">No tanks</option>';tanks.forEach(function(t){var pct=t.capacity>0?Math.round((t.currentLevel/t.capacity)*100):0;el.innerHTML+='<option value="'+t.id+'">'+t.name+' ('+pct+'%)</option>'})}
+function addTank(){var name=$('tankName').value.trim(),fuelType=$('tankFuelType').value,cap=parseInt($('tankCapacity').value)||0,level=parseInt($('tankLevel').value)||0,cppL=parseInt($('tankCostPerL').value)||0;if(!name||cap<=0)return showToast('Fill all fields',true);var tanks=DB.get('tanks');tanks.push({id:genId(),name:name,fuelType:fuelType,capacity:cap,currentLevel:level,costPerL:cppL,createdAt:iso()});DB.set('tanks',tanks);logAudit('TANK',name+' — '+cap+'L capacity');closeModal('tankModal');showToast('Tank added ✓');$('tankName').value='';$('tankCapacity').value='';$('tankLevel').value='';renderEnergy()}
+function recordDispensing(){var tid=$('dispTank').value,litres=parseFloat($('dispLitres').value)||0,price=parseInt($('dispPrice').value)||0,payment=$('dispPayment').value,customer=$('dispCustomer').value.trim();if(!tid||litres<=0)return showToast('Fill fields',true);var tanks=DB.get('tanks');var tank=tanks.find(function(t){return t.id===tid});if(!tank)return showToast('Tank not found',true);if(litres>tank.currentLevel)return showToast('Only '+tank.currentLevel+'L available',true);tank.currentLevel-=litres;DB.set('tanks',tanks);var d=DB.get('dispenses');d.unshift({id:genId(),tankId:tid,tankName:tank.name,litres:litres,price:price,total:litres*price,payment:payment,customer:customer,date:iso()});DB.set('dispenses',d);logAudit('DISPENSE',tank.name+' — '+litres+'L, UGX '+fmt(litres*price));closeModal('dispenseModal');showToast('Dispensed ✓');renderEnergy()}
+function recordDip(){var tid=$('dipTank').value,level=parseInt($('dipLevel').value)||0,notes=$('dipNotes').value.trim();if(!tid)return showToast('Select tank',true);var tanks=DB.get('tanks');var tank=tanks.find(function(t){return t.id===tid});if(!tank)return;tank.currentLevel=level;DB.set('tanks',tanks);var dips=DB.get('dips');dips.unshift({id:genId(),tankId:tid,level:level,notes:notes,date:iso()});DB.set('dips',dips);logAudit('DIP',tank.name+' — '+level+'L');closeModal('dipModal');showToast('Level updated ✓');renderEnergy()}
+function recordCylinder(){var type=$('cylType').value,size=$('cylSize').value,qty=parseInt($('cylQty').value)||1,price=parseInt($('cylPrice').value)||0,customer=$('cylCustomer').value.trim();var c=DB.get('cylinders');c.unshift({id:genId(),type:type,size:size,qty:qty,price:price,total:price*qty,customer:customer,date:iso()});DB.set('cylinders',c);logAudit('CYLINDER',type+' — '+size+' ×'+qty);closeModal('cylinderModal');showToast('Recorded ✓');renderEnergy()}
+function switchEnergyTab(tab,btn){document.querySelectorAll('#energyTabs .tab-btn').forEach(function(t){t.classList.remove('active')});if(btn)btn.classList.add('active');renderEnergyContent(tab)}
+function renderEnergy(){renderEnergyContent('tanks')}
+function renderEnergyContent(tab){var el=$('energyContent');if(!el)return;var h='';switch(tab){case'tanks':var tanks=DB.get('tanks');if(tanks.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛢️</div><p>No tanks</p></div>';return}tanks.forEach(function(t){var pct=t.capacity>0?Math.round((t.currentLevel/t.capacity)*100):0;var color=pct>=60?'var(--green)':pct>=30?'var(--yellow)':'var(--red)';h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-size:14px;font-weight:700">'+t.name+'</div><div style="font-size:12px;color:var(--muted)">'+t.fuelType+' • '+t.currentLevel+'L / '+t.capacity+'L</div></div><div style="font-size:20px;font-weight:900;color:'+color+'">'+pct+'%</div></div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openModal(\'dipModal\');setTimeout(function(){$(\'dipTank\').value=\''+t.id+'\';},100)">📏 Dip</button><button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openModal(\'dispenseModal\');setTimeout(function(){$(\'dispTank\').value=\''+t.id+'\';},100)">⛽ Dispense</button></div></div>'});break;case'dispensing':var disp=DB.get('dispenses');if(disp.length===0){el.innerHTML='<div class="empty-state"><div class="icon">⛽</div><p>No dispensing records</p></div>';return}var totalRev=disp.reduce(function(a,d){return a+d.total},0);var totalLitres=disp.reduce(function(a,d){return a+d.litres},0);h+='<div class="kpi-grid"><div class="kpi-card"><div class="kpi-label">Total Litres</div><div class="kpi-value stat-blue">'+fmt(totalLitres)+'</div></div><div class="kpi-card"><div class="kpi-label">Total Revenue</div><div class="kpi-value stat-green">UGX '+fmt(totalRev)+'</div></div></div>';disp.slice(0,20).forEach(function(d){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+d.tankName+'</div><div class="item-meta">'+d.litres+'L × UGX '+fmt(d.price)+'/L • '+d.payment+' • '+String(d.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(d.total)+'</div></div></div>'});break;case'reconciliation':var tanks=DB.get('tanks');if(tanks.length===0){el.innerHTML='<div class="empty-state"><p>Add tanks first</p></div>';return}tanks.forEach(function(t){var dispenses=DB.get('dispenses').filter(function(d){return d.tankId===t.id});var totalDispensed=dispenses.reduce(function(a,d){return a+d.litres},0);var expectedLevel=t.capacity-totalDispensed;var variance=t.currentLevel-expectedLevel;var varCls=Math.abs(variance)<5?'stat-green':Math.abs(variance)<20?'stat-yellow':'stat-red';h+='<div class="card"><div class="card-title">'+t.name+' ('+t.fuelType+')</div><div class="list-item"><div class="item-info"><div class="item-name">Current Level (Dip)</div></div><div class="item-right"><div class="item-price">'+fmt(t.currentLevel)+'L</div></div></div><div class="list-item"><div class="item-info"><div class="item-name">Expected Level</div></div><div class="item-right"><div class="item-price stat-blue">'+fmt(expectedLevel)+'L</div></div></div><div class="list-item"><div class="item-info"><div class="item-name">Variance</div></div><div class="item-right"><div class="item-price '+varCls+'">'+(variance>=0?'+':'')+fmt(variance)+'L</div></div></div><div class="list-item"><div class="item-info"><div class="item-name">Total Dispensed</div></div><div class="item-right"><div class="item-price">'+fmt(totalDispensed)+'L</div></div></div></div>'});break;case'cylinders':var cyls=DB.get('cylinders');if(cyls.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🔵</div><p>No cylinder records</p></div>';return}var totalCylRev=cyls.filter(function(c){return c.type.indexOf('Sold')!==-1}).reduce(function(a,c){return a+c.total},0);h+='<div style="margin-bottom:12px"><button class="btn btn-outline btn-sm" onclick="openModal(\'cylinderModal\')">+ New Transaction</button></div><div class="kpi-grid"><div class="kpi-card"><div class="kpi-label">Cylinder Revenue</div><div class="kpi-value stat-green">UGX '+fmt(totalCylRev)+'</div></div><div class="kpi-card"><div class="kpi-label">Transactions</div><div class="kpi-value stat-blue">'+cyls.length+'</div></div></div>';cyls.slice(0,20).forEach(function(c){var cls=c.type.indexOf('Sold')!==-1?'stat-green':'stat-blue';h+='<div class="list-item"><div class="item-info"><div class="item-name">'+c.type+' — '+c.size+'</div><div class="item-meta">×'+c.qty+(c.customer?' • '+c.customer:'')+' • '+String(c.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price '+cls+'">UGX '+fmt(c.total)+'</div></div></div>'});break}el.innerHTML=h}
+// ========== AGRICULTURE MODULE ==========
+var FARM_TYPES={crop:{plotLabel:'Plot',harvestLabel:'Harvest',yieldLabel:'Yield',icon:'🌾'},livestock:{plotLabel:'Pen',harvestLabel:'Production',yieldLabel:'Output',icon:'🐄'},poultry:{plotLabel:'Coop',harvestLabel:'Eggs',yieldLabel:'Eggs',icon:'🐔'},dairy:{plotLabel:'Herd',harvestLabel:'Milk',yieldLabel:'Milk (L)',icon:'🥛'},fish:{plotLabel:'Pond',harvestLabel:'Harvest',yieldLabel:'Fish (kg)',icon:'🐟'}};
+function getFarmConfig(seasonId){var seasons=DB.get('seasons');var s=seasons.find(function(x){return x.id===seasonId});return FARM_TYPES[(s&&s.farmType)||'crop']||FARM_TYPES.crop}
+function renderFarm(){var seasons=DB.get('seasons');var plots=DB.get('plots');var activities=DB.get('activities');var totalYield=activities.filter(function(a){return a.type==='harvest'}).reduce(function(a,h){return a+(h.quantity||0)},0);var totalCost=activities.filter(function(a){return a.type==='input'||a.type==='labour'}).reduce(function(a,b){return a+(b.cost||0)},0);var el=$('farmKPIs');if(el)el.innerHTML='<div class="kpi-card"><div class="kpi-label">Seasons</div><div class="kpi-value">'+seasons.filter(function(s){return s.status==='active'}).length+'</div></div><div class="kpi-card"><div class="kpi-label">Total Output</div><div class="kpi-value stat-green">'+fmt(totalYield)+'</div></div><div class="kpi-card"><div class="kpi-label">Farm Costs</div><div class="kpi-value stat-red">UGX '+fmt(totalCost)+'</div></div><div class="kpi-card"><div class="kpi-label">Plots</div><div class="kpi-value stat-blue">'+plots.length+'</div></div>';var sl=$('seasonList');if(sl){if(seasons.length===0)sl.innerHTML='<div style="color:var(--muted);font-size:13px">No seasons</div>';else{var h='';seasons.forEach(function(s){var cfg=FARM_TYPES[s.farmType]||FARM_TYPES.crop;var sp=plots.filter(function(p){return p.seasonId===s.id});h+='<div class="list-item"><div class="item-info"><div class="item-name">'+cfg.icon+' '+s.name+'</div><div class="item-meta">'+s.crop+' • '+sp.length+' '+cfg.plotLabel.toLowerCase()+'(s)</div></div><div class="item-right"><div style="display:flex;gap:4px"><button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openPlotModal(\''+s.id+'\')">+'+cfg.plotLabel+'</button><button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:10px" onclick="openHarvestModal(\''+s.id+'\')">+'+cfg.harvestLabel+'</button></div></div></div>'});sl.innerHTML=h}}var pl=$('plotList');if(pl){if(plots.length===0)pl.innerHTML='<div style="color:var(--muted);font-size:13px">No plots</div>';else{var h='';plots.forEach(function(p){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">'+p.crop+' • '+p.acres+' units</div></div><div class="item-right"><div class="item-stock '+(p.status==='harvested'?'stat-green':'stat-yellow')+'">'+p.status.toUpperCase()+'</div></div></div>'});pl.innerHTML=h}}var al=$('activityList');if(al){if(activities.length===0)al.innerHTML='<div style="color:var(--muted);font-size:13px">No activities</div>';else{var h='';activities.slice(0,10).forEach(function(a){var icon=a.type==='harvest'?'🌾':'📦';var plot=plots.find(function(p){return p.id===a.plotId});h+='<div class="list-item"><div class="item-info"><div class="item-name">'+icon+' '+(a.description||a.category||a.type)+'</div><div class="item-meta">'+(plot?plot.name:'')+' • '+String(a.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price '+(a.type==='harvest'?'stat-green':'stat-red')+'">'+(a.type==='harvest'?fmt(a.quantity)+' '+(a.unit||'kg'):'UGX '+fmt(a.cost||0))+'</div></div></div>'});al.innerHTML=h}}}
+function openPlotModal(seasonId){var seasons=DB.get('seasons');var el=$('plotSeason');if(!el)return;el.innerHTML='';seasons.forEach(function(s){el.innerHTML+='<option value="'+s.id+'"'+(s.id===seasonId?' selected':'')+'>'+s.name+'</option>'});var cfg=getFarmConfig(seasonId);$('plotModalTitle').textContent='🗺️ Add '+cfg.plotLabel;$('plotNameLabel').textContent=cfg.plotLabel+' Name';openModal('plotModal')}
+function addPlot(){var sid=$('plotSeason').value,name=$('plotName').value.trim(),acres=parseFloat($('plotAcres').value)||0,crop=$('plotCrop').value.trim();if(!sid||!name)return showToast('Fill fields',true);var plots=DB.get('plots');plots.unshift({id:genId(),seasonId:sid,name:name,acres:acres,crop:crop,status:'planted',createdAt:iso()});DB.set('plots',plots);logAudit('PLOT','Added: '+name);closeModal('plotModal');showToast('Plot added ✓');renderFarm()}
+function openInputModal(seasonId){var plots=DB.get('plots').filter(function(p){return p.seasonId===seasonId});var el=$('inputPlot');if(!el)return;el.innerHTML=plots.length?'':'<option value="">No plots</option>';plots.forEach(function(p){el.innerHTML+='<option value="'+p.id+'">'+p.name+'</option>'});openModal('inputModal')}
+function recordInput(){var pid=$('inputPlot').value,type=$('inputType').value,desc=$('inputDesc').value.trim(),qty=parseInt($('inputQty').value)||1,cost=parseInt($('inputCost').value)||0;if(!pid||cost<=0)return showToast('Fill fields',true);var plot=DB.get('plots').find(function(p){return p.id===pid});if(!plot)return;var a=DB.get('activities');a.unshift({id:genId(),plotId:pid,seasonId:plot.seasonId,type:type==='Labour'?'labour':'input',category:type,description:desc||type,quantity:qty,cost:cost,date:iso()});DB.set('activities',a);logAudit('FARM_INPUT',type+' — UGX '+fmt(cost));closeModal('inputModal');showToast('Input recorded ✓');renderFarm()}
+function openHarvestModal(seasonId){var plots=DB.get('plots').filter(function(p){return p.seasonId===seasonId});var el=$('harvestPlot');if(!el)return;el.innerHTML=plots.length?'':'<option value="">No plots</option>';plots.forEach(function(p){el.innerHTML+='<option value="'+p.id+'">'+p.name+'</option>'});var cfg=getFarmConfig(seasonId);$('harvestModalTitle').textContent=cfg.icon+' Record '+cfg.harvestLabel;openModal('harvestModal')}
+function recordHarvest(){var pid=$('harvestPlot').value,qty=parseInt($('harvestQty').value)||0,unit=$('harvestUnit').value,notes=$('harvestNotes').value.trim();if(!pid||qty<=0)return showToast('Fill fields',true);var plot=DB.get('plots').find(function(p){return p.id===pid});if(!plot)return;var a=DB.get('activities');a.unshift({id:genId(),plotId:pid,seasonId:plot.seasonId,type:'harvest',description:'Harvest: '+plot.crop+(notes?' — '+notes:''),quantity:qty,unit:unit,date:iso()});DB.set('activities',a);plot.status='harvested';var plots=DB.get('plots');var idx=plots.findIndex(function(p){return p.id===pid});if(idx!==-1){plots[idx]=plot;DB.set('plots',plots)}var ps=DB.get('products');var existing=ps.find(function(p){return p.name===plot.crop});if(existing){existing.stock+=qty}else{ps.unshift({id:genId(),name:plot.crop,cost:0,price:0,stock:qty,reorderPoint:5,source:'harvest',createdAt:iso()})}DB.set('products',ps);logAudit('HARVEST',plot.crop+' — '+qty+' '+unit);closeModal('harvestModal');showToast('Harvest recorded ✓');renderFarm()}
+function createSeason(){var name=$('seasonName').value.trim(),farmType=$('seasonType').value,crop=$('seasonCrop').value.trim(),sizeUnit=$('seasonUnit').value,start=$('seasonStart').value,end=$('seasonEnd').value;if(!name||!crop)return showToast('Fill fields',true);var s=DB.get('seasons');s.unshift({id:genId(),name:name,farmType:farmType,crop:crop,sizeUnit:sizeUnit,startDate:start,endDate:end,status:'active',createdAt:iso()});DB.set('seasons',s);logAudit('SEASON',name);closeModal('seasonModal');showToast('Season created ✓');renderFarm()}
+// ========== CORE CRUD ==========
+function renderProducts(){var ps=DB.get('products');var search=($('prodSearch')?$('prodSearch').value:'').toLowerCase();var filtered=ps.filter(function(p){return p.name.toLowerCase().indexOf(search)!==-1});var el=$('productList');if(!el)return;if(filtered.length===0){el.innerHTML='<div class="empty-state"><div class="icon">📦</div><p>No products</p></div>';return}var h='';filtered.forEach(function(p){var cls=isOut(p)?'stat-red':isLow(p)?'stat-yellow':'stat-green';h+='<div class="list-item"><div class="item-info"><div class="item-name">'+p.name+'</div><div class="item-meta">UGX '+fmt(p.price)+' • Cost: UGX '+fmt(p.cost||0)+'</div></div><div class="item-right"><div class="item-price">'+p.stock+'</div><div class="item-stock '+cls+'">'+(isOut(p)?'OUT':isLow(p)?'LOW':'OK')+'</div></div></div>'});el.innerHTML=h}
+function renderSales(){var sales=DB.get('sales');var el=$('salesList');if(!el)return;if(sales.length===0){el.innerHTML='<div class="empty-state"><div class="icon">🛒</div><p>No sales yet</p></div>';return}var h='';sales.slice(0,20).forEach(function(s){var prod=DB.get('products').find(function(p){return p.id===s.productId});h+='<div class="list-item"><div class="item-info"><div class="item-name">'+(prod?prod.name:(s.note||'Item'))+' ×'+s.quantity+'</div><div class="item-meta">'+s.payment+' • '+String(s.date).slice(0,10)+'</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(s.total)+'</div></div></div>'});el.innerHTML=h}
+function renderReports(){switchReportTab('overview',document.querySelector('#reportTabs .tab-btn.active'))}
+function switchReportTab(tab,btn){document.querySelectorAll('#reportTabs .tab-btn').forEach(function(t){t.classList.remove('active')});if(btn)btn.classList.add('active');var el=$('reportContent');if(!el)return;var sales=DB.get('sales'),ex=DB.get('expenses');var weekStart=new Date();weekStart.setDate(weekStart.getDate()-6);var weekSales=sales.filter(function(s){return new Date(s.date)>=weekStart});var weekRev=weekSales.reduce(function(a,s){return a+s.total},0);var weekCost=weekSales.reduce(function(a,s){return a+(costOf(s.productId)*s.quantity)},0);var weekExp=ex.filter(function(e){return new Date(e.date)>=weekStart}).reduce(function(a,e){return a+e.amount},0);var profit=weekRev-weekCost-weekExp;if(tab==='overview'){el.innerHTML='<div class="kpi-grid"><div class="kpi-card"><div class="kpi-label">Revenue (7d)</div><div class="kpi-value stat-green">UGX '+fmt(weekRev)+'</div></div><div class="kpi-card"><div class="kpi-label">Cost of Goods</div><div class="kpi-value stat-yellow">UGX '+fmt(weekCost)+'</div></div><div class="kpi-card"><div class="kpi-label">Expenses (7d)</div><div class="kpi-value stat-red">UGX '+fmt(weekExp)+'</div></div><div class="kpi-card"><div class="kpi-label">Net Profit</div><div class="kpi-value '+(profit>=0?'stat-green':'stat-red')+'">UGX '+fmt(profit)+'</div></div></div>'}else if(tab==='expenses'){var h='';if(ex.length===0)h='<div class="empty-state"><p>No expenses</p></div>';else ex.slice(0,20).forEach(function(e){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+e.category+'</div><div class="item-meta">'+String(e.date).slice(0,10)+(e.note?' • '+e.note:'')+'</div></div><div class="item-right"><div class="item-price stat-red">UGX '+fmt(e.amount)+'</div></div></div>'});el.innerHTML=h}else if(tab==='reconciliation'){var todaySales=sales.filter(function(s){return String(s.date||'').indexOf(today())===0});var cash=todaySales.filter(function(s){return s.payment==='Cash'}).reduce(function(a,s){return a+s.total},0);var momo=todaySales.filter(function(s){return s.payment==='MTN MoMo'||s.payment==='Airtel Money'}).reduce(function(a,s){return a+s.total},0);el.innerHTML='<div class="card"><div class="card-title">Today\'s Reconciliation</div><div class="list-item"><div class="item-info"><div class="item-name">Cash Sales</div></div><div class="item-right"><div class="item-price stat-green">UGX '+fmt(cash)+'</div></div></div><div class="list-item"><div class="item-info"><div class="item-name">Mobile Money</div></div><div class="item-right"><div class="item-price stat-blue">UGX '+fmt(momo)+'</div></div></div></div>'}}
+function renderCredits(){var creds=DB.get('credits');var el=$('creditList');if(!el)return;if(creds.length===0){el.innerHTML='<div class="empty-state"><div class="icon">💳</div><p>No credits</p></div>';return}var h='';creds.forEach(function(c){var rem=(c.totalAmount||c.amount||0)-(c.paidAmount||0);var cls=rem<=0?'stat-green':(new Date()-new Date(c.date))/86400000>7?'stat-red':'stat-yellow';h+='<div class="list-item"><div class="item-info"><div class="item-name">'+c.name+'</div><div class="item-meta">'+String(c.date).slice(0,10)+' • Paid: UGX '+fmt(c.paidAmount||0)+'</div></div><div class="item-right"><div class="item-price '+cls+'">UGX '+fmt(rem)+'</div><div class="item-stock">'+(rem<=0?'PAID':'OWED')+'</div></div></div>'});el.innerHTML=h}
+function renderSettings(){var p=DB.getObj('profile');var el=$('shopInfoDisplay');if(!el)return;el.innerHTML='<div style="font-size:13px;color:var(--muted)">Owner: <b style="color:var(--text)">'+(p.owner||'—')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Phone: <b style="color:var(--text)">'+(p.phone||'—')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Sector: <b style="color:var(--text)">'+(p.sector||'Retail')+'</b></div><div style="font-size:13px;color:var(--muted);margin-top:4px">Location: <b style="color:var(--text)">'+(p.location||'—')+'</b></div>';renderEmployees();renderAudit()}
+function renderEmployees(){var emps=DB.get('employees');var el=$('employeeList');if(!el)return;if(emps.length===0){el.innerHTML='<div style="font-size:13px;color:var(--muted)">No employees</div>';return}var h='';emps.forEach(function(e){h+='<div class="list-item"><div class="item-info"><div class="item-name">'+e.name+'</div><div class="item-meta">'+e.role+' • '+e.phone+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" onclick="toggleEmpStatus(\''+e.id+'\')">'+(e.status==='active'?'Suspend':'Activate')+'</button><button class="btn btn-red btn-sm" onclick="deleteEmp(\''+e.id+'\')">✕</button></div></div>'});el.innerHTML=h}
+function toggleEmpStatus(id){var emps=DB.get('employees');var e=emps.find(function(x){return x.id===id});if(!e)return;e.status=e.status==='active'?'suspended':'active';DB.set('employees',emps);showToast('Employee '+(e.status==='active'?'activated':'suspended'));renderSettings()}
+function deleteEmp(id){if(!confirm('Delete?'))return;DB.set('employees',DB.get('employees').filter(function(e){return e.id!==id}));showToast('Deleted');renderSettings()}
+function populateSaleProducts(){var ps=DB.get('products').filter(function(p){return p.stock>0});var el=$('saleProduct');if(!el)return;el.innerHTML=ps.length?'':'<option value="">No stock</option>';ps.forEach(function(p){el.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.stock+')</option>'})}
+function populateRefundSales(){var sales=DB.get('sales');var el=$('refundSale');if(!el)return;el.innerHTML=sales.length?'':'<option value="">No sales</option>';sales.slice(0,20).forEach(function(s){var prod=DB.get('products').find(function(p){return p.id===s.productId});el.innerHTML+='<option value="'+s.id+'">'+(prod?prod.name:(s.note||'Item'))+' — UGX '+fmt(s.total)+'</option>'})}
+function populateWriteoffProducts(){var ps=DB.get('products');var el=$('writeoffProduct');if(!el)return;el.innerHTML=ps.length?'':'<option value="">No products</option>';ps.forEach(function(p){el.innerHTML+='<option value="'+p.id+'">'+p.name+' ('+p.stock+')</option>'})}
+function saveProduct(){var name=$('prodName').value.trim(),barcode=$('prodBarcode').value.trim(),cost=parseInt($('prodCost').value)||0,price=parseInt($('prodPrice').value)||0,stock=parseInt($('prodStock').value)||0;if(!name)return showToast('Enter name',true);if(price<=0)return showToast('Enter price',true);var ps=DB.get('products');ps.unshift({id:genId(),name:name,barcode:barcode,cost:cost,price:price,stock:stock,reorderPoint:5,createdAt:iso()});DB.set('products',ps);logAudit('ADD_PRODUCT',name);closeModal('productModal');showToast('Added ✓');$('prodName').value='';$('prodBarcode').value='';$('prodCost').value='';$('prodPrice').value='';$('prodStock').value='';markPending();renderAll()}
+function recordSale(){var pid=$('saleProduct').value,qty=parseInt($('saleQty').value)||1,payment=$('salePayment').value;if(!pid)return showToast('Select product',true);var ps=DB.get('products');var prod=ps.find(function(x){return x.id===pid});if(!prod)return showToast('Not found',true);if(qty>prod.stock)return showToast('Only '+prod.stock+' in stock',true);var total=prod.price*qty;prod.stock-=qty;DB.set('products',ps);var sales=DB.get('sales');sales.unshift({id:genId(),productId:pid,quantity:qty,total:total,payment:payment,date:iso()});DB.set('sales',sales);logAudit('SALE',prod.name+' ×'+qty+' — UGX '+fmt(total));closeModal('saleModal');showToast('Sale: UGX '+fmt(total));$('saleQty').value='1';markPending();renderAll()}
+function recordExpense(){var cat=$('expCategory').value,amount=parseInt($('expAmount').value)||0,note=$('expNote').value.trim();if(amount<=0)return showToast('Enter amount',true);var ex=DB.get('expenses');ex.unshift({id:genId(),category:cat,amount:amount,note:note,date:iso()});DB.set('expenses',ex);logAudit('EXPENSE',cat+' — UGX '+fmt(amount));closeModal('expenseModal');showToast('Expense: UGX '+fmt(amount));$('expAmount').value='';$('expNote').value='';markPending();renderAll()}
+function addCredit(){var name=$('credName').value.trim(),amount=parseInt($('credAmount').value)||0,note=$('credNote').value.trim();if(!name)return showToast('Enter name',true);if(amount<=0)return showToast('Enter amount',true);var c=DB.get('credits');c.unshift({id:genId(),name:name,totalAmount:amount,paidAmount:0,note:note,date:iso()});DB.set('credits',c);logAudit('CREDIT',name+' — UGX '+fmt(amount));closeModal('creditModal');showToast('Credit: UGX '+fmt(amount));$('credName').value='';$('credAmount').value='';$('credNote').value='';markPending();renderAll()}
+function addEmployee(){var name=$('empName').value.trim(),phone=$('empPhone').value.trim(),role=$('empRole').value,pin=$('empPin').value.trim();if(!name||!phone||!pin)return showToast('Fill all',true);if(pin.length!==4)return showToast('PIN must be 4 digits',true);hashPin(pin).then(function(h){var emps=DB.get('employees');emps.push({id:genId(),name:name,phone:phone,role:role,pinHash:h,status:'active',createdAt:iso()});DB.set('employees',emps);logAudit('ADD_EMPLOYEE',name);closeModal('employeeModal');showToast('Employee added ✓');$('empName').value='';$('empPhone').value='';$('empPin').value='';renderSettings()}).catch(function(){showToast('Error',true)})}
+function processRefund(){var sid=$('refundSale').value,reason=$('refundReason').value.trim();if(!sid)return showToast('Select sale',true);var sales=DB.get('sales');var sale=sales.find(function(s){return s.id===sid});if(!sale)return;var ps=DB.get('products');var prod=ps.find(function(p){return p.id===sale.productId});if(prod){prod.stock+=sale.quantity;DB.set('products',ps)}DB.set('sales',sales.filter(function(s){return s.id!==sid}));logAudit('REFUND','UGX '+fmt(sale.total));closeModal('refundModal');showToast('Refunded: UGX '+fmt(sale.total));renderAll()}
+function processWriteoff(){var pid=$('writeoffProduct').value,qty=parseInt($('writeoffQty').value)||1,reason=$('writeoffReason').value;if(!pid)return showToast('Select product',true);var ps=DB.get('products');var prod=ps.find(function(p){return p.id===pid});if(!prod)return;if(qty>prod.stock)return showToast('Only '+prod.stock+' in stock',true);prod.stock-=qty;DB.set('products',ps);logAudit('WRITE-OFF',prod.name+' ×'+qty);closeModal('writeoffModal');showToast('Written off ✓');renderAll()}
+function processDrawdown(){var amount=parseInt($('drawdownAmount').value)||0,reason=$('drawdownReason').value.trim();if(amount<=0)return showToast('Enter amount',true);var ex=DB.get('expenses');ex.unshift({id:genId(),category:'Drawdown',amount:amount,note:reason||'Withdrawal',date:iso()});DB.set('expenses',ex);logAudit('DRAWDOWN','UGX '+fmt(amount));closeModal('drawdownModal');showToast('Drawdown: UGX '+fmt(amount));$('drawdownAmount').value='';$('drawdownReason').value='';renderAll()}
+// ========== BARCODE ==========
+function startBarcode(){if(typeof Html5Qrcode==='undefined'){showToast('Camera not available',true);return}try{barcodeScanner=new Html5Qrcode('barcodeReader');barcodeScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:250}},function(t){onBarcodeScanned(t)},function(){})}catch(e){showToast('Camera denied',true)}}
+function stopBarcode(){if(barcodeScanner){try{barcodeScanner.stop().then(function(){barcodeScanner=null}).catch(function(){})}catch(e){barcodeScanner=null}}}
+function onBarcodeScanned(code){stopBarcode();closeModal('barcodeModal');var ps=DB.get('products');var found=ps.find(function(p){return p.barcode===code});if(found){showToast('Found: '+found.name);openModal('saleModal');setTimeout(function(){$('saleProduct').value=found.id},300)}else{showToast('Not found. Adding new...');openModal('productModal');$('prodBarcode').value=code}}
+function lookupBarcode(){var code=$('manualBarcode').value.trim();if(!code)return showToast('Enter barcode',true);onBarcodeScanned(code)}
+// ========== WIZARD ==========
+function showWizard(){if(DB.get('products').length===0)openModal('wizardModal')}
+function wizardNext(step){document.querySelectorAll('.wizard-step').forEach(function(s){s.classList.remove('active')});$('wizStep'+step).classList.add('active');for(var i=1;i<=3;i++){var dot=$('wizDot'+i);if(dot)dot.className='wizard-dot'+(i<=step?' done':'')}}
+function finishWizard(){var name=$('wizName').value.trim(),cost=parseInt($('wizCost').value)||0,price=parseInt($('wizPrice').value)||0,stock=parseInt($('wizStock').value)||0;if(name&&price>0){var ps=DB.get('products');ps.unshift({id:genId(),name:name,cost:cost,price:price,stock:stock,reorderPoint:5,createdAt:iso()});DB.set('products',ps);logAudit('WIZARD',name);showToast('Saved! 🎉')}closeModal('wizardModal');renderAll()}
+// ========== RENDER ALL ==========
+function renderAll(){renderDashboard();renderProducts();renderSales();renderCredits();renderSettings();var sector=(DB.getObj('profile')||{}).sector;if(sector==='Transport')renderTransport();if(sector==='Food')renderFood();if(sector==='Manufacturing')renderManufacturing();if(sector==='Services')renderServices();if(sector==='Energy')renderEnergy();if(sector==='Agriculture')renderFarm()}
+function renderDashboard(){renderHealthScore();renderSectorKPIs();renderSectorAlerts();renderAttention()}
+// ========== STARTUP ==========
+setTimeout(function(){var splash=$('splash');if(splash&&!splash.classList.contains('hide')){splash.classList.add('hide');setTimeout(function(){splash.style.display='none';var p=DB.getObj('profile');if(p&&p.shopName){startApp();showWizard()}else{$('authFlow').style.display='flex';showAuth('welcome')}},500)}},2000);
 </script>
 </body>
 </html>
