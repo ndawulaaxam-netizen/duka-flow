@@ -487,7 +487,7 @@ select.form-input { appearance: none; }
 
     <!-- Reports Screen -->
     <div class="screen" id="screen-reports">
-        <h2 style="font-size:20px;font-weight:900;margin-bottom:12px">Reports</h2>
+        <h2 style="font-size:20px;font-weight:900;margin-bottom:12px">Reports</h2> <div class="tab-row" id="reportTabs" style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto"> <div class="tab-btn active" style="padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--green);color:#052e22" onclick="switchReportTab('overview')">Overview</div> <div class="tab-btn" style="padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted)" onclick="switchReportTab('expenses')">Expenses</div> <div class="tab-btn" style="padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted)" onclick="switchReportTab('reconciliation')">Reconciliation</div> </div>
         <div id="reportContent"></div>
     </div>
 
@@ -1484,6 +1484,53 @@ function renderSales() {
 }
 
 function renderReports() {
+    switchReportTab('overview');
+}
+
+function switchReportTab(tab) {
+    var tabs = document.querySelectorAll('#reportTabs .tab-btn');
+    tabs.forEach(function(t) { t.classList.remove('active'); });
+    if (event && event.target) event.target.classList.add('active');
+    
+    var el = $('reportContent');
+    if (!el) return;
+    
+    var sales = DB.get('sales');
+    var ex = DB.get('expenses');
+    var ps = DB.get('products');
+    
+    var weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 6);
+    var weekSales = sales.filter(function(s) { return new Date(s.date) >= weekStart; });
+    
+    var weekRevenue = weekSales.reduce(function(a, s) { return a + s.total; }, 0);
+    var weekCost = weekSales.reduce(function(a, s) { return a + (costOf(s.productId) * s.quantity); }, 0);
+    var weekExp = ex.filter(function(e) { return new Date(e.date) >= weekStart; }).reduce(function(a, e) { return a + e.amount; }, 0);
+    var profit = weekRevenue - weekCost - weekExp;
+    
+    if (tab === 'overview') {
+        var html = '<div class="kpi-grid">';
+        html += '<div class="kpi-card"><div class="kpi-label">Revenue (7d)</div><div class="kpi-value stat-green">UGX ' + fmt(weekRevenue) + '</div></div>';
+        html += '<div class="kpi-card"><div class="kpi-label">Cost of Goods</div><div class="kpi-value stat-yellow">UGX ' + fmt(weekCost) + '</div></div>';
+        html += '<div class="kpi-card"><div class="kpi-label">Expenses (7d)</div><div class="kpi-value stat-red">UGX ' + fmt(weekExp) + '</div></div>';
+        html += '<div class="kpi-card"><div class="kpi-label">Net Profit</div><div class="kpi-value ' + (profit >= 0 ? 'stat-green' : 'stat-red') + '">UGX ' + fmt(profit) + '</div></div>';
+        html += '</div>';
+        html += '<button class="btn btn-green btn-sm" style="margin-top:12px" onclick="openModal(\'expenseModal\')">+ Add Expense</button>';
+        el.innerHTML = html;
+    } else if (tab === 'expenses') {
+        var html = '<button class="btn btn-green btn-sm" style="margin-bottom:12px" onclick="openModal(\'expenseModal\')">+ Add Expense</button>';
+        if (ex.length === 0) {
+            html += '<div class="empty-state"><p>No expenses recorded.</p></div>';
+        } else {
+            ex.slice(0, 20).forEach(function(e) {
+                html += '<div class="list-item"><div class="item-info"><div class="item-name">' + e.category + '</div><div class="item-meta">' + String(e.date).slice(0, 10) + (e.note ? ' • ' + e.note : '') + '</div></div><div class="item-right"><div class="item-price stat-red">UGX ' + fmt(e.amount) + '</div></div></div>';
+            });
+        }
+        el.innerHTML = html;
+    } else if (tab === 'reconciliation') {
+        el.innerHTML = '<div class="card"><div class="card-title">Cash Reconciliation</div><p style="font-size:13px;color:var(--muted)">Track your cash vs expected for the day. Reconciliation feature coming soon.</p></div>';
+    }
+}
     var el = $('reportContent');
     if (!el) return;
     
@@ -1817,7 +1864,115 @@ function memorySnapshot() {
         localStorage.setItem('df_memory_snap', JSON.stringify(snap));
     } catch (e) {}
 }
+// ============================================
+// FOUNDER CONSOLE
+// ============================================
 
+function openFounderConsole() {
+    var fc = document.createElement('div');
+    fc.id = 'founderConsole';
+    fc.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;overflow-y:auto;padding:20px';
+    fc.innerHTML = '<div style="max-width:900px;margin:0 auto;padding-bottom:60px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">' +
+        '<h1 style="font-size:24px;font-weight:900;color:#fff">🏛️ Founder Console v2</h1>' +
+        '<button class="btn btn-outline" onclick="exitFounderConsole()">✕ Exit</button>' +
+        '</div>' +
+        '<div class="card"><div class="card-title">📊 Overview</div><div id="fcOverview"><div style="color:var(--muted);font-size:13px">Loading...</div></div></div>' +
+        '<div class="card"><div class="card-title">👥 Employee Adoption</div><div id="fcEmployees"><div style="color:var(--muted);font-size:13px">Loading...</div></div></div>' +
+        '<div class="card"><div class="card-title">🧠 Health Score Distribution</div><div id="fcHealth"><div style="color:var(--muted);font-size:13px">Loading...</div></div></div>' +
+        '<div class="card"><div class="card-title">⚡ Alert Patterns</div><div id="fcAlerts"><div style="color:var(--muted);font-size:13px">Loading...</div></div></div>' +
+        '<div class="card"><div class="card-title">🏪 Sector Breakdown</div><div id="fcSectors"><div style="color:var(--muted);font-size:13px">Loading...</div></div></div>' +
+        '</div>';
+    document.body.appendChild(fc);
+    loadFounderData();
+}
+
+function exitFounderConsole() {
+    var fc = document.getElementById('founderConsole');
+    if (fc) fc.remove();
+}
+
+function loadFounderData() {
+    api('/rest/v1/rpc/founder_overview', { method: 'POST', body: '{}' }).then(j).then(function(d) {
+        if (!d || !d.ok) return;
+        var el = $('fcOverview');
+        el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">' +
+            '<div style="text-align:center;padding:12px;background:var(--bg);border-radius:12px"><div style="font-size:28px;font-weight:900;color:var(--gold)">' + d.total_shops + '</div><div style="font-size:11px;color:var(--muted)">Total Shops</div></div>' +
+            '<div style="text-align:center;padding:12px;background:var(--bg);border-radius:12px"><div style="font-size:28px;font-weight:900;color:var(--green)">' + d.active_shops_7d + '</div><div style="font-size:11px;color:var(--muted)">Active (7d)</div></div>' +
+            '<div style="text-align:center;padding:12px;background:var(--bg);border-radius:12px"><div style="font-size:28px;font-weight:900;color:var(--blue)">' + d.total_employees + '</div><div style="font-size:11px;color:var(--muted)">Employees</div></div>' +
+            '<div style="text-align:center;padding:12px;background:var(--bg);border-radius:12px"><div style="font-size:28px;font-weight:900;color:var(--purple)">' + d.avg_health_score + '</div><div style="font-size:11px;color:var(--muted)">Avg Health</div></div>' +
+            '<div style="text-align:center;padding:12px;background:var(--bg);border-radius:12px"><div style="font-size:28px;font-weight:900;color:#fff">' + d.total_users + '</div><div style="font-size:11px;color:var(--muted)">Total Users</div></div>' +
+            '</div>';
+    }).catch(function() { $('fcOverview').innerHTML = '<div style="color:var(--muted);font-size:13px">Failed to load</div>'; });
+
+    api('/rest/v1/rpc/founder_employees', { method: 'POST', body: '{}' }).then(j).then(function(d) {
+        if (!d || !d.ok) return;
+        var el = $('fcEmployees');
+        var html = '<div style="margin-bottom:12px;font-size:13px;color:var(--muted)">Shops with employees: <b style="color:#fff">' + d.shops_with_employees + '</b></div>';
+        html += '<div style="display:flex;gap:16px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><div class="card-title">By Role</div>';
+        if (d.by_role && d.by_role.length) {
+            d.by_role.forEach(function(r) {
+                html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:#fff">' + r.role + '</span><span style="font-size:13px;font-weight:700;color:var(--gold)">' + r.count + '</span></div>';
+            });
+        } else {
+            html += '<div style="color:var(--muted);font-size:13px">No employees yet</div>';
+        }
+        html += '</div><div style="flex:1;min-width:200px"><div class="card-title">By Status</div>';
+        if (d.by_status && d.by_status.length) {
+            d.by_status.forEach(function(s) {
+                html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:#fff">' + s.status + '</span><span style="font-size:13px;font-weight:700;color:' + (s.status === 'active' ? 'var(--green)' : 'var(--red)') + '">' + s.count + '</span></div>';
+            });
+        } else {
+            html += '<div style="color:var(--muted);font-size:13px">No data</div>';
+        }
+        html += '</div></div>';
+        el.innerHTML = html;
+    }).catch(function() { $('fcEmployees').innerHTML = '<div style="color:var(--muted);font-size:13px">Failed to load</div>'; });
+
+    api('/rest/v1/rpc/founder_health_scores', { method: 'POST', body: '{}' }).then(j).then(function(d) {
+        if (!d || !d.ok) return;
+        var el = $('fcHealth');
+        var html = '<div style="margin-bottom:12px;font-size:13px;color:var(--muted)">Average Score: <b style="color:var(--gold);font-size:18px">' + d.avg_score + '</b>/100</div>';
+        html += '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
+        if (d.distribution && d.distribution.length) {
+            d.distribution.forEach(function(b) {
+                var color = b.range === '80-100' ? 'var(--green)' : b.range === '60-79' ? 'var(--gold)' : b.range === '40-59' ? 'var(--yellow)' : 'var(--red)';
+                html += '<div style="flex:1;min-width:80px;text-align:center;padding:10px;background:var(--bg);border-radius:8px;border-top:3px solid ' + color + '"><div style="font-size:20px;font-weight:900;color:' + color + '">' + b.count + '</div><div style="font-size:10px;color:var(--muted)">' + b.range + '</div></div>';
+            });
+        }
+        html += '</div>';
+        el.innerHTML = html;
+    }).catch(function() { $('fcHealth').innerHTML = '<div style="color:var(--muted);font-size:13px">Failed to load</div>'; });
+
+    api('/rest/v1/rpc/founder_alerts', { method: 'POST', body: '{}' }).then(j).then(function(d) {
+        if (!d || !d.ok) return;
+        var el = $('fcAlerts');
+        var html = '<div style="display:flex;gap:16px;margin-bottom:12px"><div style="font-size:13px;color:var(--muted)">Total alerts (7d): <b style="color:#fff">' + d.total_alerts_7d + '</b></div><div style="font-size:13px;color:var(--muted)">Urgent: <b style="color:var(--red)">' + d.urgent_alerts_7d + '</b></div></div>';
+        if (d.top_alerts && d.top_alerts.length) {
+            d.top_alerts.forEach(function(a) {
+                var icon = a.alert_type === 'urgent' ? '🔴' : '🟡';
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:#fff">' + icon + ' ' + a.alert_title + '</span><span style="font-size:12px;font-weight:700;color:var(--gold)">' + a.occurrences + 'x</span></div>';
+            });
+        } else {
+            html += '<div style="color:var(--muted);font-size:13px">No alerts in the last 7 days</div>';
+        }
+        el.innerHTML = html;
+    }).catch(function() { $('fcAlerts').innerHTML = '<div style="color:var(--muted);font-size:13px">Failed to load</div>'; });
+
+    api('/rest/v1/rpc/founder_sectors', { method: 'POST', body: '{}' }).then(j).then(function(d) {
+        if (!d || !d.ok) return;
+        var el = $('fcSectors');
+        var html = '';
+        if (d.sectors && d.sectors.length) {
+            d.sectors.forEach(function(s) {
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:#fff">' + s.sector + '</span><span style="font-size:12px;color:var(--muted)">' + s.shop_count + ' shops • avg ' + Math.round(s.avg_health) + '</span></div>';
+            });
+        } else {
+            html = '<div style="color:var(--muted);font-size:13px">No sector data</div>';
+        }
+        el.innerHTML = html;
+    }).catch(function() { $('fcSectors').innerHTML = '<div style="color:var(--muted);font-size:13px">Failed to load</div>'; });
+}
 // ============================================
 // EVENT LISTENERS & STARTUP
 // ============================================
@@ -1839,6 +1994,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Startup sequence
 setTimeout(function() {
+    // Check for founder console parameter
+    if (window.location.href.indexOf('founder') !== -1) {
+        var splash = $('splash');
+        if (splash) {
+            splash.classList.add('hide');
+            setTimeout(function() {
+                splash.style.display = 'none';
+                openFounderConsole();
+            }, 500);
+        }
+        return;
+    }
+    
+    var splash = $('splash');
+    if (splash && !splash.classList.contains('hide')) {
+        splash.classList.add('hide');
+        setTimeout(function() {
+            splash.style.display = 'none';
+            var p = DB.getObj('profile');
+            if (p && p.shopName) {
+                startApp();
+            } else {
+                $('authFlow').style.display = 'flex';
+                showAuth('welcome');
+            }
+        }, 500);
+    }
+}, 2000);
     var splash = $('splash');
     if (splash && !splash.classList.contains('hide')) {
         splash.classList.add('hide');
